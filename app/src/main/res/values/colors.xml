@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#34495E</color>
+    <color name="colorPrimaryDark">#212F3C</color>
+    <color name="skyBlue">#11528F</color>
+    <color name="purple">#2E3349</color>
+    <color name="green">#61FF36</color>
+
+    <color name="dialogBackground">#60212F3C</color>
+    <color name="dialogBackground2">#60000000</color>
+    <color name="fab_color">#0B3E6E</color>
+
+
+
+
+    <color name="boton_verde">#4CAF50</color>
+    <color name="background_rojo">#A61313</color>
+    <color name="TintImageEnable">#9C9C9C</color>
+    <color name="background_toast">#70000000</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="darker_grey">#FFAAAAAA</color>
+</resources>

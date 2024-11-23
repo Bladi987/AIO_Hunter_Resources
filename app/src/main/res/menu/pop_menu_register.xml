@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/itVer"
+        android:icon="@drawable/ic_ver"
+        android:title="Ver"
+        android:iconTint="@color/background_rojo"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/itEditar"
+        android:icon="@drawable/ic_edit"
+        android:title="Editar"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/itEliminar"
+        android:icon="@drawable/ic_delete"
+        android:title="Eliminar"
+        app:showAsAction="always"/>
+</menu>

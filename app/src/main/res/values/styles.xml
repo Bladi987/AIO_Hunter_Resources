@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <style name="CustomDialogTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="PopupAnimation" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/popupmenu_animation</item>
+    </style>
+</resources>

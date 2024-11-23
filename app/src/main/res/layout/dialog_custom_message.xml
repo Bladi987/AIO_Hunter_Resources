@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog"
+    android:backgroundTint="@color/colorPrimaryDark"
+    app:cardCornerRadius="8dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clContenedor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <FrameLayout
+            android:id="@+id/flcontnedorExit"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="15dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            >
+            <ImageView
+                android:id="@+id/ivExit"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:src="@drawable/close_icon"
+                android:layout_gravity="center"
+                />
+        </FrameLayout>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/ivimagen"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="-20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true" />
+
+        <LinearLayout
+            android:id="@+id/llbody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-20dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivimagen">
+
+
+            <TextView
+                android:id="@+id/tvTexto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                tools:text="Ups... Al parecer no hay conección a internet, verifique su conexión y vuelva a intentarlo mas tarde." />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llfoot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llbody">
+
+            <Button
+                android:id="@+id/btnAceptar"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:text="Aceptar" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

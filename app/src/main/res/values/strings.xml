@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">AIO Hunter Resources</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="ingrese_usuario">Ingrese Usuario</string>
+    <string name="ingrese_password">Ingrese Contraseña</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="usuario">Usuario</string>
+    <string name="ingrese_nombre">Ingrese Nombre</string>
+    <string name="nombre">Nombre</string>
+    <string name="ingrese_apellidos">Ingrese Apellidos</string>
+    <string name="nuevo_registro">Nuevo Registro</string>
+    <string name="kgsolution">KGSolution</string>
+    <string name="Pendientes_Aprobación">Pendientes de Aprobación</string>
+    <string name="archivos">Archivos</string>
+    <string name="registros">Registrar</string>
+    <string name="saldo_contable">Saldo disponible</string>
+    <string name="titleSettings">Ajustes</string>
+    <string name="CajaChica">Caja chica</string>
+    <string name="urlScrip">Url</string>
+    <string name="fileDrive">Folder google Drive</string>
+    <string name="FichasTecnicas">Fichas Tecnicas</string>
+    <string name="Cancelar">Cancelar</string>
+    <string name="btn_add_equipment">Agregar</string>
+    <string name="Resumen_costos">Resumen costos</string>
+    <string name="Resumen_cantidad">Cantidad registros</string>
+    <string name="con_sustento">Con\nSustento</string>
+    <string name="sin_sustento">Sin\nSustento</string>
+    <string name="nro_registros">Cantidad de Registros por categoria y tipo</string>
+    <string name="total_Categoria">Total</string>
+    <string name="Lista_Archivos">LISTA DE ARCHIVOS</string>
+    <string name="idSheedFichas">Sheet</string>
+    <string name="brand">Lista de marcas</string>
+    <string name="liquidacion">Liquidaciones</string>
+    <string name="Lista_Liquidaciones">LISTA DE LIQUIDACIONES</string>
+    <string name="sheetLiquidacion">Sheet Liquidación</string>
+    <string name="tittle_resumen">Resumen</string>
+    <string name="MontoCajaChica">Caja Chica</string>
+
+</resources>

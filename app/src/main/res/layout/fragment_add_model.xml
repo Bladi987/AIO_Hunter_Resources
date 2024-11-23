@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/border_dialog"
+    app:cardCornerRadius="8dp"
+    tools:context=".UI.FichasTecnicas.view.fragment.dialog.AddModelFragment">
+
+    <com.kasolution.aiohunterresources.core.RoundedImageView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/decorate_head_small"
+        app:bottomLeftRadius="0dp"
+        app:bottomRightRadius="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:topLeftRadius="10dp"
+        app:topRightRadius="10dp" />
+
+    <TextView
+        android:id="@+id/tvtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/nuevo_registro"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnCancelar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:padding="10dp"
+        android:src="@drawable/close_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/colorPrimaryDark" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvtitle">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <LinearLayout
+                    android:id="@+id/linearlayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+                    <ImageView
+                        android:id="@+id/imgIcon"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/etModelo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="10dp"
+                        android:background="@drawable/edittext_style"
+                        android:hint="Ingrese Modelo"
+                        android:imeOptions="actionNext"
+                        android:inputType="textCapCharacters"
+                        android:singleLine="true" />
+
+                    <ImageView
+                        android:id="@+id/ivimagen"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/btnSelectImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Elegir Imagen" />
+
+                    <EditText
+                        android:id="@+id/etComentarios"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:layout_marginVertical="10dp"
+                        android:background="@drawable/edittext_style"
+                        android:gravity="left"
+                        android:hint="Ingrese un comentario"
+                        android:imeOptions="actionDone"
+                        android:inputType="textMultiLine|textCapSentences" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="Conexiones" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:weightSum="0.9">
+
+                            <CheckBox
+                                android:id="@+id/cbPositivo"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="Positivo" />
+
+                            <CheckBox
+                                android:id="@+id/cbGND"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="GND" />
+
+                            <CheckBox
+                                android:id="@+id/cbIgnition"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="Ignition" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:weightSum="0.9">
+
+                            <CheckBox
+                                android:id="@+id/cbCorte"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="Corte" />
+
+                            <CheckBox
+                                android:id="@+id/cbPestillos"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:text="Pestillos" />
+
+                            <EditText
+                                android:id="@+id/etOtros"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.3"
+                                android:background="@drawable/edittext_style2"
+                                android:hint="Otros" />
+                        </LinearLayout>
+                        <Button
+                            android:id="@+id/btnGuardar"
+                            android:layout_width="200dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/colorPrimaryDark"
+                            android:layout_gravity="center"
+                            android:text="Guardar" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/pbloading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".UI.Settings.SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/imgBack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:src="@drawable/back_icon" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="@string/titleSettings"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight="0.1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CajaChica"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold" />
+        <LinearLayout
+            android:id="@+id/itemCajaChica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/MontoCajaChica" />
+
+            <TextView
+                android:id="@+id/tvMonto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:textStyle="bold"
+                android:singleLine="true"
+                tools:text="S/.2000.00" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemUrlCajaChica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/urlScrip" />
+
+            <TextView
+                android:id="@+id/tvURL"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                tools:text="*********************" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/itemFileCajaChica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/fileDrive" />
+
+            <TextView
+                android:id="@+id/tvFileDrive"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                tools:text="*********************" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/itemLiquidacionCajaChica"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/sheetLiquidacion" />
+
+            <TextView
+                android:id="@+id/tvSheetLiquidacion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                tools:text="*********************" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D3D3D3" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/FichasTecnicas"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/itemUrlFichasTecnicas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/urlScrip" />
+
+            <TextView
+                android:id="@+id/tvURLFichas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textPassword"
+                android:layout_weight="0.6"
+                tools:text="*********************" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/itemSheetFichasTecnicas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.4"
+                android:text="@string/idSheedFichas" />
+
+            <TextView
+                android:id="@+id/tvsheetFichas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textPassword"
+                android:layout_weight="0.6"
+                tools:text="*********************" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D3D3D3" />
+    </LinearLayout>
+
+</LinearLayout>
