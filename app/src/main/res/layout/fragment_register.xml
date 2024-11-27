@@ -46,6 +46,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="8dp"
+
                     android:layout_weight="0.75">
 
                     <Spinner
@@ -53,15 +54,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
-                        android:background="@drawable/spinner_background_rounded"
+                        android:background="@drawable/circular_ripple"
                         android:dropDownVerticalOffset="40dp"
-                        android:foreground="?android:attr/selectableItemBackground"
+
+
                         android:popupBackground="@drawable/spinner_dropdown_background_rounded"
                         android:textAlignment="center" />
                 </FrameLayout>
 
                 <FrameLayout
-                    android:id="@+id/btnAction"
+                    android:id="@+id/btnLiquidar"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginStart="5dp"

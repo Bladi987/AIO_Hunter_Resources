@@ -22,6 +22,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.CajaChica.interfaces.DialogListener
+import com.kasolution.aiohunterresources.UI.CajaChica.view.adapter.CustomSpinnerAdapter
 import com.kasolution.aiohunterresources.UI.CajaChica.view.adapter.RegisterAdapter
 import com.kasolution.aiohunterresources.UI.CajaChica.view.fragment.dialog.AddRegisterFragment
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
@@ -34,6 +35,7 @@ import com.kasolution.aiohunterresources.core.DialogUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.DialogResumenLiquidacionBinding
 import com.kasolution.aiohunterresources.databinding.FragmentRegisterBinding
+import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Calendar
@@ -45,6 +47,7 @@ class RegisterFragment : Fragment(), DialogListener {
     private val registerViewModel: RegisterViewModel by viewModels()
     private val liquidacionViewModel: LiquidacionViewModel by viewModels()
     private lateinit var adapter: RegisterAdapter
+    private lateinit var adapterSpinner:CustomSpinnerAdapter
     private lateinit var lmanager: LinearLayoutManager
     private lateinit var listRegister: ArrayList<register>
     private var itemRegistro: register? = null
@@ -56,7 +59,9 @@ class RegisterFragment : Fragment(), DialogListener {
     private lateinit var sheetName: String
     private lateinit var fileName: String
     private lateinit var sumaTotal: String
-    lateinit var listSheets: ArrayList<String>
+
+    //    lateinit var listSheets: ArrayList<String>
+    private lateinit var listSheets: List<fileDetails>
     private var datosResumen: Map<String, Pair<Int, Double>>? = null
     private var urlId: urlId? = null
     override fun onCreateView(
@@ -83,7 +88,7 @@ class RegisterFragment : Fragment(), DialogListener {
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        binding.btnAction.setOnClickListener() {
+        binding.btnLiquidar.setOnClickListener() {
             dialogConfirmLiquidacion()
         }
         binding.btnAdd.setOnClickListener() {
@@ -146,6 +151,41 @@ class RegisterFragment : Fragment(), DialogListener {
                 "Liquidacion Ingresado correctamente",
                 null
             )
+
+            try {
+                // Obtener el JSON almacenado en SharedPreferences
+
+                val jsonString = preferencesCajaChica.getString("LIST_SHEET", "[]") ?: "[]"
+
+                // Convertir la cadena JSON en un JSONArray
+                val jsonArray = JSONArray(jsonString)
+
+                // Obtener el item seleccionado del Spinner
+                val selectedItemPosition = binding.spSheets.selectedItemPosition
+                val selectedItem = jsonArray.getJSONObject(selectedItemPosition)
+
+                // Modificar el valor de "NOMBREREAL"
+                val nombreReal = selectedItem.getString("NOMBREREAL")
+                val nuevoNombreReal = "$nombreReal->Enviado"  // Cambiar el texto como lo necesites
+
+                // Poner el nuevo valor en "NOMBREREAL"
+                selectedItem.put("NOMBREREAL", nuevoNombreReal)
+
+                // Convertir el JSONArray modificado de nuevo a una cadena
+                val newJsonString = jsonArray.toString()
+
+                // Guardar el nuevo JSON en SharedPreferences
+                val editor = preferencesCajaChica.edit()
+                editor.putString("LIST_SHEET", newJsonString)
+                editor.apply()
+                val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
+                Log.i("BladiDev", Sheets.toString())
+                recuperarPreferencias()
+                adapterSpinner.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Log.i("BladiDev", e.message.toString())
+            }
+
         })
         liquidacionViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Enviando...")
@@ -174,58 +214,54 @@ class RegisterFragment : Fragment(), DialogListener {
             fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
             fragmentTransaction.commit()
         } else {
-            val adapter1 = ArrayAdapter(requireContext(), R.layout.item_spinner, listSheets)
-            adapter1.setDropDownViewResource(R.layout.item_spinner_dropdown)
-            binding.spSheets.adapter = adapter1
+            adapterSpinner = CustomSpinnerAdapter(requireContext(), listSheets)
+            binding.spSheets.adapter = adapterSpinner
+
 
             //nos permite seleccionar un item con el nombre
-            binding.spSheets.setSelection(adapter1.getPosition(sheetName))
+            val position = listSheets.indexOfFirst {it.nombreReal == sheetName }
+            binding.spSheets.setSelection(position)
+            //binding.spSheets.setSelection(adapter1.getPosition(sheetName))
 
             binding.spSheets.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                }
-
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
                     view: View?,
                     position: Int,
                     id: Long
                 ) {
+                    val selectedItem = listSheets[position]
+                    // Comprobar si el nombreReal ha cambiado
                     if (preferencesCajaChica.getString(
                             "SHEETNAME",
                             ""
-                        ) != listSheets[position]
+                        ) != selectedItem.nombreReal
                     ) {
                         val editor = preferencesCajaChica.edit()
-                        editor.apply {
-                            putString("SHEETNAME", listSheets[position])
-                        }.apply()
-
+                        editor.putString("SHEETNAME", selectedItem.nombreReal)
+                        editor.apply()
                     }
+//                    Toast.makeText(requireContext(), selectedItem.nombreReal, Toast.LENGTH_SHORT).show()
+                    // Actualizar la URL y otros datos según el ítem seleccionado
                     urlId = urlId(
                         idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString(),
                         "",
                         idSheet = preferencesCajaChica.getString("IDSHEET", "").toString(),
-                        sheetName = listSheets[position]
+                        sheetName = selectedItem.nombreReal
                     )
-//                    registerViewModel.onCreate("$urlScript->$idSheet->${listSheets[position]}")
+
+                    // Llamar a tu ViewModel o actualizar la UI
                     registerViewModel.onCreate(urlId!!)
+
+
+
                 }
             }
         }
     }
 
     private fun debitarGasto(register: register?, operacion: String) {
-//        var monto = listOf(
-//            register?.s_movilidad,
-//            register?.c_movilidad,
-//            register?.s_alimentacion,
-//            register?.c_alimentacion,
-//            register?.s_alojamiento,
-//            register?.c_alojamiento,
-//            register?.s_otros,
-//            register?.c_otros
-//        ).firstOrNull { it?.isNotEmpty() == true }
         var monto = register?.let { determinarGasto(it) }
         var montoItemSeleccionado = itemRegistro?.let { determinarGasto(it) }
 
@@ -258,7 +294,6 @@ class RegisterFragment : Fragment(), DialogListener {
                     val nuevoSaldo = saldoTemp - monto.toDouble()
                     editor.putString("SALDODISPONIBLE", (nuevoSaldo).toString())
                     editor.apply()
-
                 }
             }
         }
@@ -409,15 +444,15 @@ class RegisterFragment : Fragment(), DialogListener {
         fileName = preferencesCajaChica.getString("FILENAME", "").toString()
         sheetName = preferencesCajaChica.getString("SHEETNAME", "").toString()
         val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
-        val listaRecuperada = llenarLista(Sheets)
-        if (listaRecuperada != null) {
-            for (valor in listaRecuperada) {
-                listSheets.add(valor.nombre)
-            }
-        }
+        listSheets = llenarLista(Sheets)
+//        if (listaRecuperada != null) {
+//            for (valor in listaRecuperada) {
+//                listSheets.add(valor.nombre)
+//            }
+//        }
     }
 
-    private fun llenarLista(sheets: String?): ArrayList<fileDetails>? {
+    private fun llenarLista(sheets: String?): List<fileDetails> {
         val gson = Gson()
         val type = object : TypeToken<ArrayList<fileDetails>>() {}.type
         return gson.fromJson(sheets, type)

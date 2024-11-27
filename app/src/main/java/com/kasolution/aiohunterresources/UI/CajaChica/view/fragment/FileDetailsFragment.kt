@@ -116,7 +116,7 @@ class FileDetailsFragment : Fragment() {
         editor.putString("SHEETNAME", sheetSelected)
         editor.putString("LIST_SHEET",json.toString())
         editor.apply()
-
+        Log.i("BladiDev",json.toString())
         val registerFragment = RegisterFragment()
         val fragmentManager = requireActivity().supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
