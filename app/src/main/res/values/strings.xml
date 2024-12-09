@@ -37,5 +37,6 @@
     <string name="sheetLiquidacion">Sheet Liquidación</string>
     <string name="tittle_resumen">Resumen</string>
     <string name="MontoCajaChica">Caja Chica</string>
+    <string name="IngreseNombreHoja">Nueva hoja</string>
 
 </resources>

@@ -17,7 +17,7 @@ class getFileDetailsUseCase() {
         val data = response?.getAsJsonArray("Resultado")
 
         if (data != null) {
-            for (i in 0 until data.size()) {
+            for (i in data.size() - 1 downTo 0) {
                 val nombreReal = data[i].asString
                 val nombre = generarNombres(nombreReal)
                 lista.add(fileDetails(nombreReal,nombre))

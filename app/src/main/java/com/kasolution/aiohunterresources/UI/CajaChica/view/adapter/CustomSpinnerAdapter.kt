@@ -22,7 +22,8 @@ class CustomSpinnerAdapter(context: Context, private val items: List<fileDetails
             .inflate(R.layout.spinner_item, parent, false)
         val item = getItem(position)
         val textView = view.findViewById<TextView>(R.id.spinner_text)
-//        val imageView = view.findViewById<ImageView>(R.id.spinner_icon)
+//val imageView = view.findViewById<ImageView>(R.id.spinner_icon)
+
 
         // Configurar el texto sin la fecha
         textView.text = item?.nombre
@@ -36,12 +37,31 @@ class CustomSpinnerAdapter(context: Context, private val items: List<fileDetails
 
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = convertView ?: LayoutInflater.from(context)
-            .inflate(R.layout.spinner_item, parent, false)
+            .inflate(R.layout.item_spinner_dropdown, parent, false)
         val item = getItem(position)
-        val textView = view.findViewById<TextView>(R.id.spinner_text)
-
+        val textView = view.findViewById<TextView>(R.id.text1)
+        val textView2 = view.findViewById<TextView>(R.id.text2)
+        val estado = identificarItem(item?.nombreReal.toString())
+        when (estado) {
+            "Enviado" -> {
+                textView2.text = "Enviado"
+            }
+            "Reembolsado" -> {
+                textView2.text = "Reembolsado"
+            }
+        }
         textView.text = item?.nombre
 
         return view
+    }
+
+    private fun identificarItem(texto: String): String {
+        if (texto.contains("->Enviado")) {
+            return "Enviado"
+        } else if (texto.contains("->Reembolsado")) {
+            return "Reembolsado"
+        } else {
+            return "Editable"
+        }
     }
 }

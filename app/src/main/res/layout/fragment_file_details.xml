@@ -56,11 +56,22 @@
                         android:layout_gravity="center_vertical|center_horizontal"
                         android:text="@string/Lista_Archivos"/>
                 </FrameLayout>
-                <View
+                <FrameLayout
+                    android:id="@+id/btnAdd"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="0.1" />
+                    android:layout_weight="0.1"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/add_file"
+                    />
+                </FrameLayout>
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -74,15 +85,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbAddArchivo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="bottom|center"
-        android:backgroundTint="@color/fab_color"
-        android:src="@drawable/add_icon"
-        app:tint="@color/white" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

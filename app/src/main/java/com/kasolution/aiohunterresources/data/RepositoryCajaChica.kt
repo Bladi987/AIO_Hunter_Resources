@@ -2,6 +2,7 @@ package com.kasolution.aiohunterresources.data
 
 import android.util.Log
 import com.google.gson.JsonElement
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
 import com.kasolution.aiohunterresources.UI.User.model.user
@@ -26,12 +27,25 @@ class RepositoryCajaChica() {
         return response!!
     }
     suspend fun getDetailsFile(urlId: urlId): JsonElement {
-
         procesarUrl(urlId)
         val response = api!!.getDetailsFile()
         return response!!
     }
-
+    suspend fun insertFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.insertFileSheet(fileDetails)
+        return response!!
+    }
+    suspend fun updateFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.updateFileSheet(fileDetails)
+        return response!!
+    }
+    suspend fun deleteFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.deleteFileSheet(fileDetails)
+        return response!!
+    }
     suspend fun getRegister(urlId: urlId): JsonElement {
         procesarUrl(urlId)
         val response = api!!.getRegister()

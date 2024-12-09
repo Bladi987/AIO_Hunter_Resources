@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.viewModels
@@ -47,20 +46,21 @@ class RegisterFragment : Fragment(), DialogListener {
     private val registerViewModel: RegisterViewModel by viewModels()
     private val liquidacionViewModel: LiquidacionViewModel by viewModels()
     private lateinit var adapter: RegisterAdapter
-    private lateinit var adapterSpinner:CustomSpinnerAdapter
+    private lateinit var adapterSpinner: CustomSpinnerAdapter
     private lateinit var lmanager: LinearLayoutManager
     private lateinit var listRegister: ArrayList<register>
     private var itemRegistro: register? = null
     private var itemPosition = -1
+    private var itemSpinnerPosition = -1
     private lateinit var preferencesCajaChica: SharedPreferences
 
     private lateinit var urlScript: String
     private lateinit var idSheet: String
     private lateinit var sheetName: String
+    private var sheetNameTemp=""
     private lateinit var fileName: String
     private lateinit var sumaTotal: String
 
-    //    lateinit var listSheets: ArrayList<String>
     private lateinit var listSheets: List<fileDetails>
     private var datosResumen: Map<String, Pair<Int, Double>>? = null
     private var urlId: urlId? = null
@@ -106,6 +106,12 @@ class RegisterFragment : Fragment(), DialogListener {
             adapter.limpiar()
             listRegister.addAll(listaRegistros)
             adapter.notifyDataSetChanged()
+            if(sheetNameTemp.isNotEmpty()){
+                val editor = preferencesCajaChica.edit()
+                editor.putString("SHEETNAME", sheetNameTemp)
+                editor.apply()
+                sheetNameTemp.isEmpty()
+            }
         })
         registerViewModel.insertarRegister.observe(viewLifecycleOwner, Observer { register ->
             listRegister.add(0, register)
@@ -217,11 +223,9 @@ class RegisterFragment : Fragment(), DialogListener {
             adapterSpinner = CustomSpinnerAdapter(requireContext(), listSheets)
             binding.spSheets.adapter = adapterSpinner
 
-
             //nos permite seleccionar un item con el nombre
-            val position = listSheets.indexOfFirst {it.nombreReal == sheetName }
+            val position = listSheets.indexOfFirst { it.nombre == sheetName }
             binding.spSheets.setSelection(position)
-            //binding.spSheets.setSelection(adapter1.getPosition(sheetName))
 
             binding.spSheets.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -232,32 +236,74 @@ class RegisterFragment : Fragment(), DialogListener {
                     id: Long
                 ) {
                     val selectedItem = listSheets[position]
-                    // Comprobar si el nombreReal ha cambiado
-                    if (preferencesCajaChica.getString(
-                            "SHEETNAME",
-                            ""
-                        ) != selectedItem.nombreReal
-                    ) {
-                        val editor = preferencesCajaChica.edit()
-                        editor.putString("SHEETNAME", selectedItem.nombreReal)
-                        editor.apply()
+                    itemSpinnerPosition = position
+                    val tipoItem = identificarItem(listSheets[position].nombreReal)
+                    when (tipoItem) {
+                        "Enviado" -> {
+                            DialogUtils.dialogMessageResponse(
+                                requireContext(),
+                                "El Registro ${listSheets[position].nombre} ya fue $tipoItem, solo se abrira en modo lectura.",
+                                onPositiveClick = {
+                                    binding.btnAdd.isEnabled = false
+                                    cargarRegistro(selectedItem)
+                                }
+                            )
+                        }
+
+                        "Reembolsado" -> {
+                            DialogUtils.dialogMessageResponse(
+                                requireContext(),
+                                "El Registro ${listSheets[position].nombre} ya fue $tipoItem, solo se abrira en modo lectura.",
+                                onPositiveClick = {
+                                    binding.btnAdd.isEnabled = false
+                                    cargarRegistro(selectedItem)
+                                }
+                            )
+                        }
+                        "Editable" -> {
+
+                            // Comprobar si el nombreReal ha cambiado
+                            if (preferencesCajaChica.getString(
+                                    "SHEETNAME",
+                                    ""
+                                ) != selectedItem.nombreReal
+                            ) {
+                                val editor = preferencesCajaChica.edit()
+                                editor.putString("SHEETNAME", selectedItem.nombreReal)
+                                editor.apply()
+                            }
+                            binding.btnAdd.isEnabled = true
+                            cargarRegistro(selectedItem)
+                        }
                     }
-//                    Toast.makeText(requireContext(), selectedItem.nombreReal, Toast.LENGTH_SHORT).show()
-                    // Actualizar la URL y otros datos según el ítem seleccionado
-                    urlId = urlId(
-                        idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString(),
-                        "",
-                        idSheet = preferencesCajaChica.getString("IDSHEET", "").toString(),
-                        sheetName = selectedItem.nombreReal
-                    )
-
-                    // Llamar a tu ViewModel o actualizar la UI
-                    registerViewModel.onCreate(urlId!!)
-
-
-
                 }
             }
+        }
+    }
+
+    private fun cargarRegistro(selectedItem: fileDetails) {
+        // Actualizar la URL y otros datos según el ítem seleccionado
+        urlId = urlId(
+            idScript = preferencesCajaChica.getString("URL_SCRIPT", "")
+                .toString(),
+            "",
+            idSheet = preferencesCajaChica.getString("IDSHEET", "").toString(),
+            sheetName = selectedItem.nombreReal
+        )
+
+        // Llamar a tu ViewModel o actualizar la UI
+        registerViewModel.onCreate(urlId!!)
+
+    }
+
+
+    private fun identificarItem(texto: String): String {
+        if (texto.contains("->Enviado")) {
+            return "Enviado"
+        } else if (texto.contains("->Reembolsado")) {
+            return "Reembolsado"
+        } else {
+            return "Editable"
         }
     }
 
@@ -443,14 +489,15 @@ class RegisterFragment : Fragment(), DialogListener {
         idSheet = preferencesCajaChica.getString("IDSHEET", "").toString()
         fileName = preferencesCajaChica.getString("FILENAME", "").toString()
         sheetName = preferencesCajaChica.getString("SHEETNAME", "").toString()
+        if (sheetName.contains("->")) {
+         val part=sheetName.split("->")
+            sheetName=part[0]
+            sheetNameTemp=part[1]
+        }
         val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
         listSheets = llenarLista(Sheets)
-//        if (listaRecuperada != null) {
-//            for (valor in listaRecuperada) {
-//                listSheets.add(valor.nombre)
-//            }
-//        }
     }
+
 
     private fun llenarLista(sheets: String?): List<fileDetails> {
         val gson = Gson()
@@ -483,7 +530,7 @@ class RegisterFragment : Fragment(), DialogListener {
     }
 
     private fun onItemSelected(itemRegister: register) {
-        //Toast.makeText(requireContext(), itemRegister.id, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(rewquireContext(), itemRegister.id, Toast.LENGTH_SHORT).show()
     }
 
     private fun abrirDialog(register: register? = null) {
@@ -499,45 +546,56 @@ class RegisterFragment : Fragment(), DialogListener {
     }
 
     private fun dialogConfirmLiquidacion() {
-        // Cargar la animación
-        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
-
-        // Inflar la vista con ViewBinding
-        val binding = DialogResumenLiquidacionBinding.inflate(LayoutInflater.from(context))
-
-        // Crear el AlertDialog
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setView(binding.root) // Usamos binding.root aquí
-        val dialog = builder.create()
-        dialog.setCancelable(true)
-        dialog.show()
-
-        // Aplicar la animación
-        binding.root.animation = anim1
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        binding.lblArchivo.text = fileName
-        binding.lblConcepto.text = sheetName
-        binding.lblMonto.text = sumaTotal
-        // Configurar el listener para el botón
-        binding.btnEnviar.setOnClickListener {
-            val urlIdtemp = urlId(
-                idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString(),
-                "",
-                idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", "").toString(),
-                sheetName = "LIQUIDACIONES"
-            )
-            liquidacionViewModel.insertLiquidacion(
-                urlIdtemp,
-                liquidacion(
-                    id = "",
-                    fecha = obtenerFechaActual(),
-                    archivo = idSheet,
-                    concepto = sheetName.toString(),
-                    monto = sumaTotal.toString(),
-                    estado = "Enviado"
+        if (itemSpinnerPosition != -1) {
+            if (identificarItem(listSheets[itemSpinnerPosition].nombreReal) != "Editable") {
+                DialogUtils.dialogMessageResponse(
+                    requireContext(),
+                    "El Registro '${listSheets[itemSpinnerPosition].nombre}' ya fue liquidado.\nNo se puede volver a generar la liquidacion, consulte el estado de su liquidacion en el apartado de liquidaciones.",
+                    null
                 )
-            )
-            dialog.dismiss()
+            } else {
+                // Cargar la animación
+                val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
+
+                // Inflar la vista con ViewBinding
+                val binding = DialogResumenLiquidacionBinding.inflate(LayoutInflater.from(context))
+
+                // Crear el AlertDialog
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setView(binding.root) // Usamos binding.root aquí
+                val dialog = builder.create()
+                dialog.setCancelable(true)
+                dialog.show()
+
+                // Aplicar la animación
+                binding.root.animation = anim1
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                binding.lblArchivo.text = fileName
+                binding.lblConcepto.text = sheetName
+                binding.lblMonto.text = sumaTotal
+                // Configurar el listener para el botón
+                binding.btnEnviar.setOnClickListener {
+                    val urlIdtemp = urlId(
+                        idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString(),
+                        "",
+                        idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", "")
+                            .toString(),
+                        sheetName = "LIQUIDACIONES"
+                    )
+                    liquidacionViewModel.insertLiquidacion(
+                        urlIdtemp,
+                        liquidacion(
+                            id = "",
+                            fecha = obtenerFechaActual(),
+                            archivo = idSheet,
+                            concepto = sheetName.toString(),
+                            monto = sumaTotal.toString(),
+                            estado = "Enviado"
+                        )
+                    )
+                    dialog.dismiss()
+                }
+            }
         }
     }
 
