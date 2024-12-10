@@ -20,5 +20,6 @@
     <color name="TintImageEnable">#9C9C9C</color>
     <color name="background_toast">#70000000</color>
     <color name="text_color">#FFFFFF</color>
+    <color name="text_hint_color">#949292</color>
     <color name="darker_grey">#FFAAAAAA</color>
 </resources>

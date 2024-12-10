@@ -2,6 +2,7 @@ package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -38,10 +39,12 @@ class FileDetailsFragment : Fragment() {
     private var files: file? = null
     private var urlId: urlId? = null
     var sheetSelected = ""
-    var sheetSelectedPreferences=""
+    var sheetSelectedPreferences = ""
     private var itemPosition = -1
     private var insert = false
+    private var messageLoading = "Recuperando..."
     private var listaSheet: ArrayList<fileDetails>? = null
+    private lateinit var fileDetail: fileDetails
     private lateinit var preferencesCajaChica: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,8 +71,23 @@ class FileDetailsFragment : Fragment() {
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        binding.btnAdd.setOnClickListener() {
-            dialogFile()
+        binding.btnAction1.setOnClickListener() {
+            if (binding.btnAction2.visibility == View.VISIBLE) {
+                DialogUtils.dialogQuestion(
+                    requireContext(),
+                    "Advertencia",
+                    "Desea eliminar la hoja?",
+                    positiveButtontext = "Si",
+                    negativeButtontext = "no",
+                    onPositiveClick = {
+                        messageLoading = "Eliminando..."
+                        fileDetailsViewModel.onDelete(urlId!!, fileDetail)
+                    }
+                )
+            } else dialogFile()
+        }
+        binding.btnAction2.setOnClickListener() {
+            dialogFile(fileDetail.nombre)
         }
         fileDetailsViewModel.onCreate(urlId!!)
         fileDetailsViewModel.FileDetailsModel.observe(viewLifecycleOwner, Observer { listSheet ->
@@ -80,7 +98,7 @@ class FileDetailsFragment : Fragment() {
         })
         fileDetailsViewModel.insertarFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
             if (insert) {
-                if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()){
+                if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
                     listFileDetails.add(0, fileSheet)
                     adapter.notifyItemInserted(0)
                     lmanager.scrollToPosition(0)
@@ -90,13 +108,16 @@ class FileDetailsFragment : Fragment() {
                     val editor = preferencesCajaChica.edit()
                     editor.putString("LIST_SHEET", json.toString())
                     editor.apply()
-                }else DialogUtils.dialogMessageResponse(requireContext(),"Ocurrio un error al crear la hoja")
-                insert=false
+                } else DialogUtils.dialogMessageResponse(
+                    requireContext(),
+                    "Ocurrio un error al crear la hoja"
+                )
+                insert = false
             }
 
         })
         fileDetailsViewModel.updateFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
-            if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()){
+            if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
                 listFileDetails[itemPosition] = fileSheet
                 adapter.notifyItemChanged(itemPosition)
                 val gson = Gson()
@@ -104,7 +125,10 @@ class FileDetailsFragment : Fragment() {
                 val editor = preferencesCajaChica.edit()
                 editor.putString("LIST_SHEET", json.toString())
                 editor.apply()
-            }else DialogUtils.dialogMessageResponse(requireContext(),"Ocurrio un error al intentar modificar el nombre")
+            } else DialogUtils.dialogMessageResponse(
+                requireContext(),
+                "Ocurrio un error al intentar modificar el nombre"
+            )
 
 
         })
@@ -113,18 +137,20 @@ class FileDetailsFragment : Fragment() {
             adapter.notifyItemRemoved(itemPosition)
             updatePreferences(fileSheet)
         })
-        fileDetailsViewModel.isloading.observe(viewLifecycleOwner, Observer {
-            if (it) DialogProgress.show(requireContext(), "Recuperando...")
+        fileDetailsViewModel.isloading.observe(viewLifecycleOwner, Observer { cargando ->
+            if (cargando) DialogProgress.show(requireContext(), messageLoading)
             else DialogProgress.dismiss()
+            MostrarActionIcon(false)
         })
     }
+
     private fun updatePreferences(nameSheet: String) {
         recuperarPreferencias()
         for (i in listaSheet?.indices!!) {
             val sheet = listaSheet!![i].nombre
             if (sheet == nameSheet) {
                 listaSheet!!.removeAt(i)
-                if (nameSheet==sheetSelectedPreferences) {
+                if (nameSheet == sheetSelectedPreferences) {
                     //si la hoja eliminada era la predeterminada se tiene que cambiar al siguiente en la lista
                     val editor = preferencesCajaChica.edit()
                     editor.putString("SHEETNAME", listaSheet!![0].nombre)
@@ -142,19 +168,33 @@ class FileDetailsFragment : Fragment() {
         }
 
     }
+
+    private fun MostrarActionIcon(mostrar: Boolean) {
+        if (mostrar) {
+            binding.btnAction2.visibility = View.VISIBLE
+            binding.imgAdd.setImageResource(R.drawable.ic_delete)
+            binding.imgAdd.setColorFilter(Color.parseColor("#FFFFFF"))
+        } else {
+            binding.btnAction2.visibility = View.INVISIBLE
+            binding.imgAdd.setImageResource(R.drawable.add_file)
+            binding.imgAdd.clearColorFilter()
+        }
+    }
+
     private fun llenarListaSheet(sheets: String?): ArrayList<fileDetails> {
         val gson = Gson()
         val type = object : TypeToken<ArrayList<fileDetails>>() {}.type
         return gson.fromJson(sheets, type)
     }
+
     private fun recuperarPreferencias() {
         urlId =
             urlId(preferencesCajaChica.getString("URL_SCRIPT", "").toString(), "", files!!.id, "")
-        sheetSelectedPreferences=preferencesCajaChica.getString("SHEETNAME","").toString()
+        sheetSelectedPreferences = preferencesCajaChica.getString("SHEETNAME", "").toString()
         val sheets = preferencesCajaChica.getString("LIST_SHEET", null)
 
         //if (!sheets.isNullOrEmpty() && sheets!="null")
-            listaSheet = llenarListaSheet(sheets)
+        listaSheet = llenarListaSheet(sheets)
 
     }
 
@@ -167,7 +207,17 @@ class FileDetailsFragment : Fragment() {
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            fileDetailsViewModel.onRefresh(urlId!!)
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    messageLoading = "Recuperando..."
+                    fileDetailsViewModel.onRefresh(urlId!!)
+                })
+
         }
     }
 
@@ -176,7 +226,14 @@ class FileDetailsFragment : Fragment() {
         lmanager = LinearLayoutManager(context)
         adapter = FileDetailsAdapter(
             listaRecibida = listFileDetails,
-            OnClickListener = { fileDetails,action,position -> onItemSelected(fileDetails,action,position) })
+            onClickListener = { fileDetails, action, position ->
+                onItemSelected(
+                    fileDetails,
+                    action,
+                    position
+                )
+            },
+            onClickDeselect = { MostrarActionIcon(false) })
         binding.recyclerview1.layoutManager = lmanager
         binding.recyclerview1.adapter = adapter
     }
@@ -184,11 +241,11 @@ class FileDetailsFragment : Fragment() {
 
     private fun onItemSelected(fileDetails: fileDetails, action: Int, position: Int) {
         itemPosition = position
-        when(action){
-            1->{
-                if (fileDetails.nombreReal.contains("->")){
-                    sheetSelected=fileDetails.nombre+"->"+sheetSelectedPreferences
-                }else sheetSelected = fileDetails.nombre
+        when (action) {
+            1 -> {
+                if (fileDetails.nombreReal.contains("->")) {
+                    sheetSelected = fileDetails.nombre + "->" + sheetSelectedPreferences
+                } else sheetSelected = fileDetails.nombre
                 val gson = Gson()
                 val json = gson.toJson(listaSheet)
                 val editor = preferencesCajaChica.edit()
@@ -204,11 +261,10 @@ class FileDetailsFragment : Fragment() {
                 fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
                 fragmentTransaction.commit()
             }
-            2->{
-                dialogFile(fileDetails.nombre,position)
-                }
-            3->{
-                fileDetailsViewModel.onDelete(urlId!!,fileDetails)
+
+            2 -> {
+                fileDetail = fileDetails
+                MostrarActionIcon(true)
             }
         }
 
@@ -234,7 +290,6 @@ class FileDetailsFragment : Fragment() {
         builder.setView(binding.root)
         val dialog = builder.create()
         dialog.show()
-
         // Establecer animación
         binding.root.animation = anim1
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
@@ -244,19 +299,33 @@ class FileDetailsFragment : Fragment() {
             if (binding.tvname.text.toString().isNotEmpty()) {
                 if (!nameSheet.isNullOrEmpty()) {
                     // Acción de actualización
-                    // operationSheet(nameSheet, txtNombre.text.toString().trim(), "", position, "renameSheet")
-                    fileDetailsViewModel.onUpdate(urlId!!,fileDetails(binding.tvname.text.toString().trim(),binding.tvoldName.text.toString().trim()))
+                    messageLoading = "Modificando..."
+                    fileDetailsViewModel.onUpdate(
+                        urlId!!,
+                        fileDetails(
+                            binding.tvname.text.toString().trim(),
+                            binding.tvoldName.text.toString().trim()
+                        )
+                    )
                     dialog.dismiss()
                 } else {
                     // Acción de inserción
-                    // operationSheet("", txtNombre.text.toString().trim(), "01/07/2023 - 31/07/2023", -1, "newSheet")
-                    fileDetailsViewModel.onInsert(urlId!!,fileDetails("",binding.tvname.text.toString().trim()))
+                    messageLoading = "Creando..."
+                    fileDetailsViewModel.onInsert(
+                        urlId!!,
+                        fileDetails("", binding.tvname.text.toString().trim())
+                    )
                     dialog.dismiss()
-                    insert=true
+                    insert = true
                 }
+                MostrarActionIcon(false)
             } else {
                 binding.tvname.error = "Ingrese un nombre"
             }
+        }
+        // Establecer un listener para cuando el diálogo se cierre
+        dialog.setOnDismissListener {
+            //MostrarActionIcon(false)
         }
     }
 
