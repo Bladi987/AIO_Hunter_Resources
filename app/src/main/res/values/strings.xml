@@ -38,5 +38,6 @@
     <string name="tittle_resumen">Resumen</string>
     <string name="MontoCajaChica">Caja Chica</string>
     <string name="IngreseNombreHoja">Nueva hoja</string>
+    <string name="mensajeAdvertencia">Esta Creando un documento vacio se recomienda agregar los siguientes datos:\n- Nombre de la hoja\n- Destino\n- fecha o rango de fechas</string>
 
 </resources>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/border_dialog"
+    android:paddingBottom="10dp">
+
+    <com.kasolution.aiohunterresources.core.RoundedImageView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/decorate_head_small"
+        app:bottomLeftRadius="0dp"
+        app:bottomRightRadius="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:topLeftRadius="10dp"
+        app:topRightRadius="10dp" />
+
+    <LinearLayout
+        android:id="@+id/llhead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:text="Documento nuevo"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lypather"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llhead">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <TextView
+                android:id="@+id/tvold_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="hoja 1" />
+
+            <EditText
+                android:id="@+id/tvname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_dialog_white"
+                android:hint="Ingrese nombre de documento"
+                android:textColor="@color/black"
+                android:textColorHint="@color/text_hint_color" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/llAdicional"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.9"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:text="Opcional" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="25dp"
+                        android:layout_weight="0.9"
+                        android:background="#A2A2A2" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/btnAdicional"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="25dp"
+                    android:layout_weight="0.1"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_expand"
+                        app:tint="@color/colorPrimary" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llNotificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:paddingHorizontal="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvMensaje"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mensajeAdvertencia"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="#FF0000" />
+                <TextView
+                    android:id="@+id/tvContador"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FF0000" />
+
+                <CheckBox
+                    android:id="@+id/cbConcentimiento"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:text="Soy conciente de la advertencia"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llDatosAdicional"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="10dp"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/tvFirstSheet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/border_dialog_white"
+                    android:hint="Ingrese nombre primera hoja"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/text_hint_color" />
+
+                <EditText
+                    android:id="@+id/tvDestino"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/border_dialog_white"
+                    android:hint="Ingrese destino"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/text_hint_color" />
+
+                <EditText
+                    android:id="@+id/tvFecha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:background="@drawable/border_dialog_white"
+                    android:hint="Ingrese fecha(s)"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/text_hint_color" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnCrear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="50dp"
+                android:text="Crear"
+                android:textColor="@color/text_color" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

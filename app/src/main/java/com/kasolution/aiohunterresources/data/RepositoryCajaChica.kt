@@ -1,7 +1,9 @@
 package com.kasolution.aiohunterresources.data
 
+import android.content.Context
 import android.util.Log
 import com.google.gson.JsonElement
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
@@ -26,19 +28,34 @@ class RepositoryCajaChica() {
         val response = api!!.getFile()
         return response!!
     }
+    suspend fun createDocument(urlId: urlId, file: file, adicional:List<String>): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.createDocument(file,adicional)
+        return response!!
+    }
+    suspend fun updateDocument(urlId: urlId,file: file): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.updateDocument(file)
+        return response!!
+    }
+    suspend fun deleteDocument(urlId: urlId,file: file): JsonElement {
+        procesarUrl(urlId)
+        val response = api!!.deleteDocument(file)
+        return response!!
+    }
     suspend fun getDetailsFile(urlId: urlId): JsonElement {
         procesarUrl(urlId)
         val response = api!!.getDetailsFile()
         return response!!
     }
-    suspend fun insertFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {
+    suspend fun insertFileSheet(urlId: urlId,fileDetails: fileDetails,adicional:List<String>): JsonElement {
         procesarUrl(urlId)
-        val response = api!!.insertFileSheet(fileDetails)
+        val response = api!!.insertFileSheet(fileDetails,adicional)
         return response!!
     }
-    suspend fun updateFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {
+    suspend fun updateFileSheet(urlId: urlId,fileDetails: fileDetails,adicional: List<String>): JsonElement {
         procesarUrl(urlId)
-        val response = api!!.updateFileSheet(fileDetails)
+        val response = api!!.updateFileSheet(fileDetails,adicional)
         return response!!
     }
     suspend fun deleteFileSheet(urlId: urlId,fileDetails: fileDetails): JsonElement {

@@ -4,6 +4,6 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class file(
-    @SerializedName("ID") val id: String,
-    @SerializedName("NOMBRE") val nombre: String,
+    val id: String,
+    val nombre: String,
 ): Serializable

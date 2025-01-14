@@ -28,7 +28,8 @@ class LiquidacionFragment : Fragment() {
     private lateinit var lista: ArrayList<liquidacion>
     private var itemPosition = -1
     private var urlId: urlId? = null
-    var saldoCajaChica=0.00
+    var saldoCajaChica = 0.00
+    private var messageLoading = "Recuperando..."
     private lateinit var preferencesCajaChica: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,7 +64,7 @@ class LiquidacionFragment : Fragment() {
         LiquidacionViewModel.updateLiquidacion.observe(viewLifecycleOwner) {
             lista[itemPosition] = it
             adapter.notifyItemChanged(itemPosition)
-            ToastUtils.MensajeToast(requireContext(), mensaje="Deposito registrado", tipo = 0)
+            ToastUtils.MensajeToast(requireContext(), mensaje = "Deposito registrado", tipo = 0)
             abonarPagoACajaChica(it.monto)
         }
         LiquidacionViewModel.deleteLiquidacion.observe(viewLifecycleOwner) {
@@ -72,9 +73,9 @@ class LiquidacionFragment : Fragment() {
         }
     }
 
-    private fun abonarPagoACajaChica(monto: String){
-        Log.i("BladiDev",saldoCajaChica.toString())
-        Log.i("BladiDev",monto)
+    private fun abonarPagoACajaChica(monto: String) {
+        Log.i("BladiDev", saldoCajaChica.toString())
+        Log.i("BladiDev", monto)
 
         var montorecibido = monto
         montorecibido = montorecibido.replace("S/ ", "")
@@ -88,7 +89,16 @@ class LiquidacionFragment : Fragment() {
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            LiquidacionViewModel.onRefresh(urlId!!)
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    messageLoading = "Recuperando..."
+                    LiquidacionViewModel.onRefresh(urlId!!)
+                })
         }
     }
 

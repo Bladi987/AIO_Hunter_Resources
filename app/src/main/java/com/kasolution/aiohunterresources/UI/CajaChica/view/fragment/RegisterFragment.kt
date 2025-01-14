@@ -90,6 +90,7 @@ class RegisterFragment : Fragment(), DialogListener {
         }
         binding.btnLiquidar.setOnClickListener() {
             dialogConfirmLiquidacion()
+            //liquidacionViewModel.getFileSheet(requireContext(),"https://drive.google.com/uc?export=download&id=1u0D0NKKMXngLcye4xfcOceQ6bEtPisJ2",urlId!!)
         }
         binding.btnAdd.setOnClickListener() {
             abrirDialog()
@@ -154,28 +155,27 @@ class RegisterFragment : Fragment(), DialogListener {
         liquidacionViewModel.insertLiquidacion.observe(viewLifecycleOwner, Observer { liquidacion ->
             DialogUtils.dialogMessageResponse(
                 requireContext(),
-                "Liquidacion Ingresado correctamente",
+                "Liquidacion Ingresado correctamente y archivo archivo excel fue descargdo en la carpeta descargas",
                 null
             )
 
             try {
                 // Obtener el JSON almacenado en SharedPreferences
-
                 val jsonString = preferencesCajaChica.getString("LIST_SHEET", "[]") ?: "[]"
-
+                Log.i("BladiDevBuscando",jsonString)
                 // Convertir la cadena JSON en un JSONArray
                 val jsonArray = JSONArray(jsonString)
 
                 // Obtener el item seleccionado del Spinner
                 val selectedItemPosition = binding.spSheets.selectedItemPosition
                 val selectedItem = jsonArray.getJSONObject(selectedItemPosition)
-
+                Log.i("BladiDevBuscando",selectedItemPosition.toString())
                 // Modificar el valor de "NOMBREREAL"
-                val nombreReal = selectedItem.getString("NOMBREREAL")
+                val nombreReal = selectedItem.getString("nombreReal")
                 val nuevoNombreReal = "$nombreReal->Enviado"  // Cambiar el texto como lo necesites
 
                 // Poner el nuevo valor en "NOMBREREAL"
-                selectedItem.put("NOMBREREAL", nuevoNombreReal)
+                selectedItem.put("nombreReal", nuevoNombreReal)
 
                 // Convertir el JSONArray modificado de nuevo a una cadena
                 val newJsonString = jsonArray.toString()
@@ -185,11 +185,12 @@ class RegisterFragment : Fragment(), DialogListener {
                 editor.putString("LIST_SHEET", newJsonString)
                 editor.apply()
                 val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
+                binding.btnAdd.isEnabled = false
                 Log.i("BladiDev", Sheets.toString())
                 recuperarPreferencias()
                 adapterSpinner.notifyDataSetChanged()
             } catch (e: Exception) {
-                Log.i("BladiDev", e.message.toString())
+                Log.i("BladiDev", "ERROR "+e.message.toString())
             }
 
         })
@@ -316,9 +317,12 @@ class RegisterFragment : Fragment(), DialogListener {
             montoItemSeleccionado = montoItemSeleccionado?.replace("S/ ", "")
             when (operacion) {
                 "DEBITO" -> {
-                    val saldo = preferencesCajaChica.getString("SALDODISPONIBLE", "")
+                    val saldo = preferencesCajaChica.getString("SALDODISPONIBLE", "0")
                     val editor = preferencesCajaChica.edit()
-                    val nuevoSaldo = saldo!!.toDouble() - monto.toDouble()
+                    var x=saldo!!.toDouble()
+                    var y=monto.toDouble()
+                    //val nuevoSaldo = saldo!!.toDouble() - monto.toDouble()
+                    val nuevoSaldo = x - y
                     editor.putString("SALDODISPONIBLE", (nuevoSaldo).toString())
                     editor.apply()
                     Log.i("BladiDevRegister", "saldo disponible en register es $nuevoSaldo")

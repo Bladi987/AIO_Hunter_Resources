@@ -45,7 +45,9 @@ class FileDetailsFragment : Fragment() {
     private var messageLoading = "Recuperando..."
     private var listaSheet: ArrayList<fileDetails>? = null
     private lateinit var fileDetail: fileDetails
+    private var nameTecnico: String? = null
     private lateinit var preferencesCajaChica: SharedPreferences
+    private lateinit var preferencesUser: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,6 +62,8 @@ class FileDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         preferencesCajaChica =
             requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+        preferencesUser =
+            requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
         listFileDetails = ArrayList()
 
         init()
@@ -129,8 +133,6 @@ class FileDetailsFragment : Fragment() {
                 requireContext(),
                 "Ocurrio un error al intentar modificar el nombre"
             )
-
-
         })
         fileDetailsViewModel.deleteFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
             listFileDetails.removeAt(itemPosition)
@@ -182,6 +184,9 @@ class FileDetailsFragment : Fragment() {
     }
 
     private fun llenarListaSheet(sheets: String?): ArrayList<fileDetails> {
+        if (sheets.isNullOrEmpty()) {
+            return ArrayList() // Devuelve una lista vacía si sheets es null o vacío
+        }
         val gson = Gson()
         val type = object : TypeToken<ArrayList<fileDetails>>() {}.type
         return gson.fromJson(sheets, type)
@@ -192,6 +197,8 @@ class FileDetailsFragment : Fragment() {
             urlId(preferencesCajaChica.getString("URL_SCRIPT", "").toString(), "", files!!.id, "")
         sheetSelectedPreferences = preferencesCajaChica.getString("SHEETNAME", "").toString()
         val sheets = preferencesCajaChica.getString("LIST_SHEET", null)
+        nameTecnico =
+            preferencesUser.getString("NAME", "") + " " + preferencesUser.getString("LASTNAME", "")
 
         //if (!sheets.isNullOrEmpty() && sheets!="null")
         listaSheet = llenarListaSheet(sheets)
@@ -222,7 +229,6 @@ class FileDetailsFragment : Fragment() {
     }
 
     private fun init() {
-
         lmanager = LinearLayoutManager(context)
         adapter = FileDetailsAdapter(
             listaRecibida = listFileDetails,
@@ -296,7 +302,14 @@ class FileDetailsFragment : Fragment() {
 
         // Lógica de los botones
         binding.btnCrear.setOnClickListener {
-            if (binding.tvname.text.toString().isNotEmpty()) {
+
+            if (binding.tvname.text.toString().isEmpty()) {
+                binding.tvname.error = "Ingrese un nombre"
+            } else if (binding.tvDestino.text.isEmpty()) {
+                binding.tvDestino.error = "Ingrese un destino"
+            } else if (binding.tvFechas.text.isEmpty()) {
+                binding.tvFechas.error = "Ingrese fecha"
+            } else {
                 if (!nameSheet.isNullOrEmpty()) {
                     // Acción de actualización
                     messageLoading = "Modificando..."
@@ -305,6 +318,11 @@ class FileDetailsFragment : Fragment() {
                         fileDetails(
                             binding.tvname.text.toString().trim(),
                             binding.tvoldName.text.toString().trim()
+                        ),
+                        listOf(
+                            nameTecnico.toString(),
+                            binding.tvDestino.text.toString().trim(),
+                            binding.tvFechas.text.toString().trim()
                         )
                     )
                     dialog.dismiss()
@@ -313,14 +331,20 @@ class FileDetailsFragment : Fragment() {
                     messageLoading = "Creando..."
                     fileDetailsViewModel.onInsert(
                         urlId!!,
-                        fileDetails("", binding.tvname.text.toString().trim())
+                        fileDetails(
+                            "",
+                            binding.tvname.text.toString().trim()
+                        ),
+                        listOf(
+                            nameTecnico.toString(),
+                            binding.tvDestino.text.toString().trim(),
+                            binding.tvFechas.text.toString().trim()
+                        )
                     )
                     dialog.dismiss()
                     insert = true
                 }
                 MostrarActionIcon(false)
-            } else {
-                binding.tvname.error = "Ingrese un nombre"
             }
         }
         // Establecer un listener para cuando el diálogo se cierre
@@ -328,5 +352,4 @@ class FileDetailsFragment : Fragment() {
             //MostrarActionIcon(false)
         }
     }
-
 }

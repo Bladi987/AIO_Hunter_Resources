@@ -18,6 +18,7 @@
             android:background="@color/colorPrimary"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:titleTextColor="@android:color/white">
+
             <LinearLayout
                 android:id="@+id/linearLayout"
                 android:layout_width="match_parent"
@@ -45,22 +46,53 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="8dp"
-                    android:layout_weight="0.75">
+                    android:layout_weight="0.65">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:gravity="center_horizontal"
                         android:layout_gravity="center_vertical"
-                        android:text="@string/Lista_Archivos"/>
+                        android:gravity="center_horizontal"
+                        android:text="@string/Lista_Archivos"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
                 </FrameLayout>
-                <View
+
+                <FrameLayout
+                    android:id="@+id/btnAction2"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="0.1" />
+                    android:layout_weight="0.1"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="invisible"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_edit"
+                        app:tint="#FFFFFF" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/btnAction1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.1"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/imgAdd"
+                        android:layout_width="30dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/add_file" />
+                </FrameLayout>
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
@@ -77,16 +109,5 @@
             android:layout_height="match_parent" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbAddArchivo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/fab_color"
-        android:layout_marginBottom="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="bottom|center"
-        android:src="@drawable/add_icon"
-        app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

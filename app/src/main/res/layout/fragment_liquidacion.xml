@@ -78,15 +78,5 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbAddLiquidacion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/fab_color"
-        android:layout_marginBottom="25dp"
-        android:layout_marginEnd="20dp"
-        android:layout_gravity="bottom|center"
-        android:src="@drawable/add_icon"
-        app:tint="@color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

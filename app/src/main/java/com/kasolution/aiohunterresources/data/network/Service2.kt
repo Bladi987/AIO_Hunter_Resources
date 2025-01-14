@@ -1,9 +1,12 @@
 package com.kasolution.recursoshunter.data.network
 
+import android.content.Context
+import android.os.Environment
 import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
@@ -13,8 +16,11 @@ import com.kasolution.aiohunterresources.core.dataConexion.urlId
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
-//class Service(idScript: String, idSheet: String, sheetname: String? = null) {
 class Service2(urlId: urlId) {
     val log = "BladiDevService"
 
@@ -223,7 +229,46 @@ class Service2(urlId: urlId) {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getFiles")
         jsonRequest.addProperty("idFile", idFile)
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
 
+    suspend fun createDocument(file: file, adicional: List<String>): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "newDocument")
+        jsonRequest.addProperty("idFile", idFile)
+        jsonRequest.addProperty("nameDocument", file.nombre)
+        jsonRequest.addProperty("nameFirstSheet", adicional[0])
+        jsonRequest.addProperty("nameTecnico", adicional[1])
+        jsonRequest.addProperty("destino", adicional[2])
+        jsonRequest.addProperty("fecha", adicional[3])
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun updateDocument(file: file): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "updateDocument")
+        jsonRequest.addProperty("idFile", file.id)
+        jsonRequest.addProperty("newName", file.nombre)
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun deleteDocument(file: file): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "deleteDocument")
+        jsonRequest.addProperty("idFile", file.id)
+        Log.i("BladiDev", jsonRequest.toString())
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -241,30 +286,37 @@ class Service2(urlId: urlId) {
         }
     }
 
-    suspend fun insertFileSheet(fileDetails: fileDetails): JsonElement? {
+    suspend fun insertFileSheet(fileDetails: fileDetails, adicional: List<String>): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "newSheet")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", fileDetails.nombre)
-        jsonRequest.addProperty("rangoFechas", "01/07/2023 - 31/07/2023")
+        jsonRequest.addProperty("nameTecnico", adicional[0])
+        jsonRequest.addProperty("destino", adicional[1])
+        jsonRequest.addProperty("fecha", adicional[2])
         Log.i("BladiDev", jsonRequest.toString())
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
-    suspend fun updateFileSheet(fileDetails: fileDetails): JsonElement? {
+
+    suspend fun updateFileSheet(fileDetails: fileDetails, adicional: List<String>): JsonElement? {
         val jsonRequest = JsonObject()
-        jsonRequest.addProperty("action", "renameSheet")
+        jsonRequest.addProperty("action", "updateSheet")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", fileDetails.nombre)
         jsonRequest.addProperty("newName", fileDetails.nombreReal)
+        jsonRequest.addProperty("nameTecnico", adicional[0])
+        jsonRequest.addProperty("destino", adicional[1])
+        jsonRequest.addProperty("fecha", adicional[2])
         Log.i("BladiDev", jsonRequest.toString())
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
+
     suspend fun deleteFileSheet(fileDetails: fileDetails): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "deleteSheet")
@@ -276,6 +328,7 @@ class Service2(urlId: urlId) {
             response.body()
         }
     }
+
     suspend fun getRegister(): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getData")
@@ -388,7 +441,7 @@ class Service2(urlId: urlId) {
         jsonRequest.addProperty("action", "getLiquidacion")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "LIQUIDACIONES")
-
+        Log.i("BladiDev", "Datos enviados son: $jsonRequest")
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -414,6 +467,7 @@ class Service2(urlId: urlId) {
     }
 
     suspend fun updateLiquidacion(liquidacion: liquidacion): JsonElement? {
+
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "updateLiquidacion")
         jsonRequest.addProperty("idSheet", idSheet)

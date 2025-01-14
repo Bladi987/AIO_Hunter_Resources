@@ -1,20 +1,21 @@
 package com.kasolution.aiohunterresources.UI.CajaChica.view.adapter
 
-import android.content.Context
-import android.view.Gravity
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.databinding.ItemArchivosBinding
 
-class FileAdapter(private val listaRecibida: ArrayList<file>,
-                  private val OnClickListener: (file) -> Unit,
-                  private val OnClickUpdate: (file,Int) -> Unit,
-                  private val OnClickDelete: (Int,Int) -> Unit): RecyclerView.Adapter<FileAdapter.ViewHolder>() {
+class FileAdapter(
+    private val listaRecibida: ArrayList<file>,
+    private val onClickListener: (file,Int,Int) -> Unit,
+    private val onClickDeselect: () -> Unit
+) : RecyclerView.Adapter<FileAdapter.ViewHolder>() {
+    private var selectedItemPosition: Int? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileAdapter.ViewHolder {
         val layoutInflater =
             LayoutInflater.from(parent.context).inflate(R.layout.item_archivos, parent, false)
@@ -27,63 +28,54 @@ class FileAdapter(private val listaRecibida: ArrayList<file>,
 
     override fun onBindViewHolder(holder: FileAdapter.ViewHolder, position: Int) {
         val item = listaRecibida[position]
-        holder.render(item, OnClickListener,OnClickUpdate,OnClickDelete)
+        holder.render(item, position == selectedItemPosition, onClickListener, onClickDeselect)
     }
+
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val binding = ItemArchivosBinding.bind(view)
 
         fun render(
             lista: file,
-            OnClickListener: (file) -> Unit,
-            OnClickUpdate: (file,Int) -> Unit,
-            OnClickDelete: (Int,Int) -> Unit
+            isSelected: Boolean,  // Estado de selección
+            onClickListener: (file,Int,Int) -> Unit,
+            onClickDeselect: () -> Unit
         ) {
-            itemView.setOnClickListener{OnClickListener(lista)}
-//            if (lista.nombre != "LIQUIDACIONES")
+            // Actualizar el fondo del ítem usando backgroundTintList según si está seleccionado o no
+            val tintColor = if (isSelected) {
+                Color.parseColor("#34495E")  // Color de selección
+            } else {
+                Color.parseColor("#FFFFFF") // Color o predeterminado
+            }
             binding.lblNombre.text = lista.nombre
-
-
-            itemView.setOnLongClickListener() {
-                val popupMenu = PopupMenu(binding.imgIcon.context, itemView)
-                popupMenu.menuInflater.inflate(R.menu.pop_menu, popupMenu.menu)
-                popupMenu.setOnMenuItemClickListener { menuItem ->
-                    when (menuItem.itemId) {
-                        R.id.menu_item_predeterminado -> {
-                            // Acción para la opción 1
-                            val preferencesValueConexion =
-                                binding.imgIcon.context.getSharedPreferences(
-                                    "valuesConexion",
-                                    Context.MODE_PRIVATE
-                                )
-                            val editor = preferencesValueConexion.edit()
-                            editor.apply() {
-                                putString("ARCHIVO_SELECTED", lista.nombre)
-                            }.apply()
-                            notifyDataSetChanged()
-                            true
-                        }
-                        R.id.menu_item_renonbrar -> {
-
-                            OnClickUpdate(lista,position)
-                            true
-                        }
-                        R.id.menu_item_eliminar -> {
-                            OnClickDelete(lista.id!!.toInt(),position)
-                            true
-                        }
-                        // Agregar más opciones del menú si es necesario
-                        else -> false
-                    }
+            binding.cardView1.backgroundTintList = ColorStateList.valueOf(tintColor)
+            itemView.setOnClickListener() {
+                // Si el ítem está seleccionado, lo deseleccionamos
+                if (selectedItemPosition == adapterPosition) {
+                    selectedItemPosition = null
+                    onClickDeselect()
+                } else {
+                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
+                    val previousSelectedPosition = selectedItemPosition
+                    selectedItemPosition = adapterPosition
+                    // Notificar que todos los elementos deben actualizarse
+                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
+                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
+                    onClickListener(lista, 1, adapterPosition)
                 }
-
-                // Agrega los listener para las opciones del menú si es necesario
-                popupMenu.gravity = Gravity.END
-                popupMenu.show()
+                notifyDataSetChanged() // Actualizar la vista
+            }
+            itemView.setOnLongClickListener() {
+                // Seleccionamos el ítem al mantener presionado
+                binding.cardView1.backgroundTintList =
+                    itemView.context.getColorStateList(R.color.fab_color)
+                selectedItemPosition = adapterPosition
+                notifyDataSetChanged() // Actualizamos la vista
+                onClickListener(lista, 2, position)
                 true
             }
         }
     }
-    fun limpiar(){
+    fun limpiar() {
         listaRecibida.clear()
     }
 }

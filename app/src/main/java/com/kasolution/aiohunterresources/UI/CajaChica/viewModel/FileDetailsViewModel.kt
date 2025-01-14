@@ -48,20 +48,20 @@ class FileDetailsViewModel : ViewModel() {
         }
     }
 
-    fun onInsert(urlId: urlId, fileDetails: fileDetails) {
+    fun onInsert(urlId: urlId, fileDetails: fileDetails,adicional:List<String>) {
         viewModelScope.launch {
             isloading.postValue(true)
-            val response = insertFileSheetUseCase(urlId, fileDetails)
+            val response = insertFileSheetUseCase(urlId, fileDetails,adicional)
             insertarFileSheet.postValue(response)
             isloading.postValue(false)
         }
     }
 
-    fun onUpdate(urlId: urlId, fileDetails: fileDetails) {
+    fun onUpdate(urlId: urlId, fileDetails: fileDetails,adicional: List<String>) {
         viewModelScope.launch {
             isloading.postValue(true)
             try {
-                val response = updateFileSheetUseCase(urlId, fileDetails)
+                val response = updateFileSheetUseCase(urlId, fileDetails,adicional)
                 updateFileSheet.postValue(response) // Notificar actualización
             } catch (e: Exception) {
                 //exception.postValue(e.message)
