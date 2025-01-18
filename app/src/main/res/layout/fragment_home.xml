@@ -25,10 +25,17 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
+                android:id="@+id/imgSync"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_sync" />
+
+            <ProgressBar
+                android:id="@+id/pbloading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
         </FrameLayout>
 
         <com.kasolution.aiohunterresources.core.ProgressCircleView

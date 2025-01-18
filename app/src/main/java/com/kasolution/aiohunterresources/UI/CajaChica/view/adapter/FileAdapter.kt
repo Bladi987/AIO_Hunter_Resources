@@ -12,7 +12,7 @@ import com.kasolution.aiohunterresources.databinding.ItemArchivosBinding
 
 class FileAdapter(
     private val listaRecibida: ArrayList<file>,
-    private val onClickListener: (file,Int,Int) -> Unit,
+    private val onClickListener: (file, Int, Int) -> Unit,
     private val onClickDeselect: () -> Unit
 ) : RecyclerView.Adapter<FileAdapter.ViewHolder>() {
     private var selectedItemPosition: Int? = null
@@ -37,7 +37,7 @@ class FileAdapter(
         fun render(
             lista: file,
             isSelected: Boolean,  // Estado de selección
-            onClickListener: (file,Int,Int) -> Unit,
+            onClickListener: (file, Int, Int) -> Unit,
             onClickDeselect: () -> Unit
         ) {
             // Actualizar el fondo del ítem usando backgroundTintList según si está seleccionado o no
@@ -49,33 +49,48 @@ class FileAdapter(
             binding.lblNombre.text = lista.nombre
             binding.cardView1.backgroundTintList = ColorStateList.valueOf(tintColor)
             itemView.setOnClickListener() {
-                // Si el ítem está seleccionado, lo deseleccionamos
-                if (selectedItemPosition == adapterPosition) {
-                    selectedItemPosition = null
-                    onClickDeselect()
-                } else {
-                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
-                    val previousSelectedPosition = selectedItemPosition
-                    selectedItemPosition = adapterPosition
-                    // Notificar que todos los elementos deben actualizarse
-                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
-                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
+                if (selectedItemPosition!=null)
+                    limpiarSeleccion()
+                else {
                     onClickListener(lista, 1, adapterPosition)
                 }
-                notifyDataSetChanged() // Actualizar la vista
+
+//                // Si el ítem está seleccionado, lo deseleccionamos
+//                if (selectedItemPosition == adapterPosition) {
+//                    selectedItemPosition = null
+//                    onClickDeselect()
+//                } else {
+//                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
+//                    val previousSelectedPosition = selectedItemPosition
+//                    selectedItemPosition = adapterPosition
+//                    // Notificar que todos los elementos deben actualizarse
+//                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
+//                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
+//                    onClickListener(lista, 1, adapterPosition)
+//                }
+//                notifyDataSetChanged() // Actualizar la vista
             }
             itemView.setOnLongClickListener() {
                 // Seleccionamos el ítem al mantener presionado
-                binding.cardView1.backgroundTintList =
-                    itemView.context.getColorStateList(R.color.fab_color)
-                selectedItemPosition = adapterPosition
-                notifyDataSetChanged() // Actualizamos la vista
-                onClickListener(lista, 2, position)
+//                binding.cardView1.backgroundTintList =
+//                    itemView.context.getColorStateList(R.color.fab_color)
+                if(selectedItemPosition!=null) limpiarSeleccion()else{
+                    selectedItemPosition = adapterPosition
+                    notifyDataSetChanged() // Actualizamos la vista
+                    onClickListener(lista, 2, position)
+                }
                 true
             }
         }
     }
+
     fun limpiar() {
         listaRecibida.clear()
+    }
+
+    fun limpiarSeleccion() {
+        selectedItemPosition = null
+        onClickDeselect()
+        notifyDataSetChanged()
     }
 }

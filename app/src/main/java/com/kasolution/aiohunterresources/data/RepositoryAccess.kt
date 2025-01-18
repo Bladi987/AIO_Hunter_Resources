@@ -3,13 +3,13 @@ package com.kasolution.aiohunterresources.data
 import com.google.gson.JsonElement
 import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
-import com.kasolution.recursoshunter.data.network.Service2
+import com.kasolution.recursoshunter.data.network.Service
 
 class RepositoryAccess() {
     val log="BladiDevRepositoryAccess"
-    private var api:Service2?=null
+    private var api:Service?=null
     private fun procesarUrl(urlId: urlId){
-        api= Service2(urlId)
+        api= Service(urlId)
     }
 
     //secureModule

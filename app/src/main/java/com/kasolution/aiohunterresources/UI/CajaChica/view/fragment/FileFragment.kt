@@ -48,7 +48,6 @@ class FileFragment : Fragment() {
     private var messageLoading = "Recuperando..."
     private var nameTecnico: String? = null
     private var insert = false
-    private var isTimerFinished = false
     private lateinit var preferencesCajaChica: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onCreateView(
@@ -103,6 +102,7 @@ class FileFragment : Fragment() {
             guardarListaArchivos(listaArchivos)
         })
         fileViewModel.isloading.observe(viewLifecycleOwner, Observer {
+            adapter.limpiarSeleccion()
             if (it) DialogProgress.show(requireContext(), "Recuperando...")
             else DialogProgress.dismiss()
         })

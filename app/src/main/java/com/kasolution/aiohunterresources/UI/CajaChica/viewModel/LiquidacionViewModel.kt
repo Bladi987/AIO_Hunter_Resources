@@ -51,10 +51,10 @@ class LiquidacionViewModel : ViewModel() {
         }
     }
 
-    fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion) {
+    fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion,adicional:ArrayList<Int>) {
         viewModelScope.launch {
             isloading.postValue(true)
-            val response = insertLiquidacionUseCase(urlid, liquidacion)
+            val response = insertLiquidacionUseCase(urlid, liquidacion,adicional)
             insertLiquidacion.postValue(response)
             isloading.postValue(false)
         }

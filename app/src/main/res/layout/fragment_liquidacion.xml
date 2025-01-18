@@ -44,7 +44,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="8dp"
-                    android:layout_weight="0.75">
+                    android:layout_weight="0.65">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -55,11 +55,48 @@
                         android:layout_gravity="center_vertical"
                         android:text="@string/Lista_Liquidaciones"/>
                 </FrameLayout>
-                <View
+                <LinearLayout
+                    android:id="@+id/llActions"
                     android:layout_width="0dp"
+                    android:visibility="invisible"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="0.1" />
+                    android:layout_weight="0.2" >
+                    <FrameLayout
+                        android:id="@+id/btnConfirmPay"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_confirm_pay"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/btnDelete"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1"
+                        android:layout_marginStart="5dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:id="@+id/imgAdd"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            app:tint="#FFFFFF"
+                            android:src="@drawable/ic_delete" />
+                    </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>

@@ -1,25 +1,22 @@
 package com.kasolution.aiohunterresources.data
 
-import android.content.Context
 import android.util.Log
 import com.google.gson.JsonElement
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
-import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.recursoshunter.data.network.Service
-import com.kasolution.recursoshunter.data.network.Service2
 
 class RepositoryCajaChica() {
     val log="BladiDevRepository"
     var idScript:String?=null
     var idSheet:String?=null
-    private var api:Service2?=null
+    private var api:Service?=null
 
     private fun procesarUrl(urlId: urlId){
-        api=Service2(urlId)
+        api=Service(urlId)
     }
 
     //BrandModule
@@ -88,9 +85,9 @@ class RepositoryCajaChica() {
         val response = api!!.getLiquidacion()
         return response!!
     }
-    suspend fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion): JsonElement {
+    suspend fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion,adicional:ArrayList<Int>): JsonElement {
         procesarUrl(urlid)
-        val response = api!!.insertLiquidacion(liquidacion)
+        val response = api!!.insertLiquidacion(liquidacion,adicional)
         return response!!
     }
     suspend fun updateLiquidacion(urlid: urlId, liquidacion: liquidacion): JsonElement {

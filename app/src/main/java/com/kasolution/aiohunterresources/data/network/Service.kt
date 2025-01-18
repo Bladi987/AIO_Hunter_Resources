@@ -4,22 +4,25 @@ import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
+import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.RetrofitHelper
+import com.kasolution.aiohunterresources.core.dataConexion.urlId
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-class Service(idScript: String, idSheet: String, sheetname: String? = null) {
+class Service(urlId: urlId) {
     val log = "BladiDevService"
 
     private val urlScript =
-        "https://script.google.com/macros/s/$idScript/" //este sera la url para la script
-    private val urlSheet =
-        "https://docs.google.com/spreadsheets/d/$idSheet/" // remplazar por id del documentos sheet(aqui puede ir el id del documento sheet o el id de la carpeta)
-    private val idFile =
-        idSheet    //variable temporal mientras se migra a utilizar solo id y no url
-    private val sheetName = sheetname
+        "https://script.google.com/macros/s/${urlId.idScript}/" //este sera la url para la script
+    private val idFile = urlId.idFile
+    private val sheetName = urlId.sheetName
+    private val idSheet = urlId.idSheet
 
     //privateModule
     private val retrofit = RetrofitHelper.getRetrofit(urlScript)
@@ -28,11 +31,9 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     //brandModule
     suspend fun getBrand(): JsonElement? {
         val jsonRequest = JsonObject()
-        jsonRequest.addProperty("action", "getData")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
-        jsonRequest.addProperty("sheet", "Brand")
+        jsonRequest.addProperty("action", "getBrand")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "BRAND")
 
 
         return withContext(Dispatchers.IO) {
@@ -53,9 +54,7 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
 
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", valueAction)
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "VEHICLEDATA")
         jsonRequest.addProperty("filter", filter)
 
@@ -68,21 +67,20 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun insertModel(data: List<String>): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "add")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "VEHICLEDATA")
-
-        jsonRequest.addProperty("data", data[0])
-        jsonRequest.addProperty("type", data[1])
-        jsonRequest.addProperty("marca", data[2])
-        jsonRequest.addProperty("modelo", data[3])
-        jsonRequest.addProperty("comentarios", data[4])
-        jsonRequest.addProperty("basico", data[5])
-        jsonRequest.addProperty("otros", data[6])
-        jsonRequest.addProperty("tecnico", data[7])
-        jsonRequest.addProperty("aprobado", data[8])
-        jsonRequest.addProperty("estado", data[9])
+        val rowArray = JsonArray()
+        rowArray.add(data[0])
+        rowArray.add(data[1])
+        rowArray.add(data[2])
+        rowArray.add(data[3])
+        rowArray.add(data[4])
+        rowArray.add(data[5])
+        rowArray.add(data[6])
+        rowArray.add(data[7])
+        rowArray.add(data[8])
+        rowArray.add(data[9])
+        jsonRequest.add("rows", rowArray)
 
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
@@ -93,23 +91,23 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun updateModel(data: List<String>): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "editModel")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "VEHICLEDATA")
-        jsonRequest.addProperty("id", data[0])
-        jsonRequest.addProperty("data", data[1])
-        jsonRequest.addProperty("type", data[2])
-        jsonRequest.addProperty("marca", data[3])
-        jsonRequest.addProperty("modelo", data[4])
-        jsonRequest.addProperty("linkimg", data[5])
-        jsonRequest.addProperty("comentarios", data[6])
-        jsonRequest.addProperty("basica", data[7])
-        jsonRequest.addProperty("otros", data[8])
-        jsonRequest.addProperty("tecnico", data[9])
-        jsonRequest.addProperty("aprobado", data[10])
-        jsonRequest.addProperty("estado", data[11])
-        Log.i("BladiDevMonitorio", jsonRequest.toString())
+        val rowArray = JsonArray()
+        rowArray.add(data[0])
+        rowArray.add(data[1])
+        rowArray.add(data[2])
+        rowArray.add(data[3])
+        rowArray.add(data[4])
+        rowArray.add(data[5])
+        rowArray.add(data[6])
+        rowArray.add(data[7])
+        rowArray.add(data[8])
+        rowArray.add(data[9])
+        rowArray.add(data[10])
+        rowArray.add(data[11])
+        jsonRequest.add("rows", rowArray)
+
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -119,9 +117,7 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun deleteModel(id: String): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "deleteModel")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "VEHICLEDATA")
         jsonRequest.addProperty("id", id)
         return withContext(Dispatchers.IO) {
@@ -132,17 +128,14 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
 
 
     //secureModule
-    suspend fun login(user: String, password: String): JsonElement? {
+    suspend fun login(user: user): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "login")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "User")
 
-        jsonRequest.addProperty("user", user)
-        jsonRequest.addProperty("password", password)
-
+        jsonRequest.addProperty("user", user.user)
+        jsonRequest.addProperty("password", user.password)
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -152,9 +145,7 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun getUser(): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "readUsers")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "User")
 
 
@@ -164,54 +155,49 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         }
     }
 
-    suspend fun insertUser(data: List<String>): JsonElement? {
+    suspend fun insertUser(user: user): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "addUser")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "User")
-
-        jsonRequest.addProperty("name", data[0])
-        jsonRequest.addProperty("lastname", data[1])
-        jsonRequest.addProperty("user", data[2])
-        jsonRequest.addProperty("password", data[3])
-        jsonRequest.addProperty("tipo", data[4])
-
+        val rowArray = JsonArray()
+        rowArray.add(user.name)
+        rowArray.add(user.lastName)
+        rowArray.add(user.user)
+        rowArray.add(user.password)
+        rowArray.add(user.tipo)
+        jsonRequest.add("rows", rowArray)
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
 
-    suspend fun updateUser(data: List<String>): JsonElement? {
+    suspend fun updateUser(user: user): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "editUser")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "User")
-        jsonRequest.addProperty("id", data[0])
-        jsonRequest.addProperty("name", data[1])
-        jsonRequest.addProperty("lastname", data[2])
-        jsonRequest.addProperty("user", data[3])
-        jsonRequest.addProperty("password", data[4])
-        jsonRequest.addProperty("tipo", data[5])
-
+        val rowArray = JsonArray()
+        rowArray.add(user.id)
+        rowArray.add(user.name)
+        rowArray.add(user.lastName)
+        rowArray.add(user.user)
+        rowArray.add(user.password)
+        rowArray.add(user.tipo)
+        jsonRequest.add("rows", rowArray)
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
 
-    suspend fun deleteUser(id: String): JsonElement? {
+    suspend fun deleteUser(user: user): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "deleteUser")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "User")
-        jsonRequest.addProperty("id", id)
+        jsonRequest.addProperty("id", user.id)
 
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
@@ -223,12 +209,8 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun getSettings(): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getSettings")
-        jsonRequest.addProperty(
-            "urlSheet", urlSheet
-        )
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "Settings")
-
-
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -241,7 +223,46 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getFiles")
         jsonRequest.addProperty("idFile", idFile)
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
 
+    suspend fun createDocument(file: file, adicional: List<String>): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "newDocument")
+        jsonRequest.addProperty("idFile", idFile)
+        jsonRequest.addProperty("nameDocument", file.nombre)
+        jsonRequest.addProperty("nameFirstSheet", adicional[0])
+        jsonRequest.addProperty("nameTecnico", adicional[1])
+        jsonRequest.addProperty("destino", adicional[2])
+        jsonRequest.addProperty("fecha", adicional[3])
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun updateDocument(file: file): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "updateDocument")
+        jsonRequest.addProperty("idFile", file.id)
+        jsonRequest.addProperty("newName", file.nombre)
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun deleteDocument(file: file): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "deleteDocument")
+        jsonRequest.addProperty("idFile", file.id)
+        Log.i("BladiDev", jsonRequest.toString())
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -251,8 +272,51 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun getDetailsFile(): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getSheet")
-        jsonRequest.addProperty("idSheet", idFile)
+        jsonRequest.addProperty("idSheet", idSheet)
 
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun insertFileSheet(fileDetails: fileDetails, adicional: List<String>): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "newSheet")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", fileDetails.nombre)
+        jsonRequest.addProperty("nameTecnico", adicional[0])
+        jsonRequest.addProperty("destino", adicional[1])
+        jsonRequest.addProperty("fecha", adicional[2])
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun updateFileSheet(fileDetails: fileDetails, adicional: List<String>): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "updateSheet")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", fileDetails.nombre)
+        jsonRequest.addProperty("newName", fileDetails.nombreReal)
+        jsonRequest.addProperty("nameTecnico", adicional[0])
+        jsonRequest.addProperty("destino", adicional[1])
+        jsonRequest.addProperty("fecha", adicional[2])
+        Log.i("BladiDev", jsonRequest.toString())
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun deleteFileSheet(fileDetails: fileDetails): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "deleteSheet")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", fileDetails.nombreReal)
+        Log.i("BladiDev", jsonRequest.toString())
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
@@ -262,7 +326,7 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
     suspend fun getRegister(): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "getData")
-        jsonRequest.addProperty("idSheet", idFile)
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
 
         return withContext(Dispatchers.IO) {
@@ -271,14 +335,14 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         }
     }
 
-    suspend fun insertRegister(registro:register): JsonElement? {
+    suspend fun insertRegister(registro: register): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "addRegister")
-        jsonRequest.addProperty("idSheet", idFile)
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
 
         val rowArray = JsonArray()
-        val row1=JsonArray()
+        val row1 = JsonArray()
         row1.add(registro.fecha)     //fecha
         row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
@@ -298,21 +362,22 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         row1.add(registro.s_otros)    //cs-otros
 
         rowArray.add(row1)
-        jsonRequest.add("rows",rowArray)
+        jsonRequest.add("rows", rowArray)
 
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
-    suspend fun updateRegister(registro:register): JsonElement? {
+
+    suspend fun updateRegister(registro: register): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "updateRegister")
-        jsonRequest.addProperty("idSheet", idFile)
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
 
         val rowArray = JsonArray()
-        val row1=JsonArray()
+        val row1 = JsonArray()
         row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
         row1.add(registro.ciudad)    //ciudad
@@ -332,21 +397,22 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         row1.add(registro.s_otros)    //cs-otros
 
         rowArray.add(row1)
-        jsonRequest.add("rows",rowArray)
+        jsonRequest.add("rows", rowArray)
 
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
             response.body()
         }
     }
-    suspend fun deleteRegister(registro:register): JsonElement? {
+
+    suspend fun deleteRegister(registro: register): JsonElement? {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "deleteRegister")
-        jsonRequest.addProperty("idSheet", idFile)
+        jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
 
         val rowArray = JsonArray()
-        val row1=JsonArray()
+        val row1 = JsonArray()
         row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
         row1.add(registro.ciudad)    //ciudad
@@ -356,7 +422,87 @@ class Service(idScript: String, idSheet: String, sheetname: String? = null) {
         row1.add(registro.descripcion) //descripcion
 
         rowArray.add(row1)
-        jsonRequest.add("rows",rowArray)
+        jsonRequest.add("rows", rowArray)
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun getLiquidacion(): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "getLiquidacion")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "LIQUIDACIONES")
+        Log.i("BladiDev", "Datos enviados son: $jsonRequest")
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun insertLiquidacion(liquidacion: liquidacion,adicional:ArrayList<Int>): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "insertLiquidacion")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "LIQUIDACIONES")
+        val rowArray = JsonArray()
+        rowArray.add(liquidacion.fecha)
+        rowArray.add(liquidacion.archivo)
+        rowArray.add(liquidacion.concepto)
+        rowArray.add(liquidacion.monto)
+        rowArray.add(liquidacion.estado)
+        rowArray.add(adicional[0])
+        rowArray.add(adicional[1])
+        rowArray.add(adicional[2])
+        jsonRequest.add("rows", rowArray)
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun updateLiquidacion(liquidacion: liquidacion): JsonElement? {
+
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "updateLiquidacion")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "LIQUIDACIONES")
+        val rowArray = JsonArray()
+        rowArray.add(liquidacion.id)
+        rowArray.add(liquidacion.fecha)
+        rowArray.add(liquidacion.archivo)
+        rowArray.add(liquidacion.concepto)
+        rowArray.add(liquidacion.monto)
+        rowArray.add("Reembolsado")
+        jsonRequest.add("rows", rowArray)
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun deleteLiquidacion(liquidacion: liquidacion): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "deleteLiquidacion")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "LIQUIDACIONES")
+        val rowArray = JsonArray()
+        rowArray.add(liquidacion.id)
+        rowArray.add(liquidacion.archivo)
+        rowArray.add(liquidacion.concepto)
+        jsonRequest.add("rows", rowArray)
+
+        return withContext(Dispatchers.IO) {
+            val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)
+            response.body()
+        }
+    }
+
+    suspend fun getResumenGastos(): JsonElement? {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "getResumengatos")
+        jsonRequest.addProperty("idFile", idFile)
 
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(ApiClient::class.java).peticion(jsonRequest)

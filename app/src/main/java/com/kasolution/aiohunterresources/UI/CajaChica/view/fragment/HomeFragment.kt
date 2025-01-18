@@ -54,7 +54,6 @@ class HomeFragment : Fragment() {
                 resumengastos = resumen.toDouble()
                 val saldo = montoCajaChica - resumengastos
                 if (saldo != saldoDisponible) {
-                    //binding.tvSaldo.text = String.format(Locale.getDefault(), "S/. %.2f", montoCajaChica-resumengastos)
                     val editor = preferencesCajaChica.edit()
                     editor.putString("SALDODISPONIBLE", (saldo).toString())
                     editor.apply()
@@ -62,6 +61,17 @@ class HomeFragment : Fragment() {
                     animarProgresoYTexto()
                 }
                 observador=false
+            }
+        }
+        liquidacionViewModel.isloading.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.pbloading.visibility = View.VISIBLE
+                binding.btnSync.isEnabled = false
+                binding.imgSync.visibility = View.GONE
+            } else {
+                binding.pbloading.visibility = View.GONE
+                binding.btnSync.isEnabled = true
+                binding.imgSync.visibility = View.VISIBLE
             }
         }
         binding.btnRegistrar.setOnClickListener() {

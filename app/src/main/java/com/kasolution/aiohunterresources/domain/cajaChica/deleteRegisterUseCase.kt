@@ -12,7 +12,6 @@ class deleteRegisterUseCase() {
         lateinit var respuesta: String
         val response=repository.deleteRegister(urlId,register).asJsonObject
 
-        Log.i("deleteRegisterUseCase",response.toString())
         val data = response?.getAsJsonArray("Resultado")
         if(data!=null)
             respuesta="done"

@@ -1,26 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="20dp">
+    android:background="@drawable/border_dialog"
+    android:paddingBottom="10dp">
+
+    <com.kasolution.aiohunterresources.core.RoundedImageView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/decorate_head_small"
+        app:bottomLeftRadius="0dp"
+        app:bottomRightRadius="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:topLeftRadius="10dp"
+        app:topRightRadius="10dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/llhead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:text="@string/nuevo_registro"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCancelar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:padding="10dp"
+            android:src="@drawable/close_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryDark" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <LinearLayout
         android:id="@+id/lypather"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/border_dialog_white"
-        android:orientation="vertical">
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llhead">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cvcsustento"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/white"
                 android:foreground="?android:attr/selectableItemBackground"
                 app:layout_constraintEnd_toStartOf="@+id/cvssustento"
                 app:layout_constraintStart_toStartOf="parent"
@@ -59,6 +115,7 @@
                 android:id="@+id/cvssustento"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/white"
                 android:foreground="?android:attr/selectableItemBackground"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/cvcsustento"
@@ -161,37 +218,46 @@
                 android:layout_weight="0.5"
                 android:background="@drawable/border_dialog_white"
                 android:inputType="textCapCharacters"
-                android:text="AREQUIPA"
-                android:textAlignment="center" />
+                android:hint="Ingrese lugar"
+                android:textAlignment="center"
+                android:textColor="@color/text_color2" />
 
-            <EditText
-                android:id="@+id/txtFecha"
+            <LinearLayout
+                android:id="@+id/btnFecha"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="0.35"
+                android:layout_weight="0.5"
                 android:background="@drawable/border_dialog_white"
-                android:enabled="false"
-                android:inputType="date"
-                android:textAlignment="center"
-                android:textSize="15sp"
-                tools:text="01/01/2023"/>
-
-            <ImageView
-                android:id="@+id/btnfecha"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.15"
-                android:background="@drawable/border_dialog_white"
+                android:clickable="true"
+                android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                android:src="@drawable/calendar_icon"
-                app:tint="@color/background_toast"/>
+                android:gravity="center_vertical"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/tvFecha"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7"
+                    android:gravity="center"
+                    android:text="__/__/____"
+                    android:textColor="@color/text_color2" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:src="@drawable/calendar_icon"
+                    app:tint="@color/background_toast" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/lysustento"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="5dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/border_dialog_white"
             android:orientation="vertical"
@@ -201,7 +267,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tipo de documento"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textColor="@color/text_color2" />
 
             <RadioGroup
                 android:id="@+id/rgGrupo"
@@ -217,7 +284,8 @@
                     android:layout_weight="1"
                     android:buttonTint="@color/boton_verde"
                     android:checked="true"
-                    android:text="Factura" />
+                    android:text="Factura"
+                    android:textColor="@color/text_color2" />
 
                 <RadioButton
                     android:id="@+id/rbboleta"
@@ -225,7 +293,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/boton_verde"
-                    android:text="Boleta" />
+                    android:text="Boleta"
+                    android:textColor="@color/text_color2" />
 
                 <RadioButton
                     android:id="@+id/rbticket"
@@ -233,7 +302,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/boton_verde"
-                    android:text="Ticket" />
+                    android:text="Ticket"
+                    android:textColor="@color/text_color2" />
             </RadioGroup>
 
             <LinearLayout
@@ -255,7 +325,8 @@
                         android:hint="Serie"
                         android:inputType="textCapCharacters"
                         android:singleLine="true"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textColor="@color/text_color2" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -263,6 +334,7 @@
                         android:layout_weight="0.05"
                         android:text="-"
                         android:textAlignment="center"
+                        android:textColor="@color/text_color2"
                         android:textStyle="bold" />
 
                     <EditText
@@ -274,7 +346,8 @@
                         android:hint="Correlativo"
                         android:inputType="number"
                         android:singleLine="true"
-                        android:textAlignment="center" />
+                        android:textAlignment="center"
+                        android:textColor="@color/text_color2" />
                 </LinearLayout>
 
                 <EditText
@@ -283,7 +356,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/border_dialog_white"
-                    android:hint="Proveedor" />
+                    android:hint="Proveedor"
+                    android:textColor="@color/text_color2" />
             </LinearLayout>
         </LinearLayout>
 
@@ -313,7 +387,8 @@
                     android:hint="Origen"
                     android:inputType="textCapCharacters"
                     android:singleLine="true"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:textColor="@color/text_color2" />
 
                 <ImageView
                     android:layout_width="0dp"
@@ -331,7 +406,8 @@
                     android:hint="Destino"
                     android:inputType="textCapCharacters"
                     android:singleLine="true"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:textColor="@color/text_color2" />
             </LinearLayout>
 
             <EditText
@@ -343,16 +419,21 @@
                 android:hint="Descipcion"
                 android:inputType="textCapCharacters"
                 android:textAlignment="center"
+                android:textColor="@color/text_color2"
                 android:visibility="gone" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="S/ "
-                    android:textSize="20sp"/>
+                    android:textColor="@color/text_color2"
+                    android:textSize="20sp" />
+
                 <EditText
                     android:id="@+id/txtMonto"
                     android:layout_width="100dp"
@@ -361,41 +442,24 @@
                     android:hint="Monto"
                     android:inputType="numberDecimal"
                     android:singleLine="true"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:textColor="@color/text_color2" />
             </LinearLayout>
-
-
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
             android:layout_marginBottom="10dp"
-            android:orientation="horizontal"
-            android:weightSum="1">
+            android:gravity="center">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_dialogCancel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="0.5"
-                android:background="@drawable/btn_cancel"
-                android:text="@string/Cancelar"
-                android:textColor="@color/text_color"
-                app:backgroundTint="@null" />
-
-            <androidx.appcompat.widget.AppCompatButton
+            <Button
                 android:id="@+id/btnAgregar"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0.5"
-                android:background="@drawable/btn_save"
+                android:paddingHorizontal="50dp"
                 android:text="Guardar"
-                android:textColor="@color/text_color"
-                app:backgroundTint="@null" />
+                android:textColor="@color/text_color" />
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

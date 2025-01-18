@@ -47,7 +47,16 @@ class RegisterViewModel : ViewModel() {
             isloading.postValue(false)
         }
     }
-
+    fun onRefresh(urlId: urlId) {
+        viewModelScope.launch {
+            isloading.postValue(true)
+            val response = getRegisterUseCase(urlId)
+            if (response.isNotEmpty()) {
+                getRegister.postValue(listRegister)
+            }
+            isloading.postValue(false)
+        }
+    }
     fun insertRegister(urlId: urlId, register: register) {
         viewModelScope.launch {
             isloading.postValue(true)
@@ -92,14 +101,12 @@ class RegisterViewModel : ViewModel() {
             isloading.postValue(true)
             try {
                 val response = deleteRegisterUseCase(urlId, register)
-//                if (response != null) {
                 val index = listRegister.indexOfFirst { it.id == register.id }
                 if (index != -1) {
                     listRegister.removeAt(index) // Eliminar registro
                     deleteRegister.postValue(response)
                     calcularTotales(listRegister) // Actualizar resumen
                 }
-//                }
             }catch (e:Exception){
                 exception.postValue(e.message)
             }

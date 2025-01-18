@@ -3,6 +3,7 @@ package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -53,11 +54,11 @@ class RegisterFragment : Fragment(), DialogListener {
     private var itemPosition = -1
     private var itemSpinnerPosition = -1
     private lateinit var preferencesCajaChica: SharedPreferences
-
+    private var messageLoading = "Recuperando..."
     private lateinit var urlScript: String
     private lateinit var idSheet: String
     private lateinit var sheetName: String
-    private var sheetNameTemp=""
+    private var sheetNameTemp = ""
     private lateinit var fileName: String
     private lateinit var sumaTotal: String
 
@@ -93,6 +94,7 @@ class RegisterFragment : Fragment(), DialogListener {
             //liquidacionViewModel.getFileSheet(requireContext(),"https://drive.google.com/uc?export=download&id=1u0D0NKKMXngLcye4xfcOceQ6bEtPisJ2",urlId!!)
         }
         binding.btnAdd.setOnClickListener() {
+            adapter.limpiarSeleccion()
             abrirDialog()
 //            agregarGasto()
         }
@@ -107,7 +109,7 @@ class RegisterFragment : Fragment(), DialogListener {
             adapter.limpiar()
             listRegister.addAll(listaRegistros)
             adapter.notifyDataSetChanged()
-            if(sheetNameTemp.isNotEmpty()){
+            if (sheetNameTemp.isNotEmpty()) {
                 val editor = preferencesCajaChica.edit()
                 editor.putString("SHEETNAME", sheetNameTemp)
                 editor.apply()
@@ -123,12 +125,14 @@ class RegisterFragment : Fragment(), DialogListener {
         })
 
         registerViewModel.updateRegister.observe(viewLifecycleOwner, Observer { register ->
+            adapter.limpiarSeleccion()
             listRegister[itemPosition] = register
             adapter.notifyItemChanged(itemPosition)
             debitarGasto(register, "COMPARAR")
         })
 
         registerViewModel.deleteRegister.observe(viewLifecycleOwner, Observer {
+            adapter.limpiarSeleccion()
             listRegister.removeAt(itemPosition)
             adapter.notifyItemRemoved(itemPosition)
             debitarGasto(itemRegistro, "ABONAR")
@@ -155,21 +159,21 @@ class RegisterFragment : Fragment(), DialogListener {
         liquidacionViewModel.insertLiquidacion.observe(viewLifecycleOwner, Observer { liquidacion ->
             DialogUtils.dialogMessageResponse(
                 requireContext(),
-                "Liquidacion Ingresado correctamente y archivo archivo excel fue descargdo en la carpeta descargas",
+                "Liquidacion Ingresado correctamente, archivo excel fue descargado en la carpeta descargas",
                 null
             )
 
             try {
                 // Obtener el JSON almacenado en SharedPreferences
                 val jsonString = preferencesCajaChica.getString("LIST_SHEET", "[]") ?: "[]"
-                Log.i("BladiDevBuscando",jsonString)
+                Log.i("BladiDevBuscando", jsonString)
                 // Convertir la cadena JSON en un JSONArray
                 val jsonArray = JSONArray(jsonString)
 
                 // Obtener el item seleccionado del Spinner
                 val selectedItemPosition = binding.spSheets.selectedItemPosition
                 val selectedItem = jsonArray.getJSONObject(selectedItemPosition)
-                Log.i("BladiDevBuscando",selectedItemPosition.toString())
+                Log.i("BladiDevBuscando", selectedItemPosition.toString())
                 // Modificar el valor de "NOMBREREAL"
                 val nombreReal = selectedItem.getString("nombreReal")
                 val nuevoNombreReal = "$nombreReal->Enviado"  // Cambiar el texto como lo necesites
@@ -190,7 +194,7 @@ class RegisterFragment : Fragment(), DialogListener {
                 recuperarPreferencias()
                 adapterSpinner.notifyDataSetChanged()
             } catch (e: Exception) {
-                Log.i("BladiDev", "ERROR "+e.message.toString())
+                Log.i("BladiDev", "ERROR " + e.message.toString())
             }
 
         })
@@ -261,6 +265,7 @@ class RegisterFragment : Fragment(), DialogListener {
                                 }
                             )
                         }
+
                         "Editable" -> {
 
                             // Comprobar si el nombreReal ha cambiado
@@ -319,8 +324,8 @@ class RegisterFragment : Fragment(), DialogListener {
                 "DEBITO" -> {
                     val saldo = preferencesCajaChica.getString("SALDODISPONIBLE", "0")
                     val editor = preferencesCajaChica.edit()
-                    var x=saldo!!.toDouble()
-                    var y=monto.toDouble()
+                    var x = saldo!!.toDouble()
+                    var y = monto.toDouble()
                     //val nuevoSaldo = saldo!!.toDouble() - monto.toDouble()
                     val nuevoSaldo = x - y
                     editor.putString("SALDODISPONIBLE", (nuevoSaldo).toString())
@@ -365,7 +370,16 @@ class RegisterFragment : Fragment(), DialogListener {
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            registerViewModel.onCreate(urlId!!)
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    messageLoading = "Recuperando..."
+                    registerViewModel.onRefresh(urlId!!)
+                })
         }
     }
 
@@ -494,9 +508,9 @@ class RegisterFragment : Fragment(), DialogListener {
         fileName = preferencesCajaChica.getString("FILENAME", "").toString()
         sheetName = preferencesCajaChica.getString("SHEETNAME", "").toString()
         if (sheetName.contains("->")) {
-         val part=sheetName.split("->")
-            sheetName=part[0]
-            sheetNameTemp=part[1]
+            val part = sheetName.split("->")
+            sheetName = part[0]
+            sheetNameTemp = part[1]
         }
         val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
         listSheets = llenarLista(Sheets)
@@ -513,18 +527,24 @@ class RegisterFragment : Fragment(), DialogListener {
         lmanager = LinearLayoutManager(context)
         adapter = RegisterAdapter(
             listaRecibida = listRegister,
-            onclickListener = { itemRegister -> onItemSelected(itemRegister) },
-            OnClickUpdate = { itemRegister, position -> onItemUpdate(itemRegister, position) },
-            OnClickDelete = { itemRegister, position -> onItemDelete(itemRegister, position) })
+            onClickListener = { itemRegister,action,position -> onItemSelected(itemRegister,action,position) },
+            onClickDeselect = { MostrarActionIcon(false) })
         binding.RVRegistros.layoutManager = lmanager
         binding.RVRegistros.adapter = adapter
     }
 
     private fun onItemDelete(itemRegister: register, position: Int) {
-        itemPosition = position
-        itemRegistro = itemRegister
-        registerViewModel.deleteRegister(urlId!!, itemRegister)
-
+        DialogUtils.dialogQuestion(
+            requireContext(),
+            "Aviso",
+            "Esta seguro que desea eliminar este registro?",
+            positiveButtontext = "Si",
+            negativeButtontext = "no",
+            onPositiveClick = {
+                itemPosition = position
+                itemRegistro = itemRegister
+                registerViewModel.deleteRegister(urlId!!, itemRegister)
+            })
     }
 
     private fun onItemUpdate(itemRegister: register, position: Int) {
@@ -533,8 +553,22 @@ class RegisterFragment : Fragment(), DialogListener {
         abrirDialog(itemRegister)
     }
 
-    private fun onItemSelected(itemRegister: register) {
-        //Toast.makeText(rewquireContext(), itemRegister.id, Toast.LENGTH_SHORT).show()
+    private fun onItemSelected(itemRegister: register, action: Int, position: Int) {
+        when (action) {
+            1 -> onItemUpdate(itemRegister, position)
+            2 -> onItemDelete(itemRegister, position)
+        }
+    }
+    private fun MostrarActionIcon(mostrar: Boolean) {
+//        if (mostrar) {
+//            binding.btnAction2.visibility = View.VISIBLE
+//            binding.imgAdd.setImageResource(R.drawable.ic_delete)
+//            binding.imgAdd.setColorFilter(Color.parseColor("#FFFFFF"))
+//        } else {
+//            binding.btnAction2.visibility = View.INVISIBLE
+//            binding.imgAdd.setImageResource(R.drawable.add_file)
+//            binding.imgAdd.clearColorFilter()
+//        }
     }
 
     private fun abrirDialog(register: register? = null) {
@@ -586,6 +620,18 @@ class RegisterFragment : Fragment(), DialogListener {
                             .toString(),
                         sheetName = "LIQUIDACIONES"
                     )
+                    val install =
+                        if (binding.etnroInstalaciones.text.isNotEmpty() && binding.etnroInstalaciones.text.toString()
+                                .toIntOrNull() != null
+                        ) binding.etnroInstalaciones.text.toString().toInt() else 0
+                    val desinstall =
+                        if (binding.etnroDesinstalaciones.text.isNotEmpty() && binding.etnroDesinstalaciones.text.toString()
+                                .toIntOrNull() != null
+                        ) binding.etnroDesinstalaciones.text.toString().toInt() else 0
+                    val chequeos =
+                        if (binding.etnroChequeos.text.isNotEmpty() && binding.etnroChequeos.text.toString()
+                                .toIntOrNull() != null
+                        ) binding.etnroChequeos.text.toString().toInt() else 0
                     liquidacionViewModel.insertLiquidacion(
                         urlIdtemp,
                         liquidacion(
@@ -595,7 +641,7 @@ class RegisterFragment : Fragment(), DialogListener {
                             concepto = sheetName.toString(),
                             monto = sumaTotal.toString(),
                             estado = "Enviado"
-                        )
+                        ), arrayListOf(install, desinstall, chequeos)
                     )
                     dialog.dismiss()
                 }

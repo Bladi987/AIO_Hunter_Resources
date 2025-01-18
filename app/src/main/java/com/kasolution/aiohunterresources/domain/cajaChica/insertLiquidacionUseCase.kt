@@ -15,9 +15,9 @@ import java.net.URL
 
 class insertLiquidacionUseCase() {
     private val repository= RepositoryCajaChica()
-    suspend operator fun invoke(urlid: urlId,liquidacion:liquidacion): liquidacion {
+    suspend operator fun invoke(urlid: urlId,liquidacion:liquidacion,adicional:ArrayList<Int>): liquidacion {
         lateinit var dataliquidacion: liquidacion
-        val response=repository.insertLiquidacion(urlid,liquidacion).asJsonObject
+        val response=repository.insertLiquidacion(urlid,liquidacion,adicional).asJsonObject
         Log.i("BladiDevUser",response.toString())
         val data = response?.getAsJsonArray("Respuesta")
         if (data!=null){

@@ -140,6 +140,7 @@ class FileDetailsFragment : Fragment() {
             updatePreferences(fileSheet)
         })
         fileDetailsViewModel.isloading.observe(viewLifecycleOwner, Observer { cargando ->
+            adapter.limpiarSeleccion()
             if (cargando) DialogProgress.show(requireContext(), messageLoading)
             else DialogProgress.dismiss()
             MostrarActionIcon(false)

@@ -1,29 +1,26 @@
 package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment.dialog
 
 import android.app.DatePickerDialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.DialogFragment
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.CajaChica.interfaces.DialogListener
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
-import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.VehicleModel
-import com.kasolution.aiohunterresources.core.ToastUtils
-
 import com.kasolution.aiohunterresources.databinding.FragmentAddRegisterBinding
 import java.util.Calendar
 import java.util.Locale
@@ -32,9 +29,10 @@ import java.util.Locale
 class AddRegisterFragment : DialogFragment() {
     private lateinit var binding: FragmentAddRegisterBinding
     var listener: DialogListener? = null
-
+    private lateinit var preferencesCajaChica: SharedPreferences
     var sustento = false
     var tipoGasto = 0
+    var ultimaUbicacion=""
     private var register: register? = null
     var idRegister = ""
     override fun onCreateView(
@@ -61,11 +59,15 @@ class AddRegisterFragment : DialogFragment() {
                 register = it.getSerializable("register")!! as register
             }
         }
+        preferencesCajaChica = requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+        recuperarPreferencias()
         calcularTamano()
 
         if (register == null) {
             //es registro nuevo
-            binding.txtFecha.setText(obtenerFecha())
+            binding.tvFecha.text = obtenerFecha()
+            binding.txtLugar.setText(ultimaUbicacion)
+            binding.tvtitle.text = "Nuevo Registro"
             binding.imgSSustento.setColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.boton_verde),
                 PorterDuff.Mode.SRC_IN
@@ -171,8 +173,9 @@ class AddRegisterFragment : DialogFragment() {
             }
             //guardamos el id del registro seleccionado para actualizarlo
             idRegister = register!!.id
-            binding.txtFecha.setText(register!!.fecha)
-
+            binding.tvFecha.text = register!!.fecha
+            binding.txtLugar.setText(register!!.ciudad)
+            binding.tvtitle.text = "Editar Registro"
             //se distribuye los datos en los distinto imputs segun al tipo de gasto
             when (tipoGasto) {
                 1 -> {
@@ -296,7 +299,7 @@ class AddRegisterFragment : DialogFragment() {
             tipoGasto = 4
         }
 
-        binding.btnfecha.setOnClickListener() {
+        binding.btnFecha.setOnClickListener() {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
@@ -310,7 +313,7 @@ class AddRegisterFragment : DialogFragment() {
                         selectedMonth + 1,
                         selectedYear
                     )
-                    binding.txtFecha.setText(formattedDate)
+                    binding.tvFecha.text = formattedDate
                 }, year, month, day)
 
             datePickerDialog.show()
@@ -324,6 +327,7 @@ class AddRegisterFragment : DialogFragment() {
             if (sustento) {
                 if (tipoGasto == 1) {
                     textosVacios = when {
+                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtserie, mensajeError) -> true
                         validatetvVacio(binding.txtcorrelativo, mensajeError) -> true
                         validatetvVacio(binding.txtproveedor, mensajeError) -> true
@@ -334,6 +338,7 @@ class AddRegisterFragment : DialogFragment() {
                     }
                 } else {
                     textosVacios = when {
+                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtserie, mensajeError) -> true
                         validatetvVacio(binding.txtcorrelativo, mensajeError) -> true
                         validatetvVacio(binding.txtproveedor, mensajeError) -> true
@@ -345,6 +350,7 @@ class AddRegisterFragment : DialogFragment() {
             } else {
                 if (tipoGasto == 1) {
                     textosVacios = when {
+                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtorigen, mensajeError) -> true
                         validatetvVacio(binding.txtdestino, mensajeError) -> true
                         validatetvVacio(binding.txtMonto, mensajeError) -> true
@@ -352,6 +358,7 @@ class AddRegisterFragment : DialogFragment() {
                     }
                 } else {
                     textosVacios = when {
+                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtDescripcion, mensajeError) -> true
                         validatetvVacio(binding.txtMonto, mensajeError) -> true
                         else -> false
@@ -382,7 +389,7 @@ class AddRegisterFragment : DialogFragment() {
                     listener?.onDataCollected(
                         register(
                             "",
-                            binding.txtFecha.text.toString(),
+                            binding.tvFecha.text.toString(),
                             binding.txtLugar.text.toString(),
                             tipoDoc,
                             nroDocumento,
@@ -439,13 +446,14 @@ class AddRegisterFragment : DialogFragment() {
                         )
                     )
                     idRegister = ""
+                    actualizarUltimaUbicacion(binding.txtLugar.text.toString())
                 } else {
                     if (!sustento) tipoDoc = ""
                     //se realizara una actualizacion de registro
                     listener?.onDataCollectedUpdate(
                         register(
                             idRegister,
-                            binding.txtFecha.text.toString(),
+                            binding.tvFecha.text.toString(),
                             binding.txtLugar.text.toString(),
                             tipoDoc,
                             nroDocumento,
@@ -505,9 +513,19 @@ class AddRegisterFragment : DialogFragment() {
                 dismiss()
             }
         }
-        binding.btnDialogCancel.setOnClickListener() {
+        binding.btnCancelar.setOnClickListener(){
             dismiss()
         }
+    }
+
+    private fun actualizarUltimaUbicacion(ultimoLugar: String) {
+        val editor = preferencesCajaChica.edit()
+        editor.putString("ULTIMA_UBICACION", ultimoLugar)
+        editor.apply()
+    }
+
+    private fun recuperarPreferencias() {
+        ultimaUbicacion = preferencesCajaChica.getString("ULTIMA_UBICACION", "").toString()
     }
 
     private fun identificarGasto(

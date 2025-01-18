@@ -87,30 +87,38 @@ class FileDetailsAdapter(
             binding.cardView1.backgroundTintList = ColorStateList.valueOf(tintColor)
 
             itemView.setOnClickListener {
-                // Si el ítem está seleccionado, lo deseleccionamos
-                if (selectedItemPosition == adapterPosition) {
-                    selectedItemPosition = null
-                    onClickDeselect()
-                } else {
-                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
-                    val previousSelectedPosition = selectedItemPosition
-                    selectedItemPosition = adapterPosition
-                    // Notificar que todos los elementos deben actualizarse
-                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
-                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
-                    onClickListener(lista, 1, adapterPosition)
-                }
-                notifyDataSetChanged() // Actualizar la vista
+                if (selectedItemPosition != null) limpiarSeleccion() else onClickListener(
+                    lista,
+                    1,
+                    adapterPosition
+                )
+
+//                // Si el ítem está seleccionado, lo deseleccionamos
+//                if (selectedItemPosition == adapterPosition) {
+//                    selectedItemPosition = null
+//                    onClickDeselect()
+//                } else {
+//                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
+//                    val previousSelectedPosition = selectedItemPosition
+//                    selectedItemPosition = adapterPosition
+//                    // Notificar que todos los elementos deben actualizarse
+//                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
+//                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
+//                    onClickListener(lista, 1, adapterPosition)
+//                }
+//                notifyDataSetChanged() // Actualizar la vista
             }
 //
             // Manejar la acción de mantener presionado (long click)
             itemView.setOnLongClickListener {
                 // Seleccionamos el ítem al mantener presionado
-                binding.cardView1.backgroundTintList =
-                    itemView.context.getColorStateList(R.color.fab_color)
-                selectedItemPosition = adapterPosition
-                notifyDataSetChanged() // Actualizamos la vista
-                onClickListener(lista, 2, position)
+//                binding.cardView1.backgroundTintList =
+//                    itemView.context.getColorStateList(R.color.fab_color)
+                if(selectedItemPosition!=null) limpiarSeleccion()else{
+                    selectedItemPosition = adapterPosition
+                    notifyDataSetChanged() // Actualizamos la vista
+                    onClickListener(lista, 2, position)
+                }
                 true
             }
         }
@@ -121,11 +129,6 @@ class FileDetailsAdapter(
         notifyDataSetChanged()
     }
 
-    // Método para limpiar la selección
-    fun limpiarSeleccion() {
-        selectedItemPosition = null
-        notifyDataSetChanged()
-    }
 
     // Método para obtener la posición seleccionada
     fun getSelectedItem(): Int? = selectedItemPosition
@@ -136,5 +139,11 @@ class FileDetailsAdapter(
             texto.contains("->Reembolsado") -> "Reembolsado"
             else -> "Editable"
         }
+    }
+
+    fun limpiarSeleccion() {
+        selectedItemPosition = null
+        onClickDeselect()
+        notifyDataSetChanged()
     }
 }

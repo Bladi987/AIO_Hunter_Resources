@@ -4,135 +4,249 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="15dp"
+    android:backgroundTint="@color/white"
     app:cardCornerRadius="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="@string/tittle_resumen"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:paddingVertical="10dp"
-                    android:text="@string/tittle_resumen"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                android:weightSum="1">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <FrameLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp"
-                    android:weightSum="1">
+                    android:layout_weight="0.3">
 
-                    <FrameLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.3">
+                        android:text="Archivo:"
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Archivo:" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.7">
-
-                        <TextView
-                            android:id="@+id/lblArchivo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-                    </FrameLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <FrameLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp"
-                    android:weightSum="1">
+                    android:layout_weight="0.7">
 
-                    <FrameLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/lblArchivo"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="0.3">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Concepto:" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.7">
-
-                        <TextView
-                            android:id="@+id/lblConcepto"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-                    </FrameLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp"
-                    android:weightSum="1">
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.3">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Monto:" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.7">
-
-                        <TextView
-                            android:id="@+id/lblMonto"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
-                    </FrameLayout>
-                </LinearLayout>
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
             </LinearLayout>
 
-            <FrameLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp">
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                android:weightSum="1">
 
-                <Button
-                    android:id="@+id/btnEnviar"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:layout_width="match_parent"
-                    android:background="@drawable/btn_buttom"
+                <FrameLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Enviar" />
-            </FrameLayout>
+                    android:layout_weight="0.3">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Concepto:"
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7">
+
+                    <TextView
+                        android:id="@+id/lblConcepto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp"
+                android:weightSum="1">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Monto:"
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7">
+
+                    <TextView
+                        android:id="@+id/lblMonto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_color2" />
+                </FrameLayout>
+            </LinearLayout>
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="5dp"
+            android:layout_marginVertical="10dp"
+            android:background="#D3D3D3" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nro de trabajos:"
+                android:textColor="@color/text_color2"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="0.9">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Instalaciones:"
+                        android:textColor="@color/text_color2" />
+
+                    <EditText
+                        android:id="@+id/etnroInstalaciones"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_style"
+                        android:gravity="center"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textColor="@color/text_color2"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Desinstalaciones:"
+                        android:textColor="@color/text_color2" />
+
+                    <EditText
+                        android:id="@+id/etnroDesinstalaciones"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_style"
+                        android:gravity="center"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textColor="@color/text_color2"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingVertical="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chequeos:"
+                        android:textColor="@color/text_color2" />
+
+                    <EditText
+                        android:id="@+id/etnroChequeos"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_style"
+                        android:gravity="center"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textColor="@color/text_color2"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:id="@+id/btnEnviar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_buttom"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="Enviar" />
+        </FrameLayout>
+    </LinearLayout>
 </androidx.cardview.widget.CardView>
