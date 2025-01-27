@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +12,6 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -27,12 +25,13 @@ import com.kasolution.aiohunterresources.databinding.FragmentFileBinding
 import java.io.Serializable
 import java.util.ArrayList
 import com.google.gson.Gson
-import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.recent
 import com.kasolution.aiohunterresources.core.DialogUtils
-import com.kasolution.aiohunterresources.core.ToastUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.DialogNewDocumentBinding
-import com.kasolution.aiohunterresources.databinding.DialogNewSheetBinding
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 
 class FileFragment : Fragment() {
@@ -94,43 +93,122 @@ class FileFragment : Fragment() {
             dialogFile(files.nombre)
         }
         fileViewModel.onCreate(urlId!!)
-        fileViewModel.FileModel.observe(viewLifecycleOwner, Observer { listaArchivos ->
-            adapter.limpiar()
-            listFile.addAll(listaArchivos)
-            adapter.notifyDataSetChanged()
-            //Guardar en preferences la lista de archivos
-            guardarListaArchivos(listaArchivos)
-        })
         fileViewModel.isloading.observe(viewLifecycleOwner, Observer {
             adapter.limpiarSeleccion()
             if (it) DialogProgress.show(requireContext(), "Recuperando...")
             else DialogProgress.dismiss()
         })
-        fileViewModel.createDocument.observe(viewLifecycleOwner, Observer { fileAdd ->
-            if (fileAdd.id.isNotEmpty() && fileAdd.nombre.isNotEmpty()) {
-                listFile.add(0, fileAdd)
-                adapter.notifyItemInserted(0)
-                glmanager.scrollToPosition(0)
-            } else DialogUtils.dialogMessageResponse(
-                requireContext(),
-                "Ocurrio un error al crear la hoja"
-            )
+        fileViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
+        fileViewModel.FileModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    adapter.limpiar()
+                    val lista = respuesta.getOrNull()
+                    lista?.let { listaArchivos ->
+                        listFile.addAll(listaArchivos)
+                        adapter.notifyDataSetChanged()
+                        //Guardar en preferences la lista de archivos
+                        guardarListaArchivos(listaArchivos)
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
-        fileViewModel.updateDocument.observe(viewLifecycleOwner, Observer { fileUpdate ->
-            if (fileUpdate.id.isNotEmpty() && fileUpdate.nombre.isNotEmpty()) {
-                listFile[itemPosition] = fileUpdate
-                adapter.notifyItemChanged(itemPosition)
-            } else DialogUtils.dialogMessageResponse(
-                requireContext(),
-                "Ocurrio un error al intentar modificar el nombre"
-            )
+
+        fileViewModel.createDocument.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { fileAdd ->
+                        if (fileAdd.id.isNotEmpty() && fileAdd.nombre.isNotEmpty()) {
+                            listFile.add(0, fileAdd)
+                            adapter.notifyItemInserted(0)
+                            glmanager.scrollToPosition(0)
+                            saveRecent(
+                                recent(
+                                    icon = R.drawable.carpeta,
+                                    titulo = "Archivos -> Documentos creado",
+                                    detalle = fileAdd.nombre,
+                                    fecha = obtenerFechaActual()
+                                )
+                            )
+                        } else DialogUtils.dialogMessageResponse(
+                            requireContext(),
+                            "Ocurrio un error al crear la hoja"
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
-        fileViewModel.deleteDocument.observe(viewLifecycleOwner, Observer { fileDelete ->
-            listFile.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
-            //ToastUtils.MensajeToast(requireContext(),fileDelete,1)
+        fileViewModel.updateDocument.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { fileUpdate ->
+                        if (fileUpdate.id.isNotEmpty() && fileUpdate.nombre.isNotEmpty()) {
+                            listFile[itemPosition] = fileUpdate
+                            adapter.notifyItemChanged(itemPosition)
+                            saveRecent(
+                                recent(
+                                    icon = R.drawable.carpeta,
+                                    titulo = "Archivos -> Documentos Modificado",
+                                    detalle = "Nuevo nombre ${fileUpdate.nombre}",
+                                    fecha = obtenerFechaActual()
+                                )
+                            )
+                        } else DialogUtils.dialogMessageResponse(
+                            requireContext(),
+                            "Ocurrio un error al intentar modificar el nombre"
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+
 
         })
+        fileViewModel.deleteDocument.observe(
+            viewLifecycleOwner,
+            Observer { result -> //fileDelete ->
+                result?.let { respuesta ->
+                    if (respuesta.isSuccess) {
+                        val data = respuesta.getOrNull()
+                        data?.let { fileDelete ->
+                            val nombreitem = listFile[itemPosition].nombre
+                            listFile.removeAt(itemPosition)
+                            adapter.notifyItemRemoved(itemPosition)
+                            saveRecent(
+                                recent(
+                                    icon = R.drawable.carpeta,
+                                    titulo = "Archivos -> Documentos eliminado",
+                                    detalle = nombreitem,
+                                    fecha = obtenerFechaActual()
+                                )
+                            )
+                        }
+                    } else {
+                        val exception = respuesta.exceptionOrNull()
+                        exception?.let { ex ->
+                            showMessageError(ex.message.toString())
+                        }
+                    }
+                }
+            })
     }
 
     private fun recuperarPreferencias() {
@@ -227,8 +305,8 @@ class FileFragment : Fragment() {
             binding.llAdicional.visibility = View.GONE
         }
         var mostrarAdicional = false
-        var concentimiento=false
-        var datosCompletos=false
+        var concentimiento = false
+        var datosCompletos = false
         // Crear el diálogo y mostrarlo
         val builder = AlertDialog.Builder(requireContext())
         builder.setView(binding.root)
@@ -245,8 +323,8 @@ class FileFragment : Fragment() {
             binding.llNotificacion.visibility = View.GONE
             mostrarAdicional = true
         }
-        binding.cbConcentimiento.setOnClickListener(){
-            concentimiento=true
+        binding.cbConcentimiento.setOnClickListener() {
+            concentimiento = true
             binding.btnCrear.isEnabled = true
         }
         binding.btnCrear.setOnClickListener {
@@ -266,7 +344,7 @@ class FileFragment : Fragment() {
                     dialog.dismiss()
                 } else {
                     // Acción de inserción
-                    if (concentimiento){
+                    if (concentimiento) {
                         // Si todos los campos son válidos, continuar con el proceso
                         messageLoading = "Creando..."
                         fileViewModel.onCreateDocument(
@@ -279,7 +357,7 @@ class FileFragment : Fragment() {
                         )
                         dialog.dismiss()
                         insert = true
-                    }else{
+                    } else {
                         if (mostrarAdicional) {
                             //los campos adicionales esta visibles, evaluar si estan con datos
                             val editTexts =
@@ -315,7 +393,7 @@ class FileFragment : Fragment() {
                                 if (isFinished) {
                                     // Aquí puedes manejar lo que pasa cuando el temporizador termine
                                     binding.tvContador.visibility = View.GONE
-                                    binding.cbConcentimiento.visibility=View.VISIBLE
+                                    binding.cbConcentimiento.visibility = View.VISIBLE
                                 }
                             }
                         }
@@ -384,5 +462,44 @@ class FileFragment : Fragment() {
             }
         }
         return file!!
+    }
+
+    private fun saveRecent(recent: recent) {
+        val editor = preferencesCajaChica.edit()
+
+        val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
+
+        val recentList = mutableListOf<String>()
+
+        // Convertir la lista actual de JSON a objetos Recent (si existe)
+        recentListJson?.let {
+            recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
+        }
+
+        // Agregar el nuevo objeto a la lista y limitar a 10 elementos
+        recentList.add(0, Gson().toJson(recent))
+        if (recentList.size > 10) {
+            recentList.removeAt(recentList.size - 1)
+        }
+
+        // Convertir la lista actualizada a JSON y guardarla
+        editor.putString("RECENT_DATA", Gson().toJson(recentList))
+        editor.apply()
+    }
+
+    private fun obtenerFechaActual(): String {
+        val fechaActual = Calendar.getInstance()  // Obtiene la fecha actual del sistema
+        val formato =
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())  // Define el formato deseado
+        return formato.format(fechaActual.time)  // Formatea la fecha y la devuelve como cadena
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

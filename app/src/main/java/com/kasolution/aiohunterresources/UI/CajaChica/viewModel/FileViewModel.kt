@@ -14,74 +14,129 @@ import kotlinx.coroutines.launch
 
 
 class FileViewModel : ViewModel() {
-    val FileModel = MutableLiveData<ArrayList<file>>()
+    var isDataLoaded = false
+    val exception = MutableLiveData<String>()
+    val FileModel = MutableLiveData<Result<ArrayList<file>>>()
     val isloading = MutableLiveData<Boolean>()
-    val createDocument = MutableLiveData<file>()
-    val updateDocument = MutableLiveData<file>()
-    val deleteDocument = MutableLiveData<String>()
+    val createDocument = MutableLiveData<Result<file>>()
+    val updateDocument = MutableLiveData<Result<file>>()
+    val deleteDocument = MutableLiveData<Result<String>>()
     var getFileUseCase = getFileUseCase()
     var createDocumentUseCase = createDocumentUseCase()
-    var updateDocumentUseCase =updateDocumentUseCase()
-    var deleteDocumentUseCase =deleteDocumentUseCase()
+    var updateDocumentUseCase = updateDocumentUseCase()
+    var deleteDocumentUseCase = deleteDocumentUseCase()
 
     fun onCreate(urlId: urlId) {
-        if (FileModel.value.isNullOrEmpty()) {
+        if (!isDataLoaded) {
             viewModelScope.launch {
-                isloading.postValue(true)
-                val response = getFileUseCase(urlId)
-                if (response.isNotEmpty()) {
-                    FileModel.postValue(response)
+                try {
+                    isloading.postValue(true)
+                    val response = getFileUseCase(urlId)
+
+                    if (response.isSuccess) {
+                        response.getOrNull()?.let { lista ->
+                            FileModel.postValue(Result.success(lista))
+                            isDataLoaded = true
+                        }
+                    } else {
+                        response.exceptionOrNull()?.let { ex ->
+                            FileModel.postValue(Result.failure(ex))
+                        }
+                    }
+                } catch (e: Exception) {
+                    exception.postValue(e.message)
+                } finally {
+                    isloading.postValue(false)
                 }
-                isloading.postValue(false)
             }
         }
     }
 
     fun onRefresh(urlId: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getFileUseCase(urlId)
-            if (response.isNotEmpty()) {
-                FileModel.postValue(response)
+            try {
+                isloading.postValue(true)
+                val response = getFileUseCase(urlId)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        FileModel.postValue(Result.success(lista))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        FileModel.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-            isloading.postValue(false)
         }
     }
-    fun onCreateDocument(urlId: urlId, file: file, adicional:List<String>) {
+
+    fun onCreateDocument(urlId: urlId, file: file, adicional: List<String>) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = createDocumentUseCase(urlId, file,adicional)
-            createDocument.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = createDocumentUseCase(urlId, file, adicional)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        createDocument.postValue(Result.success(registro)) // Notificar inserción
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        createDocument.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun onUpdateDocument(urlId: urlId, file: file) {
         viewModelScope.launch {
-            isloading.postValue(true)
             try {
+                isloading.postValue(true)
                 val response = updateDocumentUseCase(urlId, file)
-                updateDocument.postValue(response) // Notificar actualización
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        updateDocument.postValue(Result.success(registro)) // Notificar actualización
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        updateDocument.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
             } catch (e: Exception) {
-                //exception.postValue(e.message)
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
 
     fun onDeleteDocument(urlId: urlId, file: file) {
         viewModelScope.launch {
-            isloading.postValue(true)
             try {
+                isloading.postValue(true)
                 val response = deleteDocumentUseCase(urlId, file)
-                deleteDocument.postValue(response)
-
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        deleteDocument.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        deleteDocument.postValue(Result.failure(ex))
+                    }
+                }
             } catch (e: Exception) {
-//                exception.postValue(e.message)
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
 }

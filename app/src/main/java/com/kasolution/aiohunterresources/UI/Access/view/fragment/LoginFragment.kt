@@ -28,6 +28,7 @@ import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.UI.User.viewModel.UserViewModel
 import com.kasolution.aiohunterresources.UI.dashboard.view.Dashboard
 import com.kasolution.aiohunterresources.core.DialogProgress
+import com.kasolution.aiohunterresources.core.DialogUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentLoginBinding
 
@@ -36,7 +37,7 @@ class LoginFragment : Fragment() {
     private val loginViewModel: LoginViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private lateinit var usuario: user
-    private var urlId: urlId?=null
+    private var urlId: urlId? = null
     private lateinit var preferencesAccess: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
 
@@ -48,32 +49,55 @@ class LoginFragment : Fragment() {
         binding = FragmentLoginBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        preferencesAccess = requireContext().getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
+        preferencesAccess =
+            requireContext().getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
         preferencesUser = requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
 
-    recuperarPreferencias()
+        recuperarPreferencias()
         binding.btnIngresar.setOnClickListener() {
             if (binding.etUser.text.toString().isEmpty()) {
                 binding.etUser.error = "Campo obligatorio"
             } else if (binding.etPassword.text.toString().isEmpty()) {
                 binding.etPassword.error = "Campo obligatorio"
             } else {
-                loginViewModel.onCreate(urlId!!,user("","","",binding.etUser.text.toString(),binding.etPassword.text.toString(),""))
+                loginViewModel.onCreate(
+                    urlId!!,
+                    user(
+                        "",
+                        "",
+                        "",
+                        binding.etUser.text.toString(),
+                        binding.etPassword.text.toString(),
+                        ""
+                    )
+                )
             }
         }
-        binding.tvVersion.text="Version: ${BuildConfig.VERSION_NAME}"
+        binding.tvVersion.text = "Version: ${BuildConfig.VERSION_NAME}"
         loginViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Espere por favor")
             else DialogProgress.dismiss()
         })
 
-        loginViewModel.Datauser.observe(viewLifecycleOwner, Observer { User ->
-            usuario = User
-            if (User.id.isNotEmpty() && User.name.isNotEmpty() && User.lastName.isNotEmpty() && User.user.isNotEmpty() && User.password.isNotEmpty() && User.tipo.isNotEmpty())
-                almacenarpref(User.id, User.name, User.lastName, User.tipo)
-
+        loginViewModel.Datauser.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val lista = respuesta.getOrNull()
+                    lista?.let { User ->
+                        usuario = User
+                        if (User.id.isNotEmpty() && User.name.isNotEmpty() && User.lastName.isNotEmpty() && User.user.isNotEmpty() && User.password.isNotEmpty() && User.tipo.isNotEmpty())
+                            almacenarpref(User.id, User.name, User.lastName, User.tipo)
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         userViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
@@ -83,6 +107,9 @@ class LoginFragment : Fragment() {
                     .show()
             }
         })
+        loginViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
         loginViewModel.access.observe(getViewLifecycleOwner(), Observer { valor ->
             if (valor == 1) {
                 requireActivity().finish()
@@ -106,7 +133,12 @@ class LoginFragment : Fragment() {
 
 
     private fun recuperarPreferencias() {
-        urlId= urlId(idScript=preferencesAccess.getString("IDSCRIPTACCESS", "").toString(),"",idSheet=preferencesAccess.getString("IDSHEETACCESS", "").toString(),"")
+        urlId = urlId(
+            idScript = preferencesAccess.getString("IDSCRIPTACCESS", "").toString(),
+            "",
+            idSheet = preferencesAccess.getString("IDSHEETACCESS", "").toString(),
+            ""
+        )
 //        val id = preferencesAccess.getString("ID", "")
 //        val name = preferencesAccess.getString("NAME", "")
 //        val lastName = preferencesAccess.getString("LASTNAME", "")
@@ -223,16 +255,25 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun getIds(public:Boolean):String{
-        val idScript:String
-        val idSheet:String
-        if (public){
+    private fun getIds(public: Boolean): String {
+        val idScript: String
+        val idSheet: String
+        if (public) {
             idScript = preferencesAccess.getString("IDSCRIPTPUBLIC", "").toString()
             idSheet = preferencesAccess.getString("IDSHEETPUBLIC", "").toString()
-        }else{
+        } else {
             idScript = preferencesAccess.getString("IDSCRIPTPRIVATE", "").toString()
             idSheet = preferencesAccess.getString("IDSHEETPRIVATE", "").toString()
         }
         return "$idScript->$idSheet"
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

@@ -55,13 +55,28 @@ class BrandFragment : Fragment() {
         //extraerIniciales()
 
         brandViewModel.onCreate(urlId!!)
-        brandViewModel.BrandModel.observe(viewLifecycleOwner, Observer { listaBrand ->
-            lista.addAll(listaBrand)
-            adapter.notifyDataSetChanged()
-        })
         brandViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
             else DialogProgress.dismiss()
+        })
+        brandViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
+        brandViewModel.BrandModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { listaBrand ->
+                        lista.addAll(listaBrand)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
 
         binding.customSearch.addTextChangedListener(object : TextWatcher {
@@ -149,15 +164,6 @@ class BrandFragment : Fragment() {
             requireActivity().finish()
         }
     }
-
-
-//    private fun extraerIniciales() {
-//        val part = "$name $lastName".split(" ")
-//        if (part?.size!! > 1) binding.tvInitialUser.text =
-//            part[0][0].toString() + part[1][0].toString()
-//        else binding.tvInitialUser.text = part[0][0].toString() + part[0][1].toString()
-//    }
-
     private fun initUI() {
         val columnWidthDp = 300
         val columns = resources.displayMetrics.widthPixels / columnWidthDp
@@ -240,6 +246,7 @@ class BrandFragment : Fragment() {
         }
         return lista
     }
+
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
@@ -248,4 +255,12 @@ class BrandFragment : Fragment() {
         }
     }
 
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
+    }
 }

@@ -9,18 +9,26 @@ import com.kasolution.aiohunterresources.data.RepositoryCajaChica
 
 class updateDocumentUseCase() {
     private val repository = RepositoryCajaChica()
-    suspend operator fun invoke(urlid: urlId, file: file): file {
+    suspend operator fun invoke(urlid: urlId, file: file): Result<file> {
         lateinit var datafileSheet: file
-        val response = repository.updateDocument(urlid, file).asJsonObject
-        Log.i("BladiDevMonitor", response.toString())
-        val resultado = response?.get("Resultado")
-        if (resultado is JsonPrimitive && resultado.asString == "exito") {
-            val idFile = response.get("idFile").asString
-            val fileName = response.get("newName").asString
-            datafileSheet = file(idFile, fileName)
-        } else {
+        val responseResult = repository.updateDocument(urlid, file)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val resultado = response?.get("Resultado")
+                if (resultado is JsonPrimitive && resultado.asString == "exito") {
+                    val idFile = response.get("idFile").asString
+                    val fileName = response.get("newName").asString
+                    datafileSheet = file(idFile, fileName)
+                }
+                Result.success(datafileSheet)
+            }
 
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
         }
-        return datafileSheet
     }
 }

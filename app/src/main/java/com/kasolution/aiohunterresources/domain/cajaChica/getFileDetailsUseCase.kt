@@ -5,28 +5,37 @@ import android.util.Log
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.data.RepositoryCajaChica
-import org.json.JSONArray
+
 
 
 class getFileDetailsUseCase() {
     private val repository = RepositoryCajaChica()
-    suspend operator fun invoke(urlId: urlId): ArrayList<fileDetails> {
-        var lista = ArrayList<fileDetails>()
+    suspend operator fun invoke(urlId: urlId): Result<ArrayList<fileDetails>> {
+        val lista = ArrayList<fileDetails>()
+        val responseResult = repository.getDetailsFile(urlId)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val data = response?.getAsJsonArray("Resultado")
+                if (data != null) {
+                    for (i in data.size() - 1 downTo 0) {
+                        val nombreReal = data[i].asString
+                        val nombre = generarNombres(nombreReal)
+                        lista.add(fileDetails(nombreReal, nombre))
+                    }
+                }
+                Result.success(lista)
+            }
 
-        val response = repository.getDetailsFile(urlId).asJsonObject
-        val data = response?.getAsJsonArray("Resultado")
-
-        if (data != null) {
-            for (i in data.size() - 1 downTo 0) {
-                val nombreReal = data[i].asString
-                val nombre = generarNombres(nombreReal)
-                lista.add(fileDetails(nombreReal,nombre))
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
             }
         }
-        return lista
     }
 
-    private fun generarNombres(nombre: String?) :String{
+    private fun generarNombres(nombre: String?): String {
         // Buscar la posición del delimitador '->'
         val posicionDelimitador = nombre!!.indexOf("->")
 

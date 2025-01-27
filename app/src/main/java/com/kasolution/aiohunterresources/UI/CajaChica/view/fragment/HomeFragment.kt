@@ -4,8 +4,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,14 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.kasolution.aiohunterresources.R
+import com.kasolution.aiohunterresources.UI.CajaChica.view.adapter.RecentAdapter
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.recent
 import com.kasolution.aiohunterresources.UI.CajaChica.viewModel.LiquidacionViewModel
-import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment.CheckFragment
-import com.kasolution.aiohunterresources.core.DialogProgress
+import com.kasolution.aiohunterresources.core.DialogUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentHomeBinding
-import java.util.Locale
 
 
 class HomeFragment : Fragment() {
@@ -31,8 +30,9 @@ class HomeFragment : Fragment() {
     var resumengastos = 0.00
     var saldoDisponible = 0.00
     var montoCajaChica = 0.00
-    var observador=false
-
+    var observador = false
+    private lateinit var adapter: RecentAdapter
+    private lateinit var lmanager: LinearLayoutManager
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,21 +47,37 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         preferencesCajaChica =
             requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+        recuperarSaldo()
         init()
+
         animarProgresoYTexto()
-        liquidacionViewModel.getResumenGastos.observe(viewLifecycleOwner) { resumen ->
-            if (observador){
-                resumengastos = resumen.toDouble()
-                val saldo = montoCajaChica - resumengastos
-                if (saldo != saldoDisponible) {
-                    val editor = preferencesCajaChica.edit()
-                    editor.putString("SALDODISPONIBLE", (saldo).toString())
-                    editor.apply()
-                    recuperarSaldo()
-                    animarProgresoYTexto()
+        liquidacionViewModel.getResumenGastos.observe(viewLifecycleOwner) { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val resultResumen = respuesta.getOrNull()
+                    resultResumen?.let { resumen ->
+                        if (observador) {
+                            resumengastos = resumen.toDouble()
+                            val saldo = montoCajaChica - resumengastos
+                            if (saldo != saldoDisponible) {
+                                val editor = preferencesCajaChica.edit()
+                                editor.putString("SALDODISPONIBLE", (saldo).toString())
+                                editor.apply()
+                                recuperarSaldo()
+                                animarProgresoYTexto()
+                            }
+                            observador = false
+                        }
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
                 }
-                observador=false
             }
+
+
         }
         liquidacionViewModel.isloading.observe(viewLifecycleOwner) {
             if (it) {
@@ -99,14 +115,42 @@ class HomeFragment : Fragment() {
             fragmentTransaction.commit()
         }
         binding.btnSync.setOnClickListener() {
-            observador=true
+            observador = true
             liquidacionViewModel.getResumenGastos(urlId!!)
         }
     }
 
     private fun init() {
         //cargar saldo contable
-        recuperarSaldo()
+
+        //getRecentList()
+
+        lmanager = LinearLayoutManager(context)
+        adapter = RecentAdapter(
+            listaRecibida = getRecentList(),
+            onClickListener = { recent, action, position ->
+                onItemSelected(
+                    recent,
+                    action,
+                    position
+                )
+            })
+        binding.rvRecent.layoutManager = lmanager
+        binding.rvRecent.adapter = adapter
+    }
+
+    private fun onItemSelected(recent: recent, action: Int, position: Int) {
+
+    }
+
+    private fun getRecentList(): List<recent> {
+        val recentListJson = preferencesCajaChica.getString("RECENT_DATA", "").toString()
+        if (recentListJson != "")
+            return recentListJson.let {
+                Gson().fromJson(it, Array<String>::class.java)
+                    .map { json -> Gson().fromJson(json, recent::class.java) }.toList()
+            } ?: emptyList()
+        else return emptyList()
     }
 
     // Método para calcular el porcentaje restante
@@ -135,6 +179,7 @@ class HomeFragment : Fragment() {
             val animatedValue = animation.animatedValue as Float
 
             // Actualizamos el progreso circular
+            //binding.progressCircleView.setColor(Color.parseColor("#87CEEB"))
             binding.progressCircleView.setProgress(animatedValue)
 
             // Actualizamos el texto del saldo restante (en el centro del círculo)
@@ -157,5 +202,15 @@ class HomeFragment : Fragment() {
             preferencesCajaChica.getString("MONTOCAJACHICA", "")
         )!!.toDouble()
         Log.i("BladiDev", "saldo disponible en home es $saldoDisponible")
+    }
+
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

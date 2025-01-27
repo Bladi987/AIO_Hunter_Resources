@@ -58,9 +58,20 @@ class SplashActivity : AppCompatActivity() {
             }
         }
 
-        SettingsViewModel.versionAPP.observe(this, Observer { version ->
-            Log.i("BladiDevSplashActivity", version)
-            versionAPP = version
+        SettingsViewModel.versionAPP.observe(this, Observer { result-> //version ->
+            result?.let { respuesta->
+                if (respuesta.isSuccess){
+                    val data = respuesta.getOrNull()
+                    data?.let { version->
+                        versionAPP = version
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         SettingsViewModel.isloading.observe(this, Observer { loading ->
             if (loading) {
@@ -129,14 +140,12 @@ class SplashActivity : AppCompatActivity() {
         return !(id.isNullOrEmpty() || name.isNullOrEmpty() || lastName.isNullOrEmpty() || tipo.isNullOrEmpty())
     }
 
-//    private fun direccionar() {
-//        if (recuperarPreferenciasUser()) {
-//            var i = Intent(this, Dashboard::class.java)
-//            startActivity(i)
-//        } else {
-//            var i = Intent(this, AccessActivity::class.java)
-//            startActivity(i)
-//        }
-//        finish()
-//    }
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            this,
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
+    }
 }

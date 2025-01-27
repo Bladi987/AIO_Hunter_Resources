@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.User.adapter.UserAdapter
 import com.kasolution.aiohunterresources.UI.User.fragment.AddUserFragment
 import com.kasolution.aiohunterresources.UI.User.model.user
@@ -36,22 +37,65 @@ class UserActivity : AppCompatActivity() {
         initUI()
         recuperarPreferencias()
         UserViewModel.onCreate(urlId!!)
-        UserViewModel.user.observe(this, Observer { listaUser ->
-            lista.addAll(listaUser)
-            adapter.notifyDataSetChanged()
+        UserViewModel.user.observe(this, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val listaUser = respuesta.getOrNull()
+                    listaUser?.let { listaUser ->
+                        lista.addAll(listaUser)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         UserViewModel.isloading.observe(this, Observer {
             if (it) DialogProgress.show(this, "Cargando...")
             else DialogProgress.dismiss()
         })
-        UserViewModel.insertUser.observe(this, Observer { usuario ->
-            lista.add(usuario)
-            adapter.notifyItemInserted(lista.size - 1)
-            lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
+        UserViewModel.exception.observe(this, Observer { error ->
+            showMessageError(error)
         })
-        UserViewModel.updateUser.observe(this, Observer { usuario ->
-            lista[itemPosition] = usuario
-            adapter.notifyItemChanged(itemPosition)
+        UserViewModel.insertUser.observe(this, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val usuarioData = respuesta.getOrNull()
+                    usuarioData?.let { usuario ->
+                        lista.add(usuario)
+                        adapter.notifyItemInserted(lista.size - 1)
+                        lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
+//                        lista.add(0, usuario)
+//                        adapter.notifyItemInserted(0)
+//                        lmanager.scrollToPositionWithOffset(0, 10)
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+
+        })
+        UserViewModel.updateUser.observe(this, Observer { result -> //usuario ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val usuarioData = respuesta.getOrNull()
+                    usuarioData?.let { usuario ->
+                        lista[itemPosition] = usuario
+                        adapter.notifyItemChanged(itemPosition)
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         UserViewModel.deleteUser.observe(this, Observer { id ->
             lista.removeAt(itemPosition)
@@ -80,10 +124,10 @@ class UserActivity : AppCompatActivity() {
     }
 
     private fun recuperarPreferencias() {
-        val idScript= preferencesAccess.getString("IDSCRIPTACCESS", "").toString()
-        val idSheet=preferencesAccess.getString("IDSHEETACCESS", "").toString()
+        val idScript = preferencesAccess.getString("IDSCRIPTACCESS", "").toString()
+        val idSheet = preferencesAccess.getString("IDSHEETACCESS", "").toString()
         urlId = urlId(
-            idScript=idScript,
+            idScript = idScript,
             "",
             idSheet = idSheet,
             ""
@@ -104,7 +148,8 @@ class UserActivity : AppCompatActivity() {
                         UserViewModel.updateUser(
                             urlId!!,
                             usuario,
-                            action = "reset")
+                            action = "reset"
+                        )
                     })
             }
 
@@ -121,14 +166,25 @@ class UserActivity : AppCompatActivity() {
 
             4 -> {
                 //eliminar
-                DialogUtils.dialogQuestion(this, titulo = "Aviso",
-                    mensage = "Desea Eliminar a ${lista[position].name} ${lista[position].lastName}?", positiveButtontext = "Aceptar",
+                DialogUtils.dialogQuestion(this,
+                    titulo = "Aviso",
+                    mensage = "Desea Eliminar a ${lista[position].name} ${lista[position].lastName}?",
+                    positiveButtontext = "Aceptar",
                     onPositiveClick = {
                         //Se eliminara al usuario
                         itemPosition = position
-                        UserViewModel.deleteUser(urlId!!,usuario)
+                        UserViewModel.deleteUser(urlId!!, usuario)
                     })
             }
         }
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            this,
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

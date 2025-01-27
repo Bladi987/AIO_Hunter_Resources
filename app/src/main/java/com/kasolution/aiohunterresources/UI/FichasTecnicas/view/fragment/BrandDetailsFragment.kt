@@ -42,10 +42,9 @@ class BrandDetailsFragment : Fragment(), DialogListener {
     private lateinit var lista: ArrayList<VehicleModel>
     private var marcas: Brand? = null
     var modeloSeleccionado = ""
-    private var tecnico = ""
     private var tipo = ""
     private var itemPosition = -1
-    private var urlId: urlId?=null
+    private var urlId: urlId? = null
     private lateinit var preferencesFichasTecnicas: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,36 +73,95 @@ class BrandDetailsFragment : Fragment(), DialogListener {
 
         binding.tvTitle.text = "Lista de modelos ${marcas!!.brand.toString().lowercase()}"
         cargarIcon()
-        ModelViewModel.vehicleModel.observe(viewLifecycleOwner, Observer { listaModel ->
-            val listModelFilter = listaModel.distinctBy { it.modelo }
-            lista.addAll(listModelFilter)
-            adapter.notifyDataSetChanged()
-        })
         ModelViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
             else DialogProgress.dismiss()
         })
-        ModelViewModel.insertarModel.observe(viewLifecycleOwner, Observer { Model ->
-            lista.add(Model)
-            adapter.notifyItemInserted(lista.size - 1)
-            lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
-            Toast.makeText(requireContext(),"Registro exitoso, pero estará pendiente de aprobación antes de ser visible.",
-                Toast.LENGTH_LONG).show()
-        })
-        ModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { vehiculo ->
-            if (vehiculo.estado!="Publicado"){
-                lista.removeAt(itemPosition)
-                adapter.notifyItemRemoved(itemPosition)
-            }else{
-                lista[itemPosition] = vehiculo
-                adapter.notifyItemChanged(itemPosition)
+        ModelViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
+        ModelViewModel.vehicleModel.observe(viewLifecycleOwner, Observer { result ->
+
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { listaModel ->
+                        val listModelFilter = listaModel.distinctBy { it.modelo }
+                        lista.addAll(listModelFilter)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
             }
-            Toast.makeText(requireContext(),"Registro actualizado, pero estará pendiente de aprobación antes de ser visible.",
-                Toast.LENGTH_LONG).show()
         })
-        ModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {
-            lista.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
+
+        ModelViewModel.insertarModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { model ->
+                        lista.add(model)
+                        adapter.notifyItemInserted(lista.size - 1)
+                        lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
+                        Toast.makeText(
+                            requireContext(),
+                            "Registro exitoso, pero estará pendiente de aprobación antes de ser visible.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+        ModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { vehiculo ->
+                        if (vehiculo.estado != "Publicado") {
+                            lista.removeAt(itemPosition)
+                            adapter.notifyItemRemoved(itemPosition)
+                        } else {
+                            lista[itemPosition] = vehiculo
+                            adapter.notifyItemChanged(itemPosition)
+                        }
+                        Toast.makeText(
+                            requireContext(),
+                            "Registro actualizado, pero estará pendiente de aprobación antes de ser visible.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+        ModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {result->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let {
+                        lista.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         binding.fbAddModel.setOnClickListener() {
 //            dialogAddModel()
@@ -279,11 +337,12 @@ class BrandDetailsFragment : Fragment(), DialogListener {
                 }
             })
     }
-    fun recuperarPreferencias(){
-        val url=preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
-        val idSheet=preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
-        urlId= urlId(url!!,"",idSheet!!,"")
-        tipo=preferencesUser.getString("TIPO", "")!!
+
+    fun recuperarPreferencias() {
+        val url = preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
+        val idSheet = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
+        urlId = urlId(url!!, "", idSheet!!, "")
+        tipo = preferencesUser.getString("TIPO", "")!!
 //        Log.i("tipo",tipo)
     }
 
@@ -365,11 +424,21 @@ class BrandDetailsFragment : Fragment(), DialogListener {
             }
         }
     }
+
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
             adapter.limpiar()
             ModelViewModel.onRefresh(urlId!!, marcas!!.brand, "Publicado")
         }
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

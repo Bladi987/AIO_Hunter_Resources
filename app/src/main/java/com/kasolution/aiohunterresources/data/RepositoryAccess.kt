@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.data
 
+import android.util.Log
 import com.google.gson.JsonElement
 import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
@@ -13,36 +14,37 @@ class RepositoryAccess() {
     }
 
     //secureModule
-    suspend fun login(urlid: urlId, user: user): JsonElement {
+    suspend fun login(urlid: urlId, user: user): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.login(user)
-        return response!!
+        return response
     }
 
-    suspend fun getUser(urlid: urlId): JsonElement {
+    suspend fun getUser(urlid: urlId): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.getUser()
-        return response!!
+        return response
     }
-    suspend fun insertUser(urlid: urlId, user: user): JsonElement {
+    suspend fun insertUser(urlid: urlId, user: user): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.insertUser(user)
-        return response!!
+        return response
     }
-    suspend fun updateUser(urlid: urlId, user: user): JsonElement {
+    suspend fun updateUser(urlid: urlId, user: user): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.updateUser(user)
-        return response!!
+        return response
     }
-    suspend fun deleteUser(urlid: urlId, user: user): JsonElement {
+    suspend fun deleteUser(urlid: urlId, user: user): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.deleteUser(user)
-        return response!!
+        return response
     }
     //settingModule
-    suspend fun getSettings(urlid: urlId): JsonElement {
+    suspend fun getSettings(urlid: urlId): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.getSettings()
-        return response!!
+        return response
     }
+
 }

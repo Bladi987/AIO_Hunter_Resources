@@ -13,11 +13,13 @@ import kotlinx.coroutines.launch
 
 
 class FileDetailsViewModel : ViewModel() {
-    val FileDetailsModel = MutableLiveData<ArrayList<fileDetails>>()
+    var isDataLoaded = false
+    val FileDetailsModel = MutableLiveData<Result<ArrayList<fileDetails>>>()
+    val exception = MutableLiveData<String>()
     val isloading = MutableLiveData<Boolean>()
-    val insertarFileSheet = MutableLiveData<fileDetails>()
-    val updateFileSheet = MutableLiveData<fileDetails>()
-    val deleteFileSheet = MutableLiveData<String>()
+    val insertarFileSheet = MutableLiveData<Result<fileDetails>>()
+    val updateFileSheet = MutableLiveData<Result<fileDetails>>()
+    val deleteFileSheet = MutableLiveData<Result<String>>()
     var getFileDetailsUseCase = getFileDetailsUseCase()
     var insertFileSheetUseCase = insertFileSheetUseCase()
     var updateFileSheetUseCase = updateFileSheetUseCase()
@@ -25,64 +27,117 @@ class FileDetailsViewModel : ViewModel() {
 
 
     fun onCreate(urlId: urlId) {
-        if (FileDetailsModel.value.isNullOrEmpty()) {
+        if (!isDataLoaded) {
             viewModelScope.launch {
+                try {
+                    isloading.postValue(true)
+                    val response = getFileDetailsUseCase(urlId)
+                    if (response.isSuccess) {
+                        response.getOrNull()?.let { registro ->
+                            FileDetailsModel.postValue(Result.success(registro))
+                            isDataLoaded = true
+                        }
+                    } else {
+                        response.exceptionOrNull()?.let { ex ->
+                            FileDetailsModel.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                        }
+                    }
+                } catch (e: Exception) {
+                    exception.postValue(e.message)
+                } finally {
+                    isloading.postValue(false)
+                }
+            }
+        }
+    }
+
+
+    fun onRefresh(urlId: urlId) {
+        viewModelScope.launch {
+            try {
                 isloading.postValue(true)
                 val response = getFileDetailsUseCase(urlId)
-                if (response.isNotEmpty()) {
-                    FileDetailsModel.postValue(response)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        FileDetailsModel.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        FileDetailsModel.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
                 isloading.postValue(false)
             }
         }
     }
 
-    fun onRefresh(urlId: urlId) {
+    fun onInsert(urlId: urlId, fileDetails: fileDetails, adicional: List<String>) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getFileDetailsUseCase(urlId)
-            if (response.isNotEmpty()) {
-                FileDetailsModel.postValue(response)
-            }
-            isloading.postValue(false)
-        }
-    }
-
-    fun onInsert(urlId: urlId, fileDetails: fileDetails,adicional:List<String>) {
-        viewModelScope.launch {
-            isloading.postValue(true)
-            val response = insertFileSheetUseCase(urlId, fileDetails,adicional)
-            insertarFileSheet.postValue(response)
-            isloading.postValue(false)
-        }
-    }
-
-    fun onUpdate(urlId: urlId, fileDetails: fileDetails,adicional: List<String>) {
-        viewModelScope.launch {
-            isloading.postValue(true)
             try {
-                val response = updateFileSheetUseCase(urlId, fileDetails,adicional)
-                updateFileSheet.postValue(response) // Notificar actualización
+                isloading.postValue(true)
+                val response = insertFileSheetUseCase(urlId, fileDetails, adicional)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        insertarFileSheet.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        insertarFileSheet.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
             } catch (e: Exception) {
-                //exception.postValue(e.message)
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
+        }
+    }
 
-            isloading.postValue(false)
+    fun onUpdate(urlId: urlId, fileDetails: fileDetails, adicional: List<String>) {
+        viewModelScope.launch {
+            try {
+                isloading.postValue(true)
+                val response = updateFileSheetUseCase(urlId, fileDetails, adicional)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        updateFileSheet.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        updateFileSheet.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun onDelete(urlId: urlId, fileDetails: fileDetails) {
         viewModelScope.launch {
-            isloading.postValue(true)
             try {
+                isloading.postValue(true)
                 val response = deleteFileSheetUseCase(urlId, fileDetails)
-                deleteFileSheet.postValue(response)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        deleteFileSheet.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        deleteFileSheet.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
 
+                }
             } catch (e: Exception) {
-//                exception.postValue(e.message)
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
 }

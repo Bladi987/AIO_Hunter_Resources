@@ -7,16 +7,24 @@ import com.kasolution.aiohunterresources.data.RepositoryCajaChica
 
 
 class deleteRegisterUseCase() {
-    private val repository= RepositoryCajaChica()
-    suspend operator fun invoke(urlId: urlId,register: register):String{
-        lateinit var respuesta: String
-        val response=repository.deleteRegister(urlId,register).asJsonObject
+    private val repository = RepositoryCajaChica()
+    suspend operator fun invoke(urlId: urlId, register: register): Result<String> {
 
-        val data = response?.getAsJsonArray("Resultado")
-        if(data!=null)
-            respuesta="done"
-        else respuesta="error"
-        return respuesta
+        val responseResult = repository.deleteRegister(urlId, register)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val data = response?.getAsJsonArray("Respuesta")
+                Log.i("BladiDevDelete", data.toString())
+                if (data != null) Result.success(data[5].asString) else Result.failure(Exception("Error"))
+            }
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+        }
+
     }
 
 }

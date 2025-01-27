@@ -6,24 +6,29 @@ import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.data.RepositoryAccess
 
 class getSettingsUseCase() {
-    private val repository= RepositoryAccess()
-    private val log="BladiDevGetSettingsUseCase"
-    suspend operator fun invoke(urlId: urlId): String {
-        var versionAPP=""
-        val response=repository.getSettings(urlId).asJsonObject
-        val data = response?.getAsJsonArray("Respuesta")
-        Log.i("respuesta",response.toString())
-        if (data != null) {
-            for (i in 0 until data.size()) {
-                val jsonObject = data.get(i).asJsonObject
-                val idscrippublic = jsonObject.get("IDSCRIPTPUBLIC").asString
-                val idsheetpublic = jsonObject.get("IDSHEETPUBLIC").asString
-                val idscriptprivate = jsonObject.get("IDSCRIPTPRIVATE").asString
-                val idsheetprivate = jsonObject.get("IDSHEETPRIVATE").asString
-                val version = jsonObject.get("VERSION").asString
-                versionAPP=version
+    private val repository = RepositoryAccess()
+    private val log = "BladiDevGetSettingsUseCase"
+
+    suspend operator fun invoke(urlId: urlId): Result<String> {
+        var versionAPP = ""  // Inicializamos el String de respuesta
+        val responseResult = repository.getSettings(urlId)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val data = response?.getAsJsonArray("Respuesta")
+                if (data != null) {
+                    for (i in 0 until data.size()) {
+                        val jsonObject = data.get(i).asJsonObject
+                        versionAPP = jsonObject.get("VERSION").asString
+                    }
+                }
+                Result.success(versionAPP)
+            }
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
             }
         }
-        return versionAPP
     }
 }

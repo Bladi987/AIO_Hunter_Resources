@@ -14,10 +14,12 @@ import com.kasolution.aiohunterresources.domain.fichasTecnicas.updateModelUseCas
 import kotlinx.coroutines.launch
 
 class ModelViewModel : ViewModel() {
-    val vehicleModel = MutableLiveData<ArrayList<VehicleModel>>()
-    val insertarModel = MutableLiveData<VehicleModel>()
-    val updateModel = MutableLiveData<VehicleModel>()
-    val deleteModel = MutableLiveData<String>()
+    var isDataLoaded = false
+    val exception = MutableLiveData<String>()
+    val vehicleModel = MutableLiveData<Result<ArrayList<VehicleModel>>>()
+    val insertarModel = MutableLiveData<Result<VehicleModel>>()
+    val updateModel = MutableLiveData<Result<VehicleModel>>()
+    val deleteModel = MutableLiveData<Result<String>>()
     val isloading = MutableLiveData<Boolean>()
     var getModeloUseCase = getModelUseCase()
     var insertModelUseCase = insertModelUseCase()
@@ -25,36 +27,60 @@ class ModelViewModel : ViewModel() {
     var deleteModelUseCase = deleteModelUseCase()
 
     fun onCreate(urlId: urlId, filter: String, state: String) {
-        if (vehicleModel.value.isNullOrEmpty()) {
+        if (!isDataLoaded) {
             viewModelScope.launch {
-                isloading.postValue(true)
-                val response = getModeloUseCase(urlId, filter, 1, state)
-                if (response.isNotEmpty()) {
-                    if (response.size == 1) {
-                        if (response[0].id.isNotEmpty())
-                            vehicleModel.postValue(response)
+                try {
+                    isloading.postValue(true)
+                    val response = getModeloUseCase(urlId, filter, 1, state)
+                    if (response.isSuccess) {
+                        response.getOrNull()?.let { lista ->
+
+                            if (lista.size == 1) {
+                                if (lista[0].id.isNotEmpty()) vehicleModel.postValue(Result.success(lista))
+                            } else {
+                                vehicleModel.postValue(Result.success(lista))
+                            }
+                            isDataLoaded = true
+                        }
                     } else {
-                        vehicleModel.postValue(response)
+                        response.exceptionOrNull()?.let { ex ->
+                            vehicleModel.postValue(Result.failure(ex))
+                        }
                     }
+                } catch (e: Exception) {
+                    exception.postValue(e.message)
+                } finally {
+                    isloading.postValue(false)
                 }
-                isloading.postValue(false)
             }
         }
     }
 
     fun onRefresh(urlId: urlId, filter: String, state: String) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getModeloUseCase(urlId, filter, 1, state)
-            if (response.isNotEmpty()) {
-                if (response.size == 1) {
-                    if (response[0].id.isNotEmpty())
-                        vehicleModel.postValue(response)
+            try {
+                isloading.postValue(true)
+                val response = getModeloUseCase(urlId, filter, 1, state)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        if (lista.size == 1) {
+                            if (lista[0].id.isNotEmpty()) vehicleModel.postValue(
+                                Result.success(
+                                    lista
+                                )
+                            )
+                        } else vehicleModel.postValue(Result.success(lista))
+                    }
                 } else {
-                    vehicleModel.postValue(response)
+                    response.exceptionOrNull()?.let { ex ->
+                        vehicleModel.postValue(Result.failure(ex))
+                    }
                 }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-            isloading.postValue(false)
         }
     }
 
@@ -74,10 +100,23 @@ class ModelViewModel : ViewModel() {
         val listaModel =
             listOf(data, type, marca, modelo, comentarios, basico, otros, tecnico, aprobado, estado)
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = insertModelUseCase(urlId, listaModel)
-            insertarModel.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = insertModelUseCase(urlId, listaModel)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        insertarModel.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        insertarModel.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
@@ -111,19 +150,45 @@ class ModelViewModel : ViewModel() {
             estado
         )
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = updateModelUseCase(urlId, modelModel)
-            updateModel.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = updateModelUseCase(urlId, modelModel)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        updateModel.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        updateModel.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun deleteModel(urlId: urlId, id: String) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = deleteModelUseCase(urlId, id)
-            deleteModel.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = deleteModelUseCase(urlId, id)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        deleteModel.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        deleteModel.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 }

@@ -13,13 +13,13 @@ import com.kasolution.aiohunterresources.domain.cajaChica.updateLiquidacionUseCa
 import kotlinx.coroutines.launch
 
 class LiquidacionViewModel : ViewModel() {
-    val getLiquidacion = MutableLiveData<ArrayList<liquidacion>>()
-    val insertLiquidacion = MutableLiveData<liquidacion>()
-    val updateLiquidacion = MutableLiveData<liquidacion>()
-    val deleteLiquidacion = MutableLiveData<String>()
-    val getResumenGastos = MutableLiveData<String>()
+    val getLiquidacion = MutableLiveData<Result<ArrayList<liquidacion>>>()
+    val insertLiquidacion = MutableLiveData<Result<liquidacion>>()
+    val updateLiquidacion = MutableLiveData<Result<liquidacion>>()
+    val deleteLiquidacion = MutableLiveData<Result<String>>()
+    val getResumenGastos = MutableLiveData<Result<String>>()
+    val exception = MutableLiveData<String>()
 
-    //    val reset=MutableLiveData<Boolean>()
     val isloading = MutableLiveData<Boolean>()
     var getLiquidacionUseCase = getLiquidacionUseCase()
     var insertLiquidacionUseCase = insertLiquidacionUseCase()
@@ -28,13 +28,22 @@ class LiquidacionViewModel : ViewModel() {
     var getSaldoContableUseCase = getResumenGastosUseCase()
 
     fun getLiquidacion(urlid: urlId) {
-        if (getLiquidacion.value.isNullOrEmpty()) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            try {
                 isloading.postValue(true)
                 val response = getLiquidacionUseCase(urlid)
-                if (response.isNotEmpty()) {
-                    getLiquidacion.postValue(response)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        getLiquidacion.postValue(Result.success(lista))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
                 isloading.postValue(false)
             }
         }
@@ -42,50 +51,111 @@ class LiquidacionViewModel : ViewModel() {
 
     fun onRefresh(urlid: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getLiquidacionUseCase(urlid)
-            if (response.isNotEmpty()) {
-                getLiquidacion.postValue(response)
+            try {
+                isloading.postValue(true)
+                val response = getLiquidacionUseCase(urlid)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        getLiquidacion.postValue(Result.success(lista))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-            isloading.postValue(false)
         }
     }
 
-    fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion,adicional:ArrayList<Int>) {
+    fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion, adicional: ArrayList<Int>) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = insertLiquidacionUseCase(urlid, liquidacion,adicional)
-            insertLiquidacion.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = insertLiquidacionUseCase(urlid, liquidacion, adicional)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { liquidacion ->
+                        insertLiquidacion.postValue(Result.success(liquidacion))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun updateLiquidacion(urlid: urlId, liquidacion: liquidacion) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = updateLiquidacionUseCase(urlid, liquidacion)
-            updateLiquidacion.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = updateLiquidacionUseCase(urlid, liquidacion)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { liquidacion ->
+                        updateLiquidacion.postValue(Result.success(liquidacion))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun deleteLiquidacion(urlid: urlId, liquidacion: liquidacion) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = deleteLiquidacionUseCase(urlid, liquidacion)
-            deleteLiquidacion.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = deleteLiquidacionUseCase(urlid, liquidacion)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { liquidacion ->
+                        deleteLiquidacion.postValue(Result.success(liquidacion))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun getResumenGastos(urlid: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getSaldoContableUseCase(urlid)
-            if (response.isNotEmpty()) {
-                getResumenGastos.postValue(response)
+            try {
+                isloading.postValue(true)
+                val response = getSaldoContableUseCase(urlid)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { liquidacion ->
+                        getResumenGastos.postValue(Result.success(liquidacion))
+                    }
+                }else{
+                    response.exceptionOrNull()?.let { ex ->
+                        getLiquidacion.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            }catch (e: Exception){
+                exception.postValue(e.message)
+            }finally {
+                isloading.postValue(false)
             }
-            isloading.postValue(false)
         }
     }
 }

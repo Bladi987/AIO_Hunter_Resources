@@ -19,10 +19,10 @@ class RegisterViewModel : ViewModel() {
     val resumen: LiveData<Map<String, Pair<Int, Double>>> get() = _resumen
     val exception = MutableLiveData<String>()
     val isloading = MutableLiveData<Boolean>()
-    val getRegister = MutableLiveData<ArrayList<register>>()
-    val insertarRegister = MutableLiveData<register>()
-    val updateRegister = MutableLiveData<register>()
-    val deleteRegister = MutableLiveData<String>()
+    val getRegister = MutableLiveData<Result<ArrayList<register>>>()
+    val insertarRegister = MutableLiveData<Result<register>>()
+    val updateRegister = MutableLiveData<Result<register>>()
+    val deleteRegister = MutableLiveData<Result<String>>()
     var getRegisterUseCase = getRegisterUseCase()
     var insertRegisterUseCase = insertRegisterUseCase()
     var updateRegisterUseCase = updateRegisterUseCase()
@@ -32,67 +32,105 @@ class RegisterViewModel : ViewModel() {
 
     fun onCreate(urlId: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
             try {
+                isloading.postValue(true)
                 val response = getRegisterUseCase(urlId)
-                if (response.isNotEmpty()) {
-                    listRegister = ArrayList(response)
-                    getRegister.postValue(listRegister)
-                    calcularTotales(listRegister)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        listRegister = ArrayList(lista)
+                        getRegister.postValue(Result.success(listRegister))
+                        calcularTotales(listRegister)
+                    }
+                } else {
+                    // Si el resultado tiene una excepción, se maneja aquí
+                    response.exceptionOrNull()?.let { ex ->
+                        getRegister.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
             } catch (e: Exception) {
                 exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
+
     fun onRefresh(urlId: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getRegisterUseCase(urlId)
-            if (response.isNotEmpty()) {
-                getRegister.postValue(listRegister)
-            }
-            isloading.postValue(false)
-        }
-    }
-    fun insertRegister(urlId: urlId, register: register) {
-        viewModelScope.launch {
-            isloading.postValue(true)
             try {
-                val response = insertRegisterUseCase(urlId, register)
-                if (response != null) {
-                    listRegister.add(0, response) // Agregar al inicio de la lista
-                    insertarRegister.postValue(response) // Notificar inserción
-                    calcularTotales(listRegister) // Actualizar resumen
+                isloading.postValue(true)
+                val response = getRegisterUseCase(urlId)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        listRegister = ArrayList(lista)
+                        getRegister.postValue(Result.success(listRegister))
+                        calcularTotales(listRegister)
+                    }
+                } else {
+                    // Si el resultado tiene una excepción, se maneja aquí
+                    response.exceptionOrNull()?.let { ex ->
+                        getRegister.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
             } catch (e: Exception) {
                 exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
+        }
+    }
 
-            isloading.postValue(false)
+    fun insertRegister(urlId: urlId, register: register) {
+        viewModelScope.launch {
+            try {
+                isloading.postValue(true)
+                val response = insertRegisterUseCase(urlId, register)
+                if (response.isSuccess) {
+                    // Extraemos el registro desde el resultado exitoso
+                    response.getOrNull()?.let { registro ->
+                        listRegister.add(0, registro) // Agregar al inicio de la lista
+                        insertarRegister.postValue(Result.success(registro)) // Notificar inserción
+                        calcularTotales(listRegister) // Actualizar resumen
+                    }
+                } else {
+                    // Si el resultado tiene una excepción, se maneja aquí
+                    response.exceptionOrNull()?.let { ex ->
+                        insertarRegister.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
     fun updateRegister(urlId: urlId, register: register) {
         viewModelScope.launch {
-            isloading.postValue(true)
             try {
+                isloading.postValue(true)
                 val response = updateRegisterUseCase(urlId, register)
-//                if (response != null) {
-                val index = listRegister.indexOfFirst { it.id == register.id }
-                if (index != -1) {
-                    listRegister[index] = response // Actualizar registro
-                    updateRegister.postValue(response) // Notificar actualización
-                    calcularTotales(listRegister) // Actualizar resumen
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        val index = listRegister.indexOfFirst { it.id == register.id }
+                        if (index != -1) {
+                            listRegister[index] = registro // Actualizar registro
+                            updateRegister.postValue(Result.success(registro)) // Notificar actualización
+                            calcularTotales(listRegister) // Actualizar resumen
+                        }
+                    }
+                } else {
+                    // Si el resultado tiene una excepción, se maneja aquí
+                    response.exceptionOrNull()?.let { ex ->
+                        updateRegister.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
-//                }
             } catch (e: Exception) {
                 exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
 
@@ -101,17 +139,26 @@ class RegisterViewModel : ViewModel() {
             isloading.postValue(true)
             try {
                 val response = deleteRegisterUseCase(urlId, register)
-                val index = listRegister.indexOfFirst { it.id == register.id }
-                if (index != -1) {
-                    listRegister.removeAt(index) // Eliminar registro
-                    deleteRegister.postValue(response)
-                    calcularTotales(listRegister) // Actualizar resumen
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { respuesta ->
+                        val index = listRegister.indexOfFirst { it.id == register.id }
+                        if (index != -1) {
+                            listRegister.removeAt(index) // Eliminar registro
+                            deleteRegister.postValue(Result.success(respuesta))
+                            calcularTotales(listRegister) // Actualizar resumen
+                        }
+                    }
+                } else {
+                    // Si el resultado tiene una excepción, se maneja aquí
+                    response.exceptionOrNull()?.let { ex ->
+                        updateRegister.postValue(Result.failure(ex)) // Publicamos el error como Result.failure
+                    }
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
             }
-
-            isloading.postValue(false)
         }
     }
 

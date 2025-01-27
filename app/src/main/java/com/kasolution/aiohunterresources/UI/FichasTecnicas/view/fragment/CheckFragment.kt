@@ -10,12 +10,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.adapter.ApproveAdapter
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment.dialog.ImageViewFragment
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.Brand
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.VehicleModel
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.viewModel.ShowModelViewModel
 import com.kasolution.aiohunterresources.core.DialogProgress
+import com.kasolution.aiohunterresources.core.DialogUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentCheckBinding
 
@@ -50,23 +52,62 @@ class CheckFragment : Fragment() {
 
 
         ShowModelViewModel.onCreate(urlId!!, "Publicado", 3, "Revision")
-        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { listaModel ->
-            lista.addAll(listaModel)
-            adapter.notifyDataSetChanged()
+        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { result->
+            result?.let { respuesta->
+                if (respuesta.isSuccess){
+                    val data=respuesta.getOrNull()
+                    data?.let { listaModel->
+                        lista.addAll(listaModel)
+                        adapter.notifyDataSetChanged()
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
-        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { vehiculo ->
-            lista.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
+        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result->
+            result?.let {respuesta->
+                if (respuesta.isSuccess){
+                    val data=respuesta.getOrNull()
+                    data?.let {
+                        lista.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+
         })
-        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {
-            lista.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
+        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {result->
+            result?.let {respuesta->
+                if (respuesta.isSuccess){
+                    val data=respuesta.getOrNull()
+                    data?.let {
+                        lista.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         ShowModelViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
             else DialogProgress.dismiss()
-//            binding.pbloading.isVisible = it
         })
+        ShowModelViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
         binding.imgBottonBack.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -135,5 +176,13 @@ class CheckFragment : Fragment() {
             binding.swipeRefresh.isRefreshing = false
             ShowModelViewModel.onRefresh(urlId!!, "Publicado", 3, "Revision")
         }
+    }
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

@@ -7,28 +7,39 @@ import com.kasolution.aiohunterresources.data.RepositoryCajaChica
 
 
 class getLiquidacionUseCase() {
-    private val repository= RepositoryCajaChica()
-    suspend operator fun invoke(urlid: urlId):ArrayList<liquidacion>{
-        var lista=ArrayList<liquidacion>()
+    private val repository = RepositoryCajaChica()
+    suspend operator fun invoke(urlid: urlId): Result<ArrayList<liquidacion>> {
+        var lista = ArrayList<liquidacion>()
 
-        val response=repository.getLiquidacion(urlid).asJsonObject
-        Log.i("BladiDev",response.toString())
-        val respuesta = response?.get("Respuesta")
-        if (respuesta != null && respuesta.asString=="exito") {
-            val data = response.getAsJsonArray("Resultado")
-            if (data != null) {
-                for (i in 0 until data.size()) {
-                    val jsonObject = data.get(i).asJsonObject
-                    val id = jsonObject.get("CODIGO").asString
-                    val fecha = jsonObject.get("FECHA").asString
-                    val archivo = jsonObject.get("ARCHIVO").asString
-                    val concepto = jsonObject.get("CONCEPTO").asString
-                    val monto = jsonObject.get("MONTO").asString
-                    val estado = jsonObject.get("ESTADO").asString
-                    lista.add(liquidacion(id,fecha,archivo,concepto,monto,estado))
+        val responseResult = repository.getLiquidacion(urlid)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val respuesta = response?.get("Respuesta")
+                if (respuesta != null && respuesta.asString == "exito") {
+                    val data = response.getAsJsonArray("Resultado")
+                    if (data != null) {
+                        for (i in 0 until data.size()) {
+                            val jsonObject = data.get(i).asJsonObject
+                            val id = jsonObject.get("CODIGO").asString
+                            val fecha = jsonObject.get("FECHA").asString
+                            val archivo = jsonObject.get("ARCHIVO").asString
+                            val concepto = jsonObject.get("CONCEPTO").asString
+                            val monto = jsonObject.get("MONTO").asString
+                            val estado = jsonObject.get("ESTADO").asString
+                            lista.add(liquidacion(id, fecha, archivo, concepto, monto, estado))
+                        }
+                    }
                 }
+                Result.success(lista)
             }
+
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+
         }
-        return lista
     }
 }

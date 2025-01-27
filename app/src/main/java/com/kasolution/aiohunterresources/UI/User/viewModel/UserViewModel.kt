@@ -12,11 +12,13 @@ import com.kasolution.aiohunterresources.domain.user.updateUserUseCase
 import kotlinx.coroutines.launch
 
 class UserViewModel : ViewModel() {
-    val user = MutableLiveData<ArrayList<user>>()
-    val insertUser=MutableLiveData<user>()
-    val updateUser=MutableLiveData<user>()
-    val deleteUser=MutableLiveData<String>()
-    val reset=MutableLiveData<Boolean>()
+    var isDataLoaded = false
+    val exception = MutableLiveData<String>()
+    val user = MutableLiveData<Result<ArrayList<user>>>()
+    val insertUser = MutableLiveData<Result<user>>()
+    val updateUser = MutableLiveData<Result<user>>()
+    val deleteUser = MutableLiveData<Result<String>>()
+    val reset = MutableLiveData<Boolean>()
     val isloading = MutableLiveData<Boolean>()
     var getUserUseCase = getUserUseCase()
     var insertUserUseCase = insertUserUseCase()
@@ -24,43 +26,116 @@ class UserViewModel : ViewModel() {
     var deleteUserUseCase = deleteUserUseCase()
 
     fun onCreate(urlid: urlId) {
-        if (user.value.isNullOrEmpty()) {
+        if (!isDataLoaded) {
             viewModelScope.launch {
+                try {
+                    isloading.postValue(true)
+                    val response = getUserUseCase(urlid)
+                    if (response.isSuccess) {
+                        response.getOrNull()?.let { lista ->
+                            user.postValue(Result.success(lista))
+                            isDataLoaded = true
+                        }
+                    } else {
+                        response.exceptionOrNull()?.let { ex ->
+                            user.postValue(Result.failure(ex))
+                        }
+                    }
+                } catch (e: Exception) {
+                    exception.postValue(e.message)
+                } finally {
+                    isloading.postValue(false)
+                }
+            }
+        }
+    }
+
+    fun onRefresh(urlid: urlId) {
+        viewModelScope.launch {
+            try {
                 isloading.postValue(true)
                 val response = getUserUseCase(urlid)
-                if (response.isNotEmpty()) {
-                    user.postValue(response)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { lista ->
+                        user.postValue(Result.success(lista))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        user.postValue(Result.failure(ex))
+                    }
                 }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
                 isloading.postValue(false)
             }
         }
     }
 
-    fun insertUser(urlid: urlId,user:user) {
+    fun insertUser(urlid: urlId, user: user) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response=insertUserUseCase(urlid,user)
-            insertUser.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = insertUserUseCase(urlid, user)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        insertUser.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        insertUser.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
-    fun updateUser(urlid: urlId,user:user,action:String) {
+    fun updateUser(urlid: urlId, user: user, action: String) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response=updateUserUseCase(urlid,user)
-            if (action=="reset") reset.postValue(true)
-            else updateUser.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = updateUserUseCase(urlid, user)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        if (action == "reset") reset.postValue(true)
+                        else updateUser.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        updateUser.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+                exception.postValue(e.message)
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 
-    fun deleteUser(urlid: urlId,user:user) {
+    fun deleteUser(urlid: urlId, user: user) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response=deleteUserUseCase(urlid,user)
-            deleteUser.postValue(response)
-            isloading.postValue(false)
+            try {
+                isloading.postValue(true)
+                val response = deleteUserUseCase(urlid, user)
+                if (response.isSuccess) {
+                    response.getOrNull()?.let { registro ->
+                        deleteUser.postValue(Result.success(registro))
+                    }
+                } else {
+                    response.exceptionOrNull()?.let { ex ->
+                        deleteUser.postValue(Result.failure(ex))
+                    }
+                }
+            } catch (e: Exception) {
+
+            } finally {
+                isloading.postValue(false)
+            }
         }
     }
 }

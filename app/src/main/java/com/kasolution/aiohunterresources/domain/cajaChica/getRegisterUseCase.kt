@@ -1,6 +1,7 @@
 package com.kasolution.aiohunterresources.domain.cajaChica
 
 
+import android.util.Log
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.data.RepositoryCajaChica
@@ -8,91 +9,95 @@ import com.kasolution.aiohunterresources.data.RepositoryCajaChica
 
 class getRegisterUseCase() {
     private val repository = RepositoryCajaChica()
-    suspend operator fun invoke(urlId: urlId): ArrayList<register> {
-        var lista = ArrayList<register>()
+    private val log = "BladiDevGetRegisterUseCase"
 
-        val response = repository.getRegister(urlId).asJsonObject
-        val data = response?.getAsJsonArray("Resultado")
-        if (data != null) {
-            for (i in data.size() - 1 downTo 0) {
-                val jsonObject = data.get(i).asJsonObject
-                val id = jsonObject.get("id").asString
-                val fecha = jsonObject.get("Fecha").asString
-                val ciudad = jsonObject.get("Ciudad").asString
-                val tipoDoc = jsonObject.get("TipoDoc").asString
-                val nroDoc = jsonObject.get("NroDoc").asString
-                val proveedor = jsonObject.get("Proveedor").asString
-                val descripcion = jsonObject.get("Descripcion").asString
-                var c_movilidad = ""
-                var c_alimentacion = ""
-                var c_alojamiento = ""
-                var c_otros = ""
-                var s_movilidad = ""
-                var s_alimentacion = ""
-                var s_alojamiento = ""
-                var s_otros = ""
-                var Monto = ""
+    suspend operator fun invoke(urlId: urlId): Result<ArrayList<register>> {
+        val lista = ArrayList<register>()
 
-                when (jsonObject.size()) {
-                    8 -> {
-                        c_movilidad = formatearMonto(jsonObject.get("cs-Movilidad").asString)
-                        Monto = c_movilidad
-                    }
+        // Llamamos al repositorio para obtener el resultado de getRegister
+        val responseResult = repository.getRegister(urlId)
 
-                    9 -> {
-                        c_alimentacion = formatearMonto(jsonObject.get("cs-Alimentación").asString)
-                        Monto = c_alimentacion
-                    }
+        return when (responseResult.isSuccess) {
+            true -> {
+                // Si la llamada fue exitosa, procesamos la respuesta
+                val response = responseResult.getOrNull()?.asJsonObject
+                val data = response?.getAsJsonArray("Resultado")
 
-                    10 -> {
-                        c_alojamiento = formatearMonto(jsonObject.get("cs-Alojamiento").asString)
-                        Monto = c_alojamiento
-                    }
+                if (data != null) {
+                    for (i in data.size() - 1 downTo 0) {
+                        val jsonObject = data.get(i).asJsonObject
+                        val id = jsonObject.get("id").asString
+                        val fecha = jsonObject.get("Fecha").asString
+                        val ciudad = jsonObject.get("Ciudad").asString
+                        val tipoDoc = jsonObject.get("TipoDoc").asString
+                        val nroDoc = jsonObject.get("NroDoc").asString
+                        val proveedor = jsonObject.get("Proveedor").asString
+                        val descripcion = jsonObject.get("Descripcion").asString
+                        var c_movilidad = ""
+                        var c_alimentacion = ""
+                        var c_alojamiento = ""
+                        var c_otros = ""
+                        var s_movilidad = ""
+                        var s_alimentacion = ""
+                        var s_alojamiento = ""
+                        var s_otros = ""
+                        var Monto = ""
 
-                    11 -> {
-                        c_otros = formatearMonto(jsonObject.get("cs-Otros").asString)
-                        Monto = c_otros
-                    }
+                        when (jsonObject.size()) {
+                            8 -> c_movilidad =
+                                formatearMonto(jsonObject.get("cs-Movilidad").asString)
 
-                    12 -> {
-                        s_movilidad = formatearMonto(jsonObject.get("ss-Movilidad").asString)
-                        Monto = s_movilidad
-                    }
+                            9 -> c_alimentacion =
+                                formatearMonto(jsonObject.get("cs-Alimentación").asString)
 
-                    13 -> {
-                        s_alimentacion = formatearMonto(jsonObject.get("ss-Alimentación").asString)
-                        Monto = s_alimentacion
-                    }
+                            10 -> c_alojamiento =
+                                formatearMonto(jsonObject.get("cs-Alojamiento").asString)
 
-                    14 -> {
-                        s_alojamiento = formatearMonto(jsonObject.get("ss-Alojamiento").asString)
-                        Monto = s_alojamiento
-                    }
+                            11 -> c_otros = formatearMonto(jsonObject.get("cs-Otros").asString)
+                            12 -> s_movilidad =
+                                formatearMonto(jsonObject.get("ss-Movilidad").asString)
 
-                    15 -> {
-                        s_otros = formatearMonto(jsonObject.get("ss-Otros").asString)
-                        Monto = s_otros
+                            13 -> s_alimentacion =
+                                formatearMonto(jsonObject.get("ss-Alimentación").asString)
+
+                            14 -> s_alojamiento =
+                                formatearMonto(jsonObject.get("ss-Alojamiento").asString)
+
+                            15 -> s_otros = formatearMonto(jsonObject.get("ss-Otros").asString)
+                        }
+
+                        lista.add(
+                            register(
+                                id,
+                                fecha,
+                                ciudad,
+                                tipoDoc,
+                                nroDoc,
+                                proveedor,
+                                descripcion,
+                                c_movilidad,
+                                c_alimentacion,
+                                c_alojamiento,
+                                c_otros,
+                                s_movilidad,
+                                s_alimentacion,
+                                s_alojamiento,
+                                s_otros
+                            )
+                        )
                     }
                 }
+                // Si la respuesta fue exitosa pero la data está vacía
+                Result.success(lista)
+            }
 
-                lista.add(register(                    id,
-                    fecha,
-                    ciudad,
-                    tipoDoc,
-                    nroDoc,
-                    proveedor,
-                    descripcion,
-                    c_movilidad,
-                    c_alimentacion,
-                    c_alojamiento,
-                    c_otros,
-                    s_movilidad,
-                    s_alimentacion,
-                    s_alojamiento,
-                    s_otros))
+            false -> {
+                // Si la llamada al repositorio falló, capturamos el mensaje de error
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e(log, "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
             }
         }
-        return lista
     }
 
     private fun formatearMonto(monto: String): String {

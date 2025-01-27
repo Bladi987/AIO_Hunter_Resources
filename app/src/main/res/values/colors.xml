@@ -23,4 +23,7 @@
     <color name="text_color2">#6D6D6D</color>
     <color name="text_hint_color">#949292</color>
     <color name="darker_grey">#FFAAAAAA</color>
+
+    <color name="circle_color">#A84417</color>
+    <color name="backgroundColor">#E0E0E0</color>
 </resources>

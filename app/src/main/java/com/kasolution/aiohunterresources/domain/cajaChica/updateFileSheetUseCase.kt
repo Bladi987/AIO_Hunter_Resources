@@ -14,23 +14,35 @@ class updateFileSheetUseCase() {
         urlid: urlId,
         fileDetails: fileDetails,
         adicional: List<String>
-    ): fileDetails {
+    ): Result<fileDetails> {
         lateinit var datafileSheet: fileDetails
-        val response = repository.updateFileSheet(urlid, fileDetails, adicional).asJsonObject
-        Log.i("BladiDevMonitor", response.toString())
-        val resultado = response?.get("Resultado")
-        if (resultado is JsonPrimitive && resultado.asString == "error") {
-            datafileSheet = fileDetails("", "")
-        } else {
-            val resultadoObj = resultado?.asJsonObject
-            if (resultadoObj != null && resultadoObj.has("sheet") && resultadoObj.has("nameTecnico")) {
-                val sheet = resultadoObj.get("newName").asString
-                datafileSheet = fileDetails(sheet, sheet)
-            } else {
-                datafileSheet = fileDetails("", "")
+        val responseResult = repository.updateFileSheet(urlid, fileDetails, adicional)
+        return when (responseResult.isSuccess) {
+            true -> {
+                val response = responseResult.getOrNull()?.asJsonObject
+                val resultado = response?.get("Resultado")
+                if (resultado is JsonPrimitive && resultado.asString == "error") {
+                    datafileSheet = fileDetails("", "")
+                } else {
+                    val resultadoObj = resultado?.asJsonObject
+                    if (resultadoObj != null && resultadoObj.has("sheet") && resultadoObj.has("nameTecnico")) {
+                        val sheet = resultadoObj.get("newName").asString
+                        datafileSheet = fileDetails(sheet, sheet)
+                    } else {
+                        datafileSheet = fileDetails("", "")
+                    }
+                }
+                Result.success(datafileSheet)
+            }
+
+            false -> {
+                val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
+                Log.e("BladiDev", "Error al obtener los datos: $errorMessage")
+                Result.failure(Exception(errorMessage))
             }
         }
-        return datafileSheet
+
+
     }
 
 }

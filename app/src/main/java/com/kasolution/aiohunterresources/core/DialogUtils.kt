@@ -14,6 +14,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.databinding.DialogCustomMessageBinding
 import com.kasolution.aiohunterresources.databinding.DialogCustomMessageResposeBinding
+import com.kasolution.aiohunterresources.databinding.DialogCustomMessageResposeErrorBinding
 import com.kasolution.aiohunterresources.databinding.DialogInputDataBinding
 import com.kasolution.aiohunterresources.databinding.DialogMessageQuestionBinding
 
@@ -70,6 +71,7 @@ object DialogUtils {
 
         dialog.show()
     }
+
     fun dialogMessageResponse(
         context: Context,
         message: String,
@@ -80,6 +82,38 @@ object DialogUtils {
 
         binding.tvTexto.text = message
 
+        val builder = AlertDialog.Builder(context)
+        builder.setView(binding.root)
+        val dialog = builder.create()
+        dialog.setCancelable(true)
+        // Configurar la ventana del diálogo como transparente
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        //Configuramos la animacion del dialogo
+        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
+        // Configuración del botón positivo
+        binding.root.animation = anim1
+
+        binding.btnAceptar.text = context.getString(android.R.string.ok)
+        binding.btnAceptar.setOnClickListener {
+            onPositiveClick?.invoke()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    fun dialogMessageResponseError(
+        context: Context,
+        icon: Int,
+        message: String,
+        codigo: String,
+        onPositiveClick: (() -> Unit)? = null
+    ) {
+        val inflater = LayoutInflater.from(context)
+        val binding = DialogCustomMessageResposeErrorBinding.inflate(inflater)
+
+        binding.tvTexto.text = message
+        binding.ivIcon.setImageResource(icon)
+        binding.tvCodError.text = codigo
         val builder = AlertDialog.Builder(context)
         builder.setView(binding.root)
         val dialog = builder.create()
@@ -169,7 +203,8 @@ object DialogUtils {
                 val item = clip.getItemAt(0)
                 binding.tvInputData.setText(item.text) // Establecer el texto del portapapeles en el EditText
             } else {
-                Toast.makeText(context, "No hay texto en el portapapeles", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "No hay texto en el portapapeles", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }

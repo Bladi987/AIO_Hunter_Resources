@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -20,14 +19,17 @@ import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.CajaChica.view.adapter.FileDetailsAdapter
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.recent
 import com.kasolution.aiohunterresources.UI.CajaChica.viewModel.FileDetailsViewModel
 import com.kasolution.aiohunterresources.core.DialogProgress
 import com.kasolution.aiohunterresources.core.DialogUtils
-import com.kasolution.aiohunterresources.core.ToastUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.DialogNewSheetBinding
 import com.kasolution.aiohunterresources.databinding.FragmentFileDetailsBinding
+import java.text.SimpleDateFormat
 import java.util.ArrayList
+import java.util.Calendar
+import java.util.Locale
 
 
 class FileDetailsFragment : Fragment() {
@@ -66,7 +68,7 @@ class FileDetailsFragment : Fragment() {
             requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
         listFileDetails = ArrayList()
 
-        init()
+        initRecycler()
         recuperarDatosRecibidos()
         recuperarPreferencias()
         configSwipe()
@@ -94,50 +96,122 @@ class FileDetailsFragment : Fragment() {
             dialogFile(fileDetail.nombre)
         }
         fileDetailsViewModel.onCreate(urlId!!)
-        fileDetailsViewModel.FileDetailsModel.observe(viewLifecycleOwner, Observer { listSheet ->
-            adapter.limpiar()
-            listaSheet = listSheet
-            listFileDetails.addAll(listSheet)
-            adapter.notifyDataSetChanged()
-        })
-        fileDetailsViewModel.insertarFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
-            if (insert) {
-                if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
-                    listFileDetails.add(0, fileSheet)
-                    adapter.notifyItemInserted(0)
-                    lmanager.scrollToPosition(0)
-                    listaSheet!!.add(0, fileSheet)
-                    val gson = Gson()
-                    val json = gson.toJson(listaSheet)
-                    val editor = preferencesCajaChica.edit()
-                    editor.putString("LIST_SHEET", json.toString())
-                    editor.apply()
-                } else DialogUtils.dialogMessageResponse(
-                    requireContext(),
-                    "Ocurrio un error al crear la hoja"
-                )
-                insert = false
+        fileDetailsViewModel.FileDetailsModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { listSheet ->
+                        adapter.limpiar()
+                        listaSheet = listSheet
+                        listFileDetails.addAll(listSheet)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
             }
-
         })
-        fileDetailsViewModel.updateFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
-            if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
-                listFileDetails[itemPosition] = fileSheet
-                adapter.notifyItemChanged(itemPosition)
-                val gson = Gson()
-                val json = gson.toJson(listFileDetails)
-                val editor = preferencesCajaChica.edit()
-                editor.putString("LIST_SHEET", json.toString())
-                editor.apply()
-            } else DialogUtils.dialogMessageResponse(
-                requireContext(),
-                "Ocurrio un error al intentar modificar el nombre"
-            )
+        fileDetailsViewModel.insertarFileSheet.observe(viewLifecycleOwner, Observer { result ->
+                result?.let { respuesta ->
+                    if (respuesta.isSuccess) {
+                        val data = respuesta.getOrNull()
+                        data?.let {fileSheet ->
+                            if (insert) {
+                                if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
+                                    listFileDetails.add(0, fileSheet)
+                                    adapter.notifyItemInserted(0)
+                                    lmanager.scrollToPosition(0)
+                                    listaSheet!!.add(0, fileSheet)
+                                    val gson = Gson()
+                                    val json = gson.toJson(listaSheet)
+                                    val editor = preferencesCajaChica.edit()
+                                    editor.putString("LIST_SHEET", json.toString())
+                                    editor.apply()
+                                    saveRecent(
+                                        recent(
+                                            icon = R.drawable.carpeta,
+                                            titulo = "Archivos -> Hoja creada",
+                                            detalle = fileSheet.nombre,
+                                            fecha = obtenerFechaActual()
+                                        )
+                                    )
+                                } else DialogUtils.dialogMessageResponse(
+                                    requireContext(),
+                                    "Ocurrio un error al crear la hoja"
+                                )
+                                insert = false
+                            }
+                        }
+                    } else {
+                        val exception = respuesta.exceptionOrNull()
+                        exception?.let { ex ->
+                            showMessageError(ex.message.toString())
+                        }
+                    }
+                }
+            })
+        fileDetailsViewModel.updateFileSheet.observe(viewLifecycleOwner, Observer { result->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { fileSheet ->
+                        if (fileSheet.nombre.isNotEmpty() && fileSheet.nombreReal.isNotEmpty()) {
+                            listFileDetails[itemPosition] = fileSheet
+                            adapter.notifyItemChanged(itemPosition)
+                            val gson = Gson()
+                            val json = gson.toJson(listFileDetails)
+                            val editor = preferencesCajaChica.edit()
+                            editor.putString("LIST_SHEET", json.toString())
+                            editor.apply()
+                            saveRecent(
+                                recent(
+                                    icon = R.drawable.carpeta,
+                                    titulo = "Archivos -> Hoja Modificada",
+                                    detalle = "Nuevo nombre ${fileSheet.nombre}",
+                                    fecha = obtenerFechaActual()
+                                )
+                            )
+                        } else DialogUtils.dialogMessageResponse(
+                            requireContext(),
+                            "Ocurrio un error al intentar modificar el nombre"
+                        )
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
-        fileDetailsViewModel.deleteFileSheet.observe(viewLifecycleOwner, Observer { fileSheet ->
-            listFileDetails.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
-            updatePreferences(fileSheet)
+        fileDetailsViewModel.deleteFileSheet.observe(viewLifecycleOwner, Observer { result-> //fileSheet ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { fileSheet ->
+                        val nombreitem = listFileDetails[itemPosition].nombre
+                        listFileDetails.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                        updatePreferences(fileSheet)
+                        saveRecent(
+                            recent(
+                                icon = R.drawable.carpeta,
+                                titulo = "Archivos -> Hoja eliminada",
+                                detalle = nombreitem,
+                                fecha = obtenerFechaActual()
+                            )
+                        )
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
         })
         fileDetailsViewModel.isloading.observe(viewLifecycleOwner, Observer { cargando ->
             adapter.limpiarSeleccion()
@@ -145,6 +219,9 @@ class FileDetailsFragment : Fragment() {
             else DialogProgress.dismiss()
             MostrarActionIcon(false)
         })
+        fileDetailsViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
     }
 
     private fun updatePreferences(nameSheet: String) {
@@ -229,7 +306,7 @@ class FileDetailsFragment : Fragment() {
         }
     }
 
-    private fun init() {
+    private fun initRecycler() {
         lmanager = LinearLayoutManager(context)
         adapter = FileDetailsAdapter(
             listaRecibida = listFileDetails,
@@ -352,5 +429,44 @@ class FileDetailsFragment : Fragment() {
         dialog.setOnDismissListener {
             //MostrarActionIcon(false)
         }
+    }
+
+    private fun saveRecent(recent: recent) {
+        val editor = preferencesCajaChica.edit()
+
+        val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
+
+        val recentList = mutableListOf<String>()
+
+        // Convertir la lista actual de JSON a objetos Recent (si existe)
+        recentListJson?.let {
+            recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
+        }
+
+        // Agregar el nuevo objeto a la lista y limitar a 10 elementos
+        recentList.add(0, Gson().toJson(recent))
+        if (recentList.size > 10) {
+            recentList.removeAt(recentList.size - 1)
+        }
+
+        // Convertir la lista actualizada a JSON y guardarla
+        editor.putString("RECENT_DATA", Gson().toJson(recentList))
+        editor.apply()
+    }
+
+    private fun obtenerFechaActual(): String {
+        val fechaActual = Calendar.getInstance()  // Obtiene la fecha actual del sistema
+        val formato =
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())  // Define el formato deseado
+        return formato.format(fechaActual.time)  // Formatea la fecha y la devuelve como cadena
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

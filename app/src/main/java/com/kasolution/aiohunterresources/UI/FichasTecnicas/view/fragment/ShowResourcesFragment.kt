@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.adapter.ShowModelAdapter
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment.dialog.AddModelFragment
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment.dialog.ImageViewFragment
@@ -39,7 +40,7 @@ class ShowResourcesFragment : Fragment(), DialogListener {
     private var marca: Brand? = null
     private var itemPosition = -1
     private var tipo = ""
-    private var urlId: urlId?=null
+    private var urlId: urlId? = null
     private lateinit var preferencesFichasTecnicas: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,36 +60,93 @@ class ShowResourcesFragment : Fragment(), DialogListener {
         lista = ArrayList()
         recuperarPreferencias()
         initUI()
-        ShowModelViewModel.onCreate(urlId!!,binding.tvModelo.text.toString(), 2, "Publicado")
-        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { listaModel ->
-            lista.addAll(listaModel)
-            adapter.notifyDataSetChanged()
-        })
-        ShowModelViewModel.insertarModel.observe(viewLifecycleOwner, Observer { Model ->
-            lista.add(Model)
-            adapter.notifyItemInserted(lista.size - 1)
-            lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
-            Toast.makeText(requireContext(),"Registro exitoso, pero estará pendiente de aprobación antes de ser visible.",
-                Toast.LENGTH_LONG).show()
-        })
-        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { vehiculo ->
-            lista[itemPosition] = vehiculo
-            adapter.notifyItemChanged(itemPosition)
-            Toast.makeText(requireContext(),"Registro actualizado, pero estará pendiente de aprobación antes de ser visible.",
-                Toast.LENGTH_LONG).show()
-        })
-        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {
-            lista.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
-            if (lista.isEmpty())
-                requireActivity().supportFragmentManager.popBackStack()
-            else Log.i("BladiDevShowResoucesFragment", "lista aun no esta vacio")
-        })
+        ShowModelViewModel.onCreate(urlId!!, binding.tvModelo.text.toString(), 2, "Publicado")
         ShowModelViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
             else DialogProgress.dismiss()
-//            binding.pbloading.isVisible = it
         })
+        ShowModelViewModel.exception.observe(viewLifecycleOwner) { error ->
+            showMessageError(error)
+        }
+        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { listaModel ->
+                        lista.addAll(listaModel)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+        ShowModelViewModel.insertarModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { model ->
+                        lista.add(model)
+                        adapter.notifyItemInserted(lista.size - 1)
+                        lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
+                        Toast.makeText(
+                            requireContext(),
+                            "Registro exitoso, pero estará pendiente de aprobación antes de ser visible.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result-> //vehiculo ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                        data?.let { vehiculo ->
+                            lista[itemPosition] = vehiculo
+                            adapter.notifyItemChanged(itemPosition)
+                            Toast.makeText(
+                                requireContext(),
+                                "Registro actualizado, pero estará pendiente de aprobación antes de ser visible.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {result->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let {
+                        lista.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                        if (lista.isEmpty())
+                            requireActivity().supportFragmentManager.popBackStack()
+                        else Log.i("BladiDevShowResoucesFragment", "lista aun no esta vacio")
+                    }
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
+
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -120,11 +178,12 @@ class ShowResourcesFragment : Fragment(), DialogListener {
         binding.RvItem.layoutManager = lmanager
         binding.RvItem.adapter = adapter
     }
-    fun recuperarPreferencias(){
-        val url=preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
-        val idSheet=preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
-        tipo=preferencesUser.getString("TIPO", "")!!
-        urlId= urlId(url!!,"",idSheet!!,"")
+
+    fun recuperarPreferencias() {
+        val url = preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
+        val idSheet = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
+        tipo = preferencesUser.getString("TIPO", "")!!
+        urlId = urlId(url!!, "", idSheet!!, "")
     }
 
     private fun onItemClick(modelos: VehicleModel, action: Int, position: Int) {
@@ -193,7 +252,7 @@ class ShowResourcesFragment : Fragment(), DialogListener {
                     mensage = "Esta a punto de Eliminar el registro de ${modelos.marca} ${modelos.modelo}",
                     positiveButtontext = "Aceptar",
                     onPositiveClick = {
-                        ShowModelViewModel.deleteModel(urlId!!,modelos.id)
+                        ShowModelViewModel.deleteModel(urlId!!, modelos.id)
                     })
             }
 
@@ -302,11 +361,21 @@ class ShowResourcesFragment : Fragment(), DialogListener {
             }
         }
     }
+
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
             adapter.limpiar()
-            ShowModelViewModel.onRefresh(urlId!!,binding.tvModelo.text.toString(), 2, "Publicado")
+            ShowModelViewModel.onRefresh(urlId!!, binding.tvModelo.text.toString(), 2, "Publicado")
         }
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

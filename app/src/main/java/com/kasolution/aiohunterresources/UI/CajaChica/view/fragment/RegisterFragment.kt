@@ -3,7 +3,6 @@ package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -27,6 +26,7 @@ import com.kasolution.aiohunterresources.UI.CajaChica.view.adapter.RegisterAdapt
 import com.kasolution.aiohunterresources.UI.CajaChica.view.fragment.dialog.AddRegisterFragment
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
+import com.kasolution.aiohunterresources.UI.CajaChica.view.model.recent
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
 import com.kasolution.aiohunterresources.UI.CajaChica.viewModel.LiquidacionViewModel
 import com.kasolution.aiohunterresources.UI.CajaChica.viewModel.RegisterViewModel
@@ -105,39 +105,117 @@ class RegisterFragment : Fragment(), DialogListener {
             procesarDatosResumen(1, datosResumen)
         }
 
-        registerViewModel.getRegister.observe(viewLifecycleOwner, Observer { listaRegistros ->
-            adapter.limpiar()
-            listRegister.addAll(listaRegistros)
-            adapter.notifyDataSetChanged()
-            if (sheetNameTemp.isNotEmpty()) {
-                val editor = preferencesCajaChica.edit()
-                editor.putString("SHEETNAME", sheetNameTemp)
-                editor.apply()
-                sheetNameTemp.isEmpty()
+        registerViewModel.getRegister.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    adapter.limpiar()
+                    val lista = respuesta.getOrNull()
+                    lista?.let {
+                        listRegister.addAll(it)
+                        adapter.notifyDataSetChanged()
+                        if (sheetNameTemp.isNotEmpty()) {
+                            val editor = preferencesCajaChica.edit()
+                            editor.putString("SHEETNAME", sheetNameTemp)
+                            editor.apply()
+                            sheetNameTemp.isEmpty()
+                        }
+                    }
+                } else {
+                    // Si el resultado es un error, puedes manejarlo aquí
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        // Puedes mostrar el mensaje de error o manejarlo como prefieras
+                        //Toast.makeText(context, "Errorr: ${ex.message}", Toast.LENGTH_LONG).show()
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+
+        })
+        registerViewModel.insertarRegister.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    // Si el resultado es exitoso, obtenemos el registro
+                    val register = respuesta.getOrNull()
+                    register?.let { registro ->
+                        // Agregar el registro a la lista
+                        listRegister.add(0, registro)
+                        adapter.notifyItemInserted(0)
+                        lmanager.scrollToPosition(0)
+                        debitarGasto(registro, "DEBITO")
+                        saveRecent(
+                            recent(
+                                icon = R.drawable.register,
+                                titulo = "Gastos -> Movilidad",
+                                detalle = registro.descripcion,
+                                fecha = obtenerFechaActual()
+                            )
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
             }
         })
-        registerViewModel.insertarRegister.observe(viewLifecycleOwner, Observer { register ->
-            listRegister.add(0, register)
-            adapter.notifyItemInserted(0)
-            lmanager.scrollToPosition(0)
-            debitarGasto(register, "DEBITO")
+
+        registerViewModel.updateRegister.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val register = respuesta.getOrNull()
+                    register?.let { registro ->
+                        listRegister[itemPosition] = registro
+                        adapter.notifyItemChanged(itemPosition)
+                        debitarGasto(register, "COMPARAR")
+                        saveRecent(
+                            recent(
+                                icon = R.drawable.register,
+                                titulo = "Gastos -> Registro actualizado",
+                                detalle = registro.descripcion,
+                                fecha = obtenerFechaActual()
+                            )
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
 
         })
 
-        registerViewModel.updateRegister.observe(viewLifecycleOwner, Observer { register ->
-            adapter.limpiarSeleccion()
-            listRegister[itemPosition] = register
-            adapter.notifyItemChanged(itemPosition)
-            debitarGasto(register, "COMPARAR")
-        })
+        registerViewModel.deleteRegister.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val register = respuesta.getOrNull()
+                    register?.let { registro ->
+                        listRegister.removeAt(itemPosition)
+                        adapter.notifyItemRemoved(itemPosition)
+                        debitarGasto(itemRegistro, "ABONAR")
+                        saveRecent(
+                            recent(
+                                icon = R.drawable.register,
+                                titulo = "Gastos -> Registro eliminado",
+                                detalle = registro,
+                                fecha = obtenerFechaActual()
+                            )
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
 
-        registerViewModel.deleteRegister.observe(viewLifecycleOwner, Observer {
-            adapter.limpiarSeleccion()
-            listRegister.removeAt(itemPosition)
-            adapter.notifyItemRemoved(itemPosition)
-            debitarGasto(itemRegistro, "ABONAR")
         })
         registerViewModel.isloading.observe(viewLifecycleOwner, Observer {
+
             if (it) DialogProgress.show(requireContext(), "Recuperando...")
             else DialogProgress.dismiss()
         })
@@ -150,53 +228,70 @@ class RegisterFragment : Fragment(), DialogListener {
         })
 
         registerViewModel.exception.observe(viewLifecycleOwner, Observer { error ->
-            Toast.makeText(
-                requireContext(),
-                "Ups... Ocurrio un error $error, Vuelva a intentarlo en unos instantes",
-                Toast.LENGTH_SHORT
-            ).show()
+            showMessageError(error)
+
+//            Toast.makeText(
+//                requireContext(),
+//                "Ups... Ocurrio un error $error, Vuelva a intentarlo en unos instantes",
+//                Toast.LENGTH_SHORT
+//            ).show()
+            Log.i("BladiDevError", "Error $error")
         })
-        liquidacionViewModel.insertLiquidacion.observe(viewLifecycleOwner, Observer { liquidacion ->
-            DialogUtils.dialogMessageResponse(
-                requireContext(),
-                "Liquidacion Ingresado correctamente, archivo excel fue descargado en la carpeta descargas",
-                null
-            )
+        liquidacionViewModel.insertLiquidacion.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val register = respuesta.getOrNull()
+                    register?.let {liquidacion->
+                        DialogUtils.dialogMessageResponse(
+                            requireContext(),
+                            "Liquidacion Ingresado correctamente, archivo excel fue descargado en la carpeta descargas",
+                            null
+                        )
+                        try {
+                            // Obtener el JSON almacenado en SharedPreferences
+                            val jsonString = preferencesCajaChica.getString("LIST_SHEET", "[]") ?: "[]"
+                            Log.i("BladiDevBuscando", jsonString)
+                            // Convertir la cadena JSON en un JSONArray
+                            val jsonArray = JSONArray(jsonString)
 
-            try {
-                // Obtener el JSON almacenado en SharedPreferences
-                val jsonString = preferencesCajaChica.getString("LIST_SHEET", "[]") ?: "[]"
-                Log.i("BladiDevBuscando", jsonString)
-                // Convertir la cadena JSON en un JSONArray
-                val jsonArray = JSONArray(jsonString)
+                            // Obtener el item seleccionado del Spinner
+                            val selectedItemPosition = binding.spSheets.selectedItemPosition
+                            val selectedItem = jsonArray.getJSONObject(selectedItemPosition)
+                            Log.i("BladiDevBuscando", selectedItemPosition.toString())
+                            // Modificar el valor de "NOMBREREAL"
+                            val nombreReal = selectedItem.getString("nombreReal")
+                            val nuevoNombreReal = "$nombreReal->Enviado"  // Cambiar el texto como lo necesites
 
-                // Obtener el item seleccionado del Spinner
-                val selectedItemPosition = binding.spSheets.selectedItemPosition
-                val selectedItem = jsonArray.getJSONObject(selectedItemPosition)
-                Log.i("BladiDevBuscando", selectedItemPosition.toString())
-                // Modificar el valor de "NOMBREREAL"
-                val nombreReal = selectedItem.getString("nombreReal")
-                val nuevoNombreReal = "$nombreReal->Enviado"  // Cambiar el texto como lo necesites
+                            // Poner el nuevo valor en "NOMBREREAL"
+                            selectedItem.put("nombreReal", nuevoNombreReal)
 
-                // Poner el nuevo valor en "NOMBREREAL"
-                selectedItem.put("nombreReal", nuevoNombreReal)
+                            // Convertir el JSONArray modificado de nuevo a una cadena
+                            val newJsonString = jsonArray.toString()
 
-                // Convertir el JSONArray modificado de nuevo a una cadena
-                val newJsonString = jsonArray.toString()
+                            // Guardar el nuevo JSON en SharedPreferences
+                            val editor = preferencesCajaChica.edit()
+                            editor.putString("LIST_SHEET", newJsonString)
+                            editor.apply()
+                            val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
+                            binding.btnAdd.isEnabled = false
+                            Log.i("BladiDev", Sheets.toString())
+                            recuperarPreferencias()
+                            adapterSpinner.notifyDataSetChanged()
+                            saveRecent(
+                                recent(
+                                    icon = R.drawable.liquidacion,
+                                    titulo = "Liquidacion -> Agregado",
+                                    detalle = "Se agrego la liquidacion ${liquidacion.concepto}",
+                                    fecha = obtenerFechaActual()
+                                )
+                            )
+                        } catch (e: Exception) {
+                            Log.i("BladiDev", "ERROR " + e.message.toString())
+                        }
 
-                // Guardar el nuevo JSON en SharedPreferences
-                val editor = preferencesCajaChica.edit()
-                editor.putString("LIST_SHEET", newJsonString)
-                editor.apply()
-                val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
-                binding.btnAdd.isEnabled = false
-                Log.i("BladiDev", Sheets.toString())
-                recuperarPreferencias()
-                adapterSpinner.notifyDataSetChanged()
-            } catch (e: Exception) {
-                Log.i("BladiDev", "ERROR " + e.message.toString())
+                    }
+                }
             }
-
         })
         liquidacionViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Enviando...")
@@ -527,8 +622,14 @@ class RegisterFragment : Fragment(), DialogListener {
         lmanager = LinearLayoutManager(context)
         adapter = RegisterAdapter(
             listaRecibida = listRegister,
-            onClickListener = { itemRegister,action,position -> onItemSelected(itemRegister,action,position) },
-            onClickDeselect = { MostrarActionIcon(false) })
+            onClickListener = { itemRegister, action, position ->
+                onItemSelected(
+                    itemRegister,
+                    action,
+                    position
+                )
+            },
+            onClickDeselect = { })
         binding.RVRegistros.layoutManager = lmanager
         binding.RVRegistros.adapter = adapter
     }
@@ -554,22 +655,13 @@ class RegisterFragment : Fragment(), DialogListener {
     }
 
     private fun onItemSelected(itemRegister: register, action: Int, position: Int) {
+        adapter.limpiarSeleccion()
         when (action) {
             1 -> onItemUpdate(itemRegister, position)
             2 -> onItemDelete(itemRegister, position)
         }
     }
-    private fun MostrarActionIcon(mostrar: Boolean) {
-//        if (mostrar) {
-//            binding.btnAction2.visibility = View.VISIBLE
-//            binding.imgAdd.setImageResource(R.drawable.ic_delete)
-//            binding.imgAdd.setColorFilter(Color.parseColor("#FFFFFF"))
-//        } else {
-//            binding.btnAction2.visibility = View.INVISIBLE
-//            binding.imgAdd.setImageResource(R.drawable.add_file)
-//            binding.imgAdd.clearColorFilter()
-//        }
-    }
+
 
     private fun abrirDialog(register: register? = null) {
         val dialogFragment = AddRegisterFragment()
@@ -704,5 +796,44 @@ class RegisterFragment : Fragment(), DialogListener {
         val formato =
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())  // Define el formato deseado
         return formato.format(fechaActual.time)  // Formatea la fecha y la devuelve como cadena
+    }
+
+    private fun saveRecent(recent: recent) {
+        val editor = preferencesCajaChica.edit()
+
+        val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
+
+        val recentList = mutableListOf<String>()
+
+        // Convertir la lista actual de JSON a objetos Recent (si existe)
+        recentListJson?.let {
+            recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
+        }
+
+        // Agregar el nuevo objeto a la lista y limitar a 10 elementos
+        recentList.add(0, Gson().toJson(recent))
+        if (recentList.size > 10) {
+            recentList.removeAt(recentList.size - 1)
+        }
+
+        // Convertir la lista actualizada a JSON y guardarla
+        editor.putString("RECENT_DATA", Gson().toJson(recentList))
+        editor.apply()
+    }
+
+    private fun getRecentList(recentList: String?): List<recent> {
+        return recentList?.let {
+            Gson().fromJson(it, Array<String>::class.java)
+                .map { json -> Gson().fromJson(json, recent::class.java) }.toList()
+        } ?: emptyList()
+    }
+
+    private fun showMessageError(error: String) {
+        DialogUtils.dialogMessageResponseError(
+            requireContext(),
+            icon = R.drawable.emoji_surprise,
+            message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
+            codigo = "Codigo: $error",
+        )
     }
 }

@@ -15,8 +15,8 @@ class ProgressCircleView @JvmOverloads constructor(
 
     private var progress = 0f // El progreso actual, entre 0 y 100
     private var strokeWidth = 20f // El grosor del círculo
-    private var circleColor = Color.parseColor("#FF4081") // Color del círculo
-    private var backgroundColor = Color.parseColor("#E0E0E0") // Color del fondo del círculo
+    private var circleColor = Color.parseColor("#87CEEB") // Color del círculo
+    private var backgroundColor = Color.parseColor("#404040") // Color del fondo del círculo
 
     private val paint = Paint()
     private val rectF = RectF()
@@ -68,5 +68,10 @@ class ProgressCircleView @JvmOverloads constructor(
             setProgress(value) // Actualizamos el progreso con el valor animado
         }
         animator.start() // Iniciamos la animación
+    }
+
+    fun setColor(color: Int) {
+        circleColor = color
+        invalidate() // Redibuja la vista para reflejar el cambio de color
     }
 }

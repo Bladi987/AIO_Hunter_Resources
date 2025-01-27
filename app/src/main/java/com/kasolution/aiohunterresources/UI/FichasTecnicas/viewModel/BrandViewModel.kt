@@ -11,31 +11,56 @@ import kotlinx.coroutines.launch
 
 
 class BrandViewModel : ViewModel() {
-    val BrandModel = MutableLiveData<ArrayList<Brand>>()
+    var isDataLoaded = false
+    val exception = MutableLiveData<String>()
+    val BrandModel = MutableLiveData<Result<ArrayList<Brand>>>()
     val isloading = MutableLiveData<Boolean>()
     var getBrandUseCase = getBrandUseCase()
 
     fun onCreate(urlId: urlId) {
-        if (BrandModel.value.isNullOrEmpty()) {
+        if (!isDataLoaded) {
             viewModelScope.launch {
-                isloading.postValue(true)
-                val response = getBrandUseCase(urlId)
-                if (response.isNotEmpty()) {
-                    BrandModel.postValue(response)
+                try {
+                    isloading.postValue(true)
+                    val response = getBrandUseCase(urlId)
+                    if(response.isSuccess){
+                        response.getOrNull()?.let { lista ->
+                            BrandModel.postValue(Result.success(lista))
+                            isDataLoaded = true
+                        }
+                    }else{
+                        response.exceptionOrNull()?.let { ex ->
+                            BrandModel.postValue(Result.failure(ex))
+                        }
+                    }
+                }catch (e: Exception){
+                    exception.postValue(e.message)
+                }finally {
+                    isloading.postValue(false)
                 }
-                isloading.postValue(false)
             }
         }
     }
 
     fun onRefresh(urlId: urlId) {
         viewModelScope.launch {
-            isloading.postValue(true)
-            val response = getBrandUseCase(urlId)
-            if (response.isNotEmpty()) {
-                BrandModel.postValue(response)
+            try {
+                isloading.postValue(true)
+                val response = getBrandUseCase(urlId)
+                if(response.isSuccess){
+                    response.getOrNull()?.let { lista ->
+                        BrandModel.postValue(Result.success(lista))
+                    }
+                }else{
+                    response.exceptionOrNull()?.let { ex ->
+                        BrandModel.postValue(Result.failure(ex))
+                    }
+                }
+            }catch (e: Exception){
+                exception.postValue(e.message)
+            }finally {
+                isloading.postValue(false)
             }
-            isloading.postValue(false)
         }
     }
 }
