@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -94,6 +95,10 @@ class FileDetailsFragment : Fragment() {
         }
         binding.btnAction2.setOnClickListener() {
             dialogFile(fileDetail.nombre)
+        }
+        binding.btnActualizar.setOnClickListener() {
+            binding.llNoData.visibility = View.GONE
+            fileDetailsViewModel.onRefresh(urlId!!)
         }
         fileDetailsViewModel.onCreate(urlId!!)
         fileDetailsViewModel.FileDetailsModel.observe(viewLifecycleOwner, Observer { result ->
@@ -216,7 +221,18 @@ class FileDetailsFragment : Fragment() {
         fileDetailsViewModel.isloading.observe(viewLifecycleOwner, Observer { cargando ->
             adapter.limpiarSeleccion()
             if (cargando) DialogProgress.show(requireContext(), messageLoading)
-            else DialogProgress.dismiss()
+            else {
+                DialogProgress.dismiss()
+                if (listFileDetails.isEmpty()) {
+                    binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                    binding.lottieAnimationView.playAnimation()
+                    binding.llNoData.visibility = View.VISIBLE
+                    binding.swipeRefresh.visibility = View.GONE
+                } else {
+                    binding.llNoData.visibility = View.GONE
+                    binding.swipeRefresh.visibility = View.VISIBLE
+                }
+            }
             MostrarActionIcon(false)
         })
         fileDetailsViewModel.exception.observe(viewLifecycleOwner) { error ->
@@ -342,7 +358,8 @@ class FileDetailsFragment : Fragment() {
                 val fragmentManager = requireActivity().supportFragmentManager
                 val fragmentTransaction = fragmentManager.beginTransaction()
                 fragmentTransaction.replace(R.id.contenedorCajaChica, registerFragment)
-                fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+                fragmentTransaction.addToBackStack("FD") // Para agregar el fragmento a la pila de retroceso
+                fragmentManager.popBackStack("H", FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 fragmentTransaction.commit()
             }
 
@@ -433,22 +450,17 @@ class FileDetailsFragment : Fragment() {
 
     private fun saveRecent(recent: recent) {
         val editor = preferencesCajaChica.edit()
-
         val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
-
         val recentList = mutableListOf<String>()
-
         // Convertir la lista actual de JSON a objetos Recent (si existe)
         recentListJson?.let {
             recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
         }
-
         // Agregar el nuevo objeto a la lista y limitar a 10 elementos
         recentList.add(0, Gson().toJson(recent))
-        if (recentList.size > 10) {
+        if (recentList.size > 20) {
             recentList.removeAt(recentList.size - 1)
         }
-
         // Convertir la lista actualizada a JSON y guardarla
         editor.putString("RECENT_DATA", Gson().toJson(recentList))
         editor.apply()

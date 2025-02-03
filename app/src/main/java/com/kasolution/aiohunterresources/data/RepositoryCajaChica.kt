@@ -100,6 +100,11 @@ class RepositoryCajaChica() {
         val response = api!!.deleteLiquidacion(liquidacion)
         return response
     }
+    suspend fun getDownloadLink(urlid: urlId): Result<JsonElement?> {
+        procesarUrl(urlid)
+        val response = api!!.getDownloadLink()
+        return response
+    }
     suspend fun getResumenGastos(urlId: urlId): Result<JsonElement?> {
         procesarUrl(urlId)
         val response = api!!.getResumenGastos()

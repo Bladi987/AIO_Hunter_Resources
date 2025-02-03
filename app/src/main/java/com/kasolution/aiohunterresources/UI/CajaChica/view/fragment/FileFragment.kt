@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -47,6 +48,7 @@ class FileFragment : Fragment() {
     private var messageLoading = "Recuperando..."
     private var nameTecnico: String? = null
     private var insert = false
+    private var loaded = false
     private lateinit var preferencesCajaChica: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onCreateView(
@@ -61,6 +63,7 @@ class FileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         preferencesCajaChica =
             requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
         preferencesUser =
@@ -92,11 +95,28 @@ class FileFragment : Fragment() {
         binding.btnAction2.setOnClickListener() {
             dialogFile(files.nombre)
         }
+        binding.btnActualizar.setOnClickListener() {
+            binding.llNoData.visibility = View.GONE
+            fileViewModel.onRefresh(urlId!!)
+        }
         fileViewModel.onCreate(urlId!!)
         fileViewModel.isloading.observe(viewLifecycleOwner, Observer {
             adapter.limpiarSeleccion()
             if (it) DialogProgress.show(requireContext(), "Recuperando...")
-            else DialogProgress.dismiss()
+            else {
+                DialogProgress.dismiss()
+                if (listFile.isEmpty()) {
+                    if (!loaded) {
+                        binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                        binding.lottieAnimationView.playAnimation()
+                        binding.llNoData.visibility = View.VISIBLE
+                        binding.swipeRefresh.visibility = View.GONE
+                    }
+                } else {
+                    binding.llNoData.visibility = View.GONE
+                    binding.swipeRefresh.visibility = View.VISIBLE
+                }
+            }
         })
         fileViewModel.exception.observe(viewLifecycleOwner) { error ->
             showMessageError(error)
@@ -278,7 +298,8 @@ class FileFragment : Fragment() {
                 val fragmentManager = requireActivity().supportFragmentManager
                 val fragmentTransaction = fragmentManager.beginTransaction()
                 fragmentTransaction.replace(R.id.contenedorCajaChica, detailsFragment)
-                fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+                fragmentTransaction.addToBackStack("F") // Para agregar el fragmento a la pila de retroceso
+                loaded=true
                 fragmentTransaction.commit()
             }
 
@@ -466,22 +487,17 @@ class FileFragment : Fragment() {
 
     private fun saveRecent(recent: recent) {
         val editor = preferencesCajaChica.edit()
-
         val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
-
         val recentList = mutableListOf<String>()
-
         // Convertir la lista actual de JSON a objetos Recent (si existe)
         recentListJson?.let {
             recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
         }
-
         // Agregar el nuevo objeto a la lista y limitar a 10 elementos
         recentList.add(0, Gson().toJson(recent))
-        if (recentList.size > 10) {
+        if (recentList.size > 20) {
             recentList.removeAt(recentList.size - 1)
         }
-
         // Convertir la lista actualizada a JSON y guardarla
         editor.putString("RECENT_DATA", Gson().toJson(recentList))
         editor.apply()

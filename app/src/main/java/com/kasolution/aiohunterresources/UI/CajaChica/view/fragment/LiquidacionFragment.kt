@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,6 +39,8 @@ class LiquidacionFragment : Fragment() {
     private var urlId: urlId? = null
     var saldoCajaChica = 0.00
     private var messageLoading = "Recuperando..."
+    private var idScript = ""
+    private var sheetName=""
     private lateinit var preferencesCajaChica: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,7 +67,7 @@ class LiquidacionFragment : Fragment() {
         LiquidacionViewModel.getLiquidacion(urlId!!)
         LiquidacionViewModel.isloading.observe(viewLifecycleOwner, Observer {
             adapter.limpiarSeleccion()
-            if (it) DialogProgress.show(requireContext(), "Recuperando...")
+            if (it) DialogProgress.show(requireContext(), messageLoading)
             else {
                 DialogProgress.dismiss()
                 if (lista.isEmpty()) {
@@ -154,6 +157,41 @@ class LiquidacionFragment : Fragment() {
             }
 
         }
+        LiquidacionViewModel.getdownloadLink.observe(viewLifecycleOwner) { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val link = respuesta.getOrNull()
+                    link?.let {
+                        messageLoading="Descargando excel"
+                        LiquidacionViewModel.downloadExcel(it, sheetName)
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        }
+        LiquidacionViewModel.downloadExcel.observe(viewLifecycleOwner) { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
+                    data?.let { mensaje ->
+                        DialogUtils.dialogMessageResponse(
+                            requireContext(),
+                            "Archivo descargado correctamente en: $mensaje",
+                            null
+                        )
+                    }
+                } else {
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        }
         LiquidacionViewModel.exception.observe(viewLifecycleOwner) { error ->
             showMessageError(error)
         }
@@ -212,7 +250,7 @@ class LiquidacionFragment : Fragment() {
     }
 
     private fun recuperarPreferencias() {
-        val idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString()
+        idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString()
         val idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", "").toString()
         saldoCajaChica = preferencesCajaChica.getString("SALDODISPONIBLE", "0.00")!!.toDouble()
         urlId = urlId(
@@ -244,30 +282,49 @@ class LiquidacionFragment : Fragment() {
         when (estado) {
             1 -> binding.btnConfirmPay.visibility = View.VISIBLE
             2 -> binding.btnConfirmPay.visibility = View.INVISIBLE
+            3 -> downloadExcel(liquidacion)
         }
-        MostrarActionIcon(true)
-        itemPosition = position
-        itemLiquidacion = liquidacion
+        if (estado != 3) {
+            MostrarActionIcon(true)
+            itemPosition = position
+            itemLiquidacion = liquidacion
+        }
+    }
+
+    private fun downloadExcel(liquidacion: liquidacion) {
+        DialogUtils.dialogQuestion(
+            requireContext(),
+            "Aviso",
+            "Desea descargar archivo excel de ${liquidacion.concepto}?",
+            positiveButtontext = "Si",
+            negativeButtontext = "no",
+            onPositiveClick = {
+                messageLoading ="Solicitando..."
+                sheetName=liquidacion.concepto
+                val newUrl = urlId(
+                    idScript,
+                    "",
+                    liquidacion.archivo,
+                    liquidacion.concepto + "->" + liquidacion.estado
+                )
+                LiquidacionViewModel.getDownloadLinkExcel(newUrl)
+            })
+
     }
 
     private fun saveRecent(recent: recent) {
         val editor = preferencesCajaChica.edit()
-
         val recentListJson = preferencesCajaChica.getString("RECENT_DATA", null)
-
         val recentList = mutableListOf<String>()
-
         // Convertir la lista actual de JSON a objetos Recent (si existe)
         recentListJson?.let {
             recentList.addAll(Gson().fromJson(it, Array<String>::class.java).toList())
         }
-
         // Agregar el nuevo objeto a la lista y limitar a 10 elementos
         recentList.add(0, Gson().toJson(recent))
-        if (recentList.size > 10) {
+        if (recentList.size > 20) {
             recentList.removeAt(recentList.size - 1)
         }
-
         // Convertir la lista actualizada a JSON y guardarla
         editor.putString("RECENT_DATA", Gson().toJson(recentList))
         editor.apply()

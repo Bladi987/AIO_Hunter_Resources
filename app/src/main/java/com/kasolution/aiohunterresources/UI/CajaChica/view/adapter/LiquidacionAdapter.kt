@@ -65,22 +65,28 @@ class LiquidacionAdapter(
             //binding.viewColor.setTextColor(tintColorEstate)
             binding.lblFecha.text = lista.fecha
             binding.lblConcepto.text = lista.concepto
-            binding.lblMonto.text = String.format(Locale.getDefault() ,"S/ %.2f", lista.monto.toDoubleOrNull() ?: 0.0)
+            binding.lblMonto.text = String.format(
+                Locale.getDefault(),
+                "S/ %.2f",
+                lista.monto.replace("[^\\d.]".toRegex(), "").toDoubleOrNull() ?: 0.0
+            )
             binding.lblEstado.text = lista.estado
             itemView.setOnClickListener() {
                 limpiarSeleccion()
             }
             itemView.setOnLongClickListener() {
                 // Seleccionar el elemento
-                if(selectedItemPosition!=null) limpiarSeleccion()else{
+                if (selectedItemPosition != null) limpiarSeleccion() else {
                     selectedItemPosition = adapterPosition
                     notifyDataSetChanged()
-                    val estado=if (lista.estado=="Enviado") 1 else 2
+                    val estado = if (lista.estado == "Enviado") 1 else 2
                     onclickListener(lista, estado, position)
                 }
                 true
             }
-
+            binding.btnDownload.setOnClickListener() {
+                onclickListener(lista, 3, position)
+            }
         }
     }
 

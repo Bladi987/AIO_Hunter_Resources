@@ -9,5 +9,7 @@ data class liquidacion(
     @SerializedName("ARCHIVO") val archivo: String,
     @SerializedName("CONCEPTO") val concepto: String,
     @SerializedName("MONTO") val monto: String,
-    @SerializedName("ESTADO") val estado: String
+    @SerializedName("ESTADO") val estado: String,
+    @SerializedName("DOWNLOADLINK") val downloadLink: String,
+    @SerializedName("DOWNLOAD") val download: Boolean
 ): Serializable

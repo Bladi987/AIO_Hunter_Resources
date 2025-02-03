@@ -6,4 +6,12 @@
         <attr name="bottomRightRadius" format="dimension"/>
         <attr name="bottomLeftRadius" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="CustomSwitch">
+        <attr name="indicatorDrawable" format="reference"/>   <!-- Fondo del selector -->
+        <attr name="backgroundDrawable" format="reference"/>  <!-- Fondo del switch -->
+        <attr name="textOption1" format="string"/>             <!-- Texto de la opción 1 -->
+        <attr name="textOption2" format="string"/>             <!-- Texto de la opción 2 -->
+        <attr name="textColor" format="color"/>
+    </declare-styleable>
 </resources>

@@ -27,7 +27,7 @@ class getLiquidacionUseCase() {
                             val concepto = jsonObject.get("CONCEPTO").asString
                             val monto = jsonObject.get("MONTO").asString
                             val estado = jsonObject.get("ESTADO").asString
-                            lista.add(liquidacion(id, fecha, archivo, concepto, monto, estado))
+                            lista.add(liquidacion(id, fecha, archivo, concepto, monto, estado,"",false))
                         }
                     }
                 }

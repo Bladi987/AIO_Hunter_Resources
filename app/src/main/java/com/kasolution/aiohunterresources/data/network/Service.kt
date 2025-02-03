@@ -249,7 +249,10 @@ class Service(urlId: urlId) {
         return safePeticion(jsonRequest)
     }
 
-    suspend fun insertFileSheet(fileDetails: fileDetails, adicional: List<String>): Result<JsonElement?> {
+    suspend fun insertFileSheet(
+        fileDetails: fileDetails,
+        adicional: List<String>
+    ): Result<JsonElement?> {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "newSheet")
         jsonRequest.addProperty("idSheet", idSheet)
@@ -261,7 +264,10 @@ class Service(urlId: urlId) {
         return safePeticion(jsonRequest)
     }
 
-    suspend fun updateFileSheet(fileDetails: fileDetails, adicional: List<String>): Result<JsonElement?> {
+    suspend fun updateFileSheet(
+        fileDetails: fileDetails,
+        adicional: List<String>
+    ): Result<JsonElement?> {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "updateSheet")
         jsonRequest.addProperty("idSheet", idSheet)
@@ -386,11 +392,16 @@ class Service(urlId: urlId) {
         return safePeticion(jsonRequest)
     }
 
-    suspend fun insertLiquidacion(liquidacion: liquidacion,adicional:ArrayList<Int>): Result<JsonElement?> {
+    suspend fun insertLiquidacion(
+        liquidacion: liquidacion,
+        adicional: ArrayList<Int>
+    ): Result<JsonElement?> {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "insertLiquidacion")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "LIQUIDACIONES")
+        jsonRequest.addProperty("download", liquidacion.download.toString())
+
         val rowArray = JsonArray()
         rowArray.add(liquidacion.fecha)
         rowArray.add(liquidacion.archivo)
@@ -401,7 +412,7 @@ class Service(urlId: urlId) {
         rowArray.add(adicional[1])
         rowArray.add(adicional[2])
         jsonRequest.add("rows", rowArray)
-
+        Log.i("BladiDev", jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
 
@@ -433,6 +444,14 @@ class Service(urlId: urlId) {
         rowArray.add(liquidacion.archivo)
         rowArray.add(liquidacion.concepto)
         jsonRequest.add("rows", rowArray)
+
+        return safePeticion(jsonRequest)
+    }
+    suspend fun getDownloadLink(): Result<JsonElement?> {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "getLinkDownload")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", sheetName)
 
         return safePeticion(jsonRequest)
     }

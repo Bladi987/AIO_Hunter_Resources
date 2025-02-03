@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.UI.CajaChica.view.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,6 @@ class RecentAdapter(
             lista: recent,
             onClickListener: (recent, Int, Int) -> Unit
         ) {
-
             binding.ivLogo.setImageResource(lista.icon)
             binding.lblTitulo.text = lista.titulo
             binding.lblDetalle.text = lista.detalle

@@ -80,7 +80,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_edit"
-                            app:tint="@color/boton_verde" />
+                            app:tint="@color/white" />
                     </FrameLayout>
 
                     <FrameLayout
@@ -96,7 +96,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_delete"
-                            app:tint="#BD5858" />
+                            app:tint="@color/white" />
                     </FrameLayout>
                 </LinearLayout>
 

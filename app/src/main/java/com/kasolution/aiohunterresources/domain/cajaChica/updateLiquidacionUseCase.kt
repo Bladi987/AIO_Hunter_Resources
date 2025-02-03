@@ -22,10 +22,12 @@ class updateLiquidacionUseCase() {
                         data[2].asString,
                         data[3].asString,
                         data[4].asString,
-                        data[5].asString
+                        data[5].asString,
+                        "",
+                        false
                     )
                 } else {
-                    dataliquidacion = liquidacion("", "", "", "", "", "")
+                    dataliquidacion = liquidacion("", "", "", "", "", "","",false)
                 }
                 Result.success(dataliquidacion)
             }

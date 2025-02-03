@@ -16,7 +16,7 @@ class ProgressCircleView @JvmOverloads constructor(
     private var progress = 0f // El progreso actual, entre 0 y 100
     private var strokeWidth = 20f // El grosor del círculo
     private var circleColor = Color.parseColor("#87CEEB") // Color del círculo
-    private var backgroundColor = Color.parseColor("#404040") // Color del fondo del círculo
+    private var backgroundColor = Color.parseColor("#34495E") // Color del fondo del círculo
 
     private val paint = Paint()
     private val rectF = RectF()

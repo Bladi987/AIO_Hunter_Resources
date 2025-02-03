@@ -234,6 +234,39 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="5dp"
+            android:layout_marginVertical="10dp"
+            android:background="#D3D3D3" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Opcional:"
+                android:textColor="@color/text_color2"
+                android:textStyle="bold" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="0.9">
+
+                <CheckBox
+                    android:id="@+id/cbdownload"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_color2"
+                    android:text="Descargar archivo Excel" />
+            </FrameLayout>
+        </LinearLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
