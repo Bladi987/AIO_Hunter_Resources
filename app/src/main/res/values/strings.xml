@@ -1,7 +1,9 @@
 <resources>
-    <string name="app_name">AIO Hunter Resources</string>
+    <string name="app_name">Hunter Hub</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="idScript">AKfycbwiMyS57P_KGB9HQj8m9nXjpn0ap3Ik00bMIVC4O5J8tg6v5GK_rSEUrh8bNQenrUs</string>
+    <string name="idSheet">1tT1q8ltoJNeAnMshA-JMYRgZb7Fkslj4ZxMYcMAsNR4</string>
 
     <string name="ingrese_usuario">Ingrese Usuario</string>
     <string name="ingrese_password">Ingrese Contraseña</string>
@@ -11,7 +13,7 @@
     <string name="nombre">Nombre</string>
     <string name="ingrese_apellidos">Ingrese Apellidos</string>
     <string name="nuevo_registro">Nuevo Registro</string>
-    <string name="kgsolution">KGSolution</string>
+    <string name="kgsolution">KGSolutions</string>
     <string name="Pendientes_Aprobación">Pendientes de Aprobación</string>
     <string name="archivos">Archivos</string>
     <string name="registros">Registrar</string>
@@ -39,5 +41,10 @@
     <string name="MontoCajaChica">Caja Chica</string>
     <string name="IngreseNombreHoja">Nueva hoja</string>
     <string name="mensajeAdvertencia">Esta Creando un documento vacio se recomienda agregar los siguientes datos:\n- Nombre de la hoja\n- Destino\n- fecha o rango de fechas</string>
+    <string name="ControlEquipos">Control de equipos</string>
+    <string name="AddFunction">Agregar Funcion</string>
+    <string name="Contact">Contáctenos</string>
+    <string name="send">Enviar</string>
+    <string name="About_Us">Acerca de</string>
 
 </resources>

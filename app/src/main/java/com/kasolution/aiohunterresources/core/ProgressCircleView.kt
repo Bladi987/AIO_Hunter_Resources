@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import com.kasolution.aiohunterresources.R
 
 class ProgressCircleView @JvmOverloads constructor(
     context: Context,
@@ -18,12 +19,20 @@ class ProgressCircleView @JvmOverloads constructor(
     private var circleColor = Color.parseColor("#87CEEB") // Color del círculo
     private var backgroundColor = Color.parseColor("#34495E") // Color del fondo del círculo
 
-    private val paint = Paint()
+    //    private val paint = Paint()
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND // Extremos redondeados
+    }
     private val rectF = RectF()
 
     init {
-        paint.isAntiAlias = true
-        paint.style = Paint.Style.STROKE
+        // Obtener atributos personalizados (opcional)
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ProgressCircleView)
+        strokeWidth = typedArray.getDimensionPixelSize(R.styleable.ProgressCircleView_strokeWidth, strokeWidth.toInt()).toFloat()
+        circleColor = typedArray.getColor(R.styleable.ProgressCircleView_circleColor, circleColor)
+        backgroundColor = typedArray.getColor(R.styleable.ProgressCircleView_backgroundColor, backgroundColor)
+        typedArray.recycle()
     }
 
     override fun onDraw(canvas: Canvas) {

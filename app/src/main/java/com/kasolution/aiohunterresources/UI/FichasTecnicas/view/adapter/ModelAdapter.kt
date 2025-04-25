@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.UI.FichasTecnicas.view.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,8 +51,7 @@ class ModelAdapter(
             lista: VehicleModel,
             onClickListener: (VehicleModel, Int,Int) -> Unit
         ) {
-            if (tipoUsuario == "Invitado" || tipoUsuario=="Colaborador") binding.ivOption.isEnabled = false
-            itemView.setOnClickListener { onClickListener(lista, 1,position) }
+            binding.ivOption.isEnabled = tipoUsuario !in setOf("Invitado", "Colaborador") // Deshabilitar el botón si el usuario es invitado o colaborador
             binding.lblModel.text = lista.modelo
             val valor = lista.basica.split(",")
             if (valor[0] == "1") binding.ivPositivo.setColorFilter(color)
@@ -59,9 +59,10 @@ class ModelAdapter(
             if (valor[2] == "1") binding.ivIgn.setColorFilter(color)
             if (valor[3] == "1") binding.ivCorte.setColorFilter(color)
             if (valor[4] == "1") binding.ivPestillos.setColorFilter(color)
+            itemView.setOnClickListener { onClickListener(lista, 1,position) }
             binding.ivOption.setOnClickListener() {
                 PopupMenuHelper.configureAndShowPopupMenu(
-                    binding.ivOption.context,
+                    itemView.context,
                     it,
                     MenuList(tipoUsuario),
                     object : PopupMenuHelper.PopupMenuItemClickListener {

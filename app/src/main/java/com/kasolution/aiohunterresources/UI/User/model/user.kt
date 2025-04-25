@@ -9,5 +9,6 @@ data class user(
     @SerializedName("LASTNAME")val lastName: String,
     @SerializedName("USER")val user: String,
     @SerializedName("PASSWORD") var password: String,
-    @SerializedName("TIPO")val tipo: String
+    @SerializedName("TIPO")val tipo: String,
+    @SerializedName("KEYS")var keys: String
 ):Serializable

@@ -47,7 +47,7 @@ class AddModelFragment : DialogFragment() {
     private var modelos: VehicleModel? = null
     private var modelo: VehicleModel? = null
     var tecnico = ""
-    private lateinit var preferencesAccess: SharedPreferences
+    private lateinit var preferencesUser: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,7 +76,7 @@ class AddModelFragment : DialogFragment() {
                 cargarImagenurl(modelo!!.imagen)
             }
         }
-        preferencesAccess = requireContext().getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
+        preferencesUser = requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
         calcularTamano()
         cargarIcon()
         if (modelos != null) cargarModel()
@@ -279,8 +279,8 @@ class AddModelFragment : DialogFragment() {
     }
 
     fun recuperarPreferencias() {
-        val nameUser=preferencesAccess.getString("NAME", "")
-        val lastName=preferencesAccess.getString("LASTNAME", "")
+        val nameUser=preferencesUser.getString("NAME", "")
+        val lastName=preferencesUser.getString("LASTNAME", "")
         tecnico ="$nameUser $lastName"
     }
 }

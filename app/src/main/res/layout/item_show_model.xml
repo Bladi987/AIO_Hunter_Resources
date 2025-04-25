@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="10dp"
     android:layout_marginVertical="5dp"
+    android:backgroundTint="@color/white"
     android:foreground="?android:attr/selectableItemBackground"
     android:padding="5dp"
     app:cardCornerRadius="8dp"
@@ -78,6 +79,7 @@
                 android:layout_marginBottom="10dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:text="Mostrar comentarios >>>"
+                android:textColor="@color/text_color2"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -115,6 +117,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
+                    android:textColor="@color/text_color"
                     tools:text="BH" />
             </FrameLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -134,7 +137,8 @@
             <TextView
                 android:id="@+id/tvComent"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_color2"/>
         </LinearLayout>
 
         <TextView

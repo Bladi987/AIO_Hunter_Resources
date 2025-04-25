@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".UI.Settings.view.fragment.AboutFragment">
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/About_Us"
+            android:textSize="45sp"
+            android:textColor="@color/text_color2"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="20sp"
+            android:textColor="@color/text_color2"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_color2"
+            tools:text="1.0.1" />
+    </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:cardBackgroundColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_margin="8dp"
+            android:textColor="@color/text_color2"
+            android:text="Hunter Hub es una innovadora plataforma diseñada para centralizar y facilitar el acceso a todos los recursos esenciales que necesitas. Nuestra aplicación busca simplificar tu flujo de trabajo y optimizar tu productividad al reunir en un solo lugar manejo de caja chica, tener a la mano cierta información técnica, manuales, control de equipos, entre otras funciones que se irán agregando.
+Nuestra Misión principal es empoderarte al proporcionarte un acceso rápido, intuitivo y organizado a la información y las herramientas que impulsan tu éxito. Nos esforzamos por ser tu aliado confiable en la gestión de recursos, permitiéndote enfocarte en lo que realmente importa.
+Creemos en la eficiencia, la accesibilidad y la mejora continua. Estamos comprometidos a evolucionar nuestra plataforma para satisfacer tus necesidades cambiantes y ofrecerte una experiencia cada vez más valiosa.
+Gracias por ser parte de la comunidad de Hunter Hub. ¡Estamos aquí para ayudarte a encontrar lo que necesitas, cuando lo necesitas!
+" />
+    </androidx.cardview.widget.CardView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:src="@drawable/icon_hunter_hub"
+            app:tint="@color/text_color2" />
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

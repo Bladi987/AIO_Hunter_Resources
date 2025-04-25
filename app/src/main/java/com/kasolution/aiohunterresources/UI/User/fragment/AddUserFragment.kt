@@ -78,7 +78,8 @@ class AddUserFragment : DialogFragment() {
                                     lastName = binding.etApellidos.text.toString(),
                                     user = binding.etUser.text.toString(),
                                     password = "",
-                                    tipo = binding.spTipo.selectedItem.toString()
+                                    tipo = binding.spTipo.selectedItem.toString(),
+                                    ""
                                 )
                             )
 
@@ -92,7 +93,8 @@ class AddUserFragment : DialogFragment() {
                                     lastName = binding.etApellidos.text.toString(),
                                     user = binding.etUser.text.toString(),
                                     password = "",
-                                    tipo = binding.spTipo.selectedItem.toString()
+                                    tipo = binding.spTipo.selectedItem.toString(),
+                                    ""
                                 )
                             )
                             dismiss()

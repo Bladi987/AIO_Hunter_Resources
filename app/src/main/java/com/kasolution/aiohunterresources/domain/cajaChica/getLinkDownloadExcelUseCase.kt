@@ -9,6 +9,7 @@ class getLinkDownloadExcelUseCase() {
     private val repository = RepositoryCajaChica()
     suspend operator fun invoke(urlid: urlId): Result<String> {
         lateinit var downloadLlink: String
+
         val responseResult = repository.getDownloadLink(urlid)
         return when (responseResult.isSuccess) {
             true -> {

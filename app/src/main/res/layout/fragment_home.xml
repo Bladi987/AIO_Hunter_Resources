@@ -24,15 +24,17 @@
             android:layout_marginVertical="15dp"
             android:paddingBottom="50dp">
 
-
             <com.kasolution.aiohunterresources.core.ProgressCircleView
                 android:id="@+id/progressCircleView"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_centerInParent="true"
+                app:backgroundColor="@color/colorPrimary"
+                app:circleColor="#057BC1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:strokeWidth="15dp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/llDatosSaldo"
@@ -70,7 +72,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:textSize="30sp"
+                    android:textSize="25sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/btnSync"
@@ -82,8 +84,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/saldo_contable"
                     android:textSize="15sp"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tvSaldo" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -107,6 +109,7 @@
             android:id="@+id/btnRegistrar"
             android:layout_width="100dp"
             android:layout_height="100dp"
+
             android:backgroundTint="@color/white"
             android:clickable="true"
             app:cardCornerRadius="8dp">
@@ -213,11 +216,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/llRecent">
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/llNoData"
             android:layout_width="match_parent"
@@ -241,6 +245,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRecent"
             android:layout_width="match_parent"

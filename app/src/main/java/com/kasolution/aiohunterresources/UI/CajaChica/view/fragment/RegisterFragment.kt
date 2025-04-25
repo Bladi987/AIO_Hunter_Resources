@@ -239,8 +239,7 @@ class RegisterFragment : Fragment(), DialogListener {
         })
         registerViewModel.isloading.observe(viewLifecycleOwner, Observer
         {
-
-            if (it) DialogProgress.show(requireContext(), "Recuperando...")
+            if (it) DialogProgress.show(requireContext(), messageLoading)
             else {
                 DialogProgress.dismiss()
                 if (listRegister.isEmpty()) {
@@ -702,6 +701,7 @@ class RegisterFragment : Fragment(), DialogListener {
             positiveButtontext = "Si",
             negativeButtontext = "no",
             onPositiveClick = {
+                messageLoading="Eliminando..."
                 itemPosition = position
                 itemRegistro = itemRegister
                 registerViewModel.deleteRegister(urlId!!, itemRegister)
@@ -806,10 +806,12 @@ class RegisterFragment : Fragment(), DialogListener {
 
 
     override fun onDataCollected(register: register) {
+        messageLoading="Guardando..."
         registerViewModel.insertRegister(urlId!!, register)
     }
 
     override fun onDataCollectedUpdate(register: register) {
+        messageLoading="Modificando..."
         registerViewModel.updateRegister(urlId!!, register)
     }
 
@@ -862,8 +864,7 @@ class RegisterFragment : Fragment(), DialogListener {
 
     private fun obtenerFechaActual(): String {
         val fechaActual = Calendar.getInstance()  // Obtiene la fecha actual del sistema
-        val formato =
-            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())  // Define el formato deseado
+        val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return formato.format(fechaActual.time)  // Formatea la fecha y la devuelve como cadena
     }
 

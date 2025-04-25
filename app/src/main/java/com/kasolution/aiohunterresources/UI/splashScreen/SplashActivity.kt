@@ -25,9 +25,9 @@ class SplashActivity : AppCompatActivity() {
     private val SettingsViewModel: splashViewModel by viewModels()
     private lateinit var preferencesAccess: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
-    private var versionAPP=""
+    private var versionAPP = ""
 
-    private var urlId: urlId?=null
+    private var urlId: urlId? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
@@ -36,7 +36,7 @@ class SplashActivity : AppCompatActivity() {
         preferencesUser = getSharedPreferences("valueUser", Context.MODE_PRIVATE)
 
         recuperarPreferencias()
-        initialSettings()
+//        initialSettings()
 
         NetworkUtils.isInternetAvailable { isConnected ->
             if (isConnected) {
@@ -58,14 +58,14 @@ class SplashActivity : AppCompatActivity() {
             }
         }
 
-        SettingsViewModel.versionAPP.observe(this, Observer { result-> //version ->
-            result?.let { respuesta->
-                if (respuesta.isSuccess){
+        SettingsViewModel.versionAPP.observe(this, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
                     val data = respuesta.getOrNull()
-                    data?.let { version->
+                    data?.let { version ->
                         versionAPP = version
                     }
-                }else{
+                } else {
                     val exception = respuesta.exceptionOrNull()
                     exception?.let { ex ->
                         showMessageError(ex.message.toString())
@@ -90,54 +90,54 @@ class SplashActivity : AppCompatActivity() {
     }
 
 
-    private fun saveprefCheckVersionSettings(versionAPP:String) {
-        val editor = preferencesAccess.edit()
-
-        if (BuildConfig.VERSION_NAME != versionAPP) {
-            //existe una nueva version
-            DialogUtils.dialogMessage(
-                this,
-                imagen = R.drawable.new_update_lite,
-                "Existe una Version nueva, necesita ser actualizada. Solicite a su Administrador dicha actualizacion",
-                countOption = 2,
-                onPositiveClick = { finish() },
-                onNegativeClick = { finish() })
-        } else {
-            //no hay version nueva
-            if (recuperarPreferenciasUser()) {
-                val i = Intent(this, Dashboard::class.java)
-                startActivity(i)
+    private fun saveprefCheckVersionSettings(versionAPP: String) {
+        if (versionAPP.isNotEmpty()) {
+            if (BuildConfig.VERSION_NAME != versionAPP) {
+                //existe una nueva version
+                DialogUtils.dialogMessage(
+                    this,
+                    imagen = R.drawable.new_update_lite,
+                    "Existe una Version nueva, necesita ser actualizada. Solicite a su Administrador dicha actualizacion",
+                    countOption = 2,
+                    onPositiveClick = { finish() },
+                    onNegativeClick = { finish() })
             } else {
-                val i = Intent(this, AccessActivity::class.java)
-                startActivity(i)
+                //no hay version nueva
+                if (recuperarPreferenciasUser()) {
+                    val i = Intent(this, Dashboard::class.java)
+                    startActivity(i)
+                } else {
+                    val i = Intent(this, AccessActivity::class.java)
+                    startActivity(i)
+                }
+                finish()
             }
-            finish()
         }
-
     }
 
-    private fun recuperarPreferencias(){
-        val idScript = preferencesAccess.getString("IDSCRIPTACCESS", "")
-        val idSheet = preferencesAccess.getString("IDSHEETACCESS", "")
-        urlId= urlId(idScript=idScript!!,idSheet=idSheet!!,idFile="",sheetName="")
-    }
+    private fun recuperarPreferencias() {
+        val newIdScript = resources.getString(R.string.idScript)
+        val newIdSheet = resources.getString(R.string.idSheet)
+        val idScript = preferencesAccess.getString("IDSCRIPTACCESS", null)
+        val idSheet = preferencesAccess.getString("IDSHEETACCESS", null)
 
-    private fun initialSettings() {
-        if (urlId!!.idScript.isEmpty() || urlId!!.idSheet.isEmpty()) {
-            //cargamos valores por defectos
-            val editor = preferencesAccess.edit()
-            editor.apply{
-                putString("IDSCRIPTACCESS", "AKfycbx0HtvtC-_XPVLkNmTGJgB_6xTrFP0gfIKEHsqRR6ZeeTJihAbEEquQKdO2I8DC1BE")
-                putString("IDSHEETACCESS", "1tT1q8ltoJNeAnMshA-JMYRgZb7Fkslj4ZxMYcMAsNR4")
+        if ((idScript == null && idSheet == null) || (idScript != newIdScript || idSheet != newIdSheet)) {
+            preferencesAccess.edit().apply {
+                putString("IDSCRIPTACCESS", newIdScript)
+                putString("IDSHEETACCESS", newIdSheet)
             }.apply()
+            urlId = urlId(idScript = newIdScript, idSheet = newIdSheet, idFile = "", sheetName = "")
+        }else{
+            urlId = urlId(idScript = idScript, idSheet = idSheet, idFile = "", sheetName = "")
         }
     }
+
+
     private fun recuperarPreferenciasUser(): Boolean {
-        val id = preferencesUser.getString("ID", "")
-        val name = preferencesUser.getString("NAME", "")
-        val lastName = preferencesUser.getString("LASTNAME", "")
-        val tipo = preferencesUser.getString("TIPO", "")
-        return !(id.isNullOrEmpty() || name.isNullOrEmpty() || lastName.isNullOrEmpty() || tipo.isNullOrEmpty())
+        val name = preferencesUser.getString("NAME", null)
+        val lastName = preferencesUser.getString("LASTNAME", null)
+        val tipo = preferencesUser.getString("TIPO", null)
+        return !(name.isNullOrEmpty() || lastName.isNullOrEmpty() || tipo.isNullOrEmpty())
     }
 
     private fun showMessageError(error: String) {
@@ -146,6 +146,9 @@ class SplashActivity : AppCompatActivity() {
             icon = R.drawable.emoji_surprise,
             message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
             codigo = "Codigo: $error",
+            onPositiveClick = {
+                finish()
+            }
         )
     }
 }

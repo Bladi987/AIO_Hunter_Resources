@@ -55,8 +55,6 @@
                         android:layout_gravity="center"
                         android:background="@drawable/circular_ripple"
                         android:dropDownVerticalOffset="40dp"
-
-
                         android:popupBackground="@drawable/spinner_dropdown_background_rounded"
                         android:textAlignment="center" />
                 </FrameLayout>
@@ -304,7 +302,6 @@
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
-
                     </LinearLayout>
 
                     <View

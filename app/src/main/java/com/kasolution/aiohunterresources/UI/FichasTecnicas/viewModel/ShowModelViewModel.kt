@@ -1,6 +1,7 @@
 package com.kasolution.aiohunterresources.UI.FichasTecnicas.viewModel
 
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,9 +35,11 @@ class ShowModelViewModel : ViewModel() {
                     if (response.isSuccess) {
                         response.getOrNull()?.let { lista ->
                             if (lista.size == 1) {
+                                if (lista[0].id.isNotEmpty()) showVehicleModel.postValue(Result.success(lista))
+                            } else {
                                 showVehicleModel.postValue(Result.success(lista))
-                                isDataLoaded = true
                             }
+                            isDataLoaded = true
                         }
                     } else {
                         response.exceptionOrNull()?.let { ex ->
@@ -60,6 +63,8 @@ class ShowModelViewModel : ViewModel() {
                 if (response.isSuccess) {
                     response.getOrNull()?.let { lista ->
                         if (lista.size == 1) {
+                            if (lista[0].id.isNotEmpty()) showVehicleModel.postValue(Result.success(lista))
+                        } else {
                             showVehicleModel.postValue(Result.success(lista))
                         }
                     }

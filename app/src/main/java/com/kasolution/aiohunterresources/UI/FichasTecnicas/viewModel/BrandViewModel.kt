@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.UI.FichasTecnicas.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.Brand
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.domain.fichasTecnicas.getBrandUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class BrandViewModel : ViewModel() {
@@ -63,4 +66,5 @@ class BrandViewModel : ViewModel() {
             }
         }
     }
+
 }

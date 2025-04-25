@@ -137,9 +137,12 @@ class ApproveAdapter(
 
     private fun extraerIniciales(author: String): String {
         var nameinitial = ""
-        var part = author.split(" ")
-        if (part?.size!! > 1) nameinitial = part[0][0].toString() + part[1][0].toString()
-        else nameinitial = part[0][0].toString() + part[0][1].toString()
-        return nameinitial
+        if(author.isEmpty()) return nameinitial
+        else{
+            var part = author.split(" ")
+            if (part?.size!! > 1) nameinitial = part[0][0].toString() + part[1][0].toString()
+            else nameinitial = part[0][0].toString() + part[0][1].toString()
+            return nameinitial
+        }
     }
 }

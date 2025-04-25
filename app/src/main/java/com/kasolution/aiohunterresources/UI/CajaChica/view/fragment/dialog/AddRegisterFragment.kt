@@ -9,6 +9,7 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -205,18 +206,8 @@ class AddRegisterFragment : DialogFragment() {
                 else -> ""
             }
             //le damos formato al monto que recuperamos y lo colocamos en su respectivo input
-            if (montoRecuperado.startsWith("S")) binding.txtMonto.setText(
-                montoRecuperado.split(
-                    "/"
-                )[1].trim()
-            )
-            else binding.txtMonto.setText(
-                String.format(
-                    Locale.getDefault(),
-                    "%.2f",
-                    formatearMonto(montoRecuperado).toFloat()
-                ).trim()
-            )
+            if (montoRecuperado.startsWith("S")) binding.txtMonto.setText(montoRecuperado.split("/")[1].trim())
+            else binding.txtMonto.setText(String.format(Locale.getDefault(), "%.2f", formatearMonto(montoRecuperado).toFloat()).trim())
 
         }
 
@@ -399,49 +390,49 @@ class AddRegisterFragment : DialogFragment() {
                                 sustento,
                                 tipoGasto,
                                 1,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 2,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 3,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 4,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 5,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 6,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 7,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 8,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             )
                         )
                     )
@@ -463,49 +454,49 @@ class AddRegisterFragment : DialogFragment() {
                                 sustento,
                                 tipoGasto,
                                 1,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 2,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 3,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 4,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 5,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 6,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 7,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             ),
                             identificarGasto(
                                 sustento,
                                 tipoGasto,
                                 8,
-                                binding.txtMonto.text.toString().trim()
+                                formatearMonto(binding.txtMonto.text.toString().trim())
                             )
                         )
                     )
@@ -546,7 +537,8 @@ class AddRegisterFragment : DialogFragment() {
             8 -> if (!b_CS && b_tipoGasto == 4) retorno = monto
             else -> retorno = monto
         }
-        return retorno.replace(".", ",")
+        //return retorno.replace(".", ",")
+        return retorno
     }
 
     private fun formatearMonto(monto: String): String {
@@ -557,6 +549,13 @@ class AddRegisterFragment : DialogFragment() {
         }
         return Monto
     }
+//    private fun formatearMonto(monto: String): String {
+//        return monto
+//            .takeIf { it.isNotEmpty() } // Verifica que no esté vacío
+//            ?.replace("S/.", "S/ ")
+//            ?.replace(",", ".")
+//            ?: ""                        // Devuelve cadena vacía si es null o vacío
+//    }
 
     private fun selectedButton(buttonSelected: ImageView) {
         val buttons = listOf(

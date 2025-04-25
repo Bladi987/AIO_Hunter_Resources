@@ -11,7 +11,6 @@ import android.widget.TextView
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.menuOption
 
-
 object PopupMenuHelper {
     interface PopupMenuItemClickListener {
         fun onMenuItemClicked(item: menuOption)

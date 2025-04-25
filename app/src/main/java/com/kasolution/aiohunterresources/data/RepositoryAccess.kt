@@ -2,6 +2,8 @@ package com.kasolution.aiohunterresources.data
 
 import android.util.Log
 import com.google.gson.JsonElement
+import com.kasolution.aiohunterresources.UI.Settings.view.model.itemContactUs
+import com.kasolution.aiohunterresources.UI.Settings.view.model.userKey
 import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.recursoshunter.data.network.Service
@@ -44,6 +46,16 @@ class RepositoryAccess() {
     suspend fun getSettings(urlid: urlId): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.getSettings()
+        return response
+    }
+    suspend fun setKeys(urlid: urlId,user:String,userKey: userKey): Result<JsonElement?> {
+        procesarUrl(urlid)
+        val response = api!!.setKeys(user,userKey)
+        return response
+    }
+    suspend fun insertMessage(urlid: urlId,itemContactUs: itemContactUs): Result<JsonElement?> {
+        procesarUrl(urlid)
+        val response = api!!.insertMessage(itemContactUs)
         return response
     }
 

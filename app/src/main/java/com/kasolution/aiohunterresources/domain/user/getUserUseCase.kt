@@ -11,6 +11,7 @@ class getUserUseCase() {
     suspend operator fun invoke(urlid: urlId): Result<ArrayList<user>> {
         var lista = ArrayList<user>()
         val responseResult = repository.getUser(urlid)
+        Log.i("BladiDev", "responseResult: $responseResult")
         return when (responseResult.isSuccess) {
             true -> {
                 val response = responseResult.getOrNull()?.asJsonObject
@@ -24,7 +25,7 @@ class getUserUseCase() {
                         val user = jsonObject.get("USER").asString
                         val password = jsonObject.get("PASSWORD").asString
                         val tipo = jsonObject.get("TIPO").asString
-                        lista.add(user(id, name, lastName, user, password, tipo))
+                        lista.add(user(id, name, lastName, user, password, tipo,""))
                     }
                 }
                 Result.success(lista)

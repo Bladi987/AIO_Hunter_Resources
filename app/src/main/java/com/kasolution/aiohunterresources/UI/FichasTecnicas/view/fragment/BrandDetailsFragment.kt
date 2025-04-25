@@ -2,6 +2,8 @@ package com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -30,6 +32,7 @@ import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentBrandDetailsBinding
 import com.kasolution.recursoshunter.UI.view.Home.Interfaces.DialogListener
 import com.squareup.picasso.Callback
+import java.io.File
 import java.io.Serializable
 import java.lang.Exception
 
@@ -45,6 +48,7 @@ class BrandDetailsFragment : Fragment(), DialogListener {
     private var tipo = ""
     private var itemPosition = -1
     private var urlId: urlId? = null
+    private var loaded = false
     private lateinit var preferencesFichasTecnicas: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,8 +57,9 @@ class BrandDetailsFragment : Fragment(), DialogListener {
             requireContext().getSharedPreferences("valueFichasTecnicas", Context.MODE_PRIVATE)
         preferencesUser = requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
         lista = ArrayList()
-        initUI()
         recuperarPreferencias()
+        initUI()
+
         ClasificarAcceso(tipo)
         configSwipe()
 
@@ -75,7 +80,20 @@ class BrandDetailsFragment : Fragment(), DialogListener {
         cargarIcon()
         ModelViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
-            else DialogProgress.dismiss()
+            else {
+                DialogProgress.dismiss()
+                if (lista.isEmpty()) {
+                    if (!loaded) {
+                        binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                        binding.lottieAnimationView.playAnimation()
+                        binding.llNoData.visibility = View.VISIBLE
+                        binding.swipeRefresh.visibility = View.GONE
+                    }
+                }else{
+                    binding.llNoData.visibility = View.GONE
+                    binding.swipeRefresh.visibility = View.VISIBLE
+                }
+            }
         })
         ModelViewModel.exception.observe(viewLifecycleOwner) { error ->
             showMessageError(error)
@@ -86,6 +104,7 @@ class BrandDetailsFragment : Fragment(), DialogListener {
                 if (respuesta.isSuccess) {
                     val data = respuesta.getOrNull()
                     data?.let { listaModel ->
+                        Log.i("BladiDev", "FileDetailsFragment: ${ listaModel.toString() }")
                         val listModelFilter = listaModel.distinctBy { it.modelo }
                         lista.addAll(listModelFilter)
                         adapter.notifyDataSetChanged()
@@ -170,7 +189,11 @@ class BrandDetailsFragment : Fragment(), DialogListener {
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
-
+        binding.btnActualizar.setOnClickListener()
+        {
+            binding.llNoData.visibility = View.GONE
+            ModelViewModel.onRefresh(urlId!!, marcas!!.brand, "Publicado")
+        }
         binding.customSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -252,6 +275,7 @@ class BrandDetailsFragment : Fragment(), DialogListener {
                 val fragmentTransaction = fragmentManager.beginTransaction()
                 fragmentTransaction.replace(R.id.contenedor, ShowdetailsFragment)
                 fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+                loaded = true
                 fragmentTransaction.commit()
             }
 
@@ -325,17 +349,10 @@ class BrandDetailsFragment : Fragment(), DialogListener {
     }
 
     private fun cargarIcon() {
-        val customPicasso = CustomPicasso.getInstance(requireContext())
-        customPicasso.load("https://drive.google.com/uc?export=view&id=${marcas!!.icon}").into(
-            binding.imgLogo,
-            object : Callback {
-                override fun onSuccess() {
-                    binding.imgLogo.animate().alpha(1f).setDuration(300)
-                }
-
-                override fun onError(e: Exception?) {
-                }
-            })
+        val cachedImage = loadImageFromCache(requireContext(), "https://drive.google.com/uc?export=view&id=${marcas!!.icon}")
+        if (cachedImage != null) {
+            binding.imgLogo.setImageBitmap(cachedImage)
+        }
     }
 
     fun recuperarPreferencias() {
@@ -428,8 +445,16 @@ class BrandDetailsFragment : Fragment(), DialogListener {
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            adapter.limpiar()
-            ModelViewModel.onRefresh(urlId!!, marcas!!.brand, "Publicado")
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    adapter.limpiar()
+                    ModelViewModel.onRefresh(urlId!!, marcas!!.brand, "Publicado")
+                })
         }
     }
 
@@ -440,5 +465,16 @@ class BrandDetailsFragment : Fragment(), DialogListener {
             message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
             codigo = "Codigo: $error",
         )
+    }
+    fun loadImageFromCache(context: Context, imageUrl: String): Bitmap? {
+        val fileName = imageUrl.split("/").last()
+        val cacheDir = context.cacheDir
+        val file = File(cacheDir, fileName)
+
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            null
+        }
     }
 }

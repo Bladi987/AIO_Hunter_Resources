@@ -54,26 +54,8 @@ class FileAdapter(
                 else {
                     onClickListener(lista, 1, adapterPosition)
                 }
-
-//                // Si el ítem está seleccionado, lo deseleccionamos
-//                if (selectedItemPosition == adapterPosition) {
-//                    selectedItemPosition = null
-//                    onClickDeselect()
-//                } else {
-//                    // Si seleccionamos otro ítem, deseleccionamos el anterior y seleccionamos este
-//                    val previousSelectedPosition = selectedItemPosition
-//                    selectedItemPosition = adapterPosition
-//                    // Notificar que todos los elementos deben actualizarse
-//                    notifyItemChanged(previousSelectedPosition ?: -1) // Actualizar el ítem anterior
-//                    notifyItemChanged(adapterPosition) // Actualizar el ítem seleccionado
-//                    onClickListener(lista, 1, adapterPosition)
-//                }
-//                notifyDataSetChanged() // Actualizar la vista
             }
             itemView.setOnLongClickListener() {
-                // Seleccionamos el ítem al mantener presionado
-//                binding.cardView1.backgroundTintList =
-//                    itemView.context.getColorStateList(R.color.fab_color)
                 if(selectedItemPosition!=null) limpiarSeleccion()else{
                     selectedItemPosition = adapterPosition
                     notifyDataSetChanged() // Actualizamos la vista

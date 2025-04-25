@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".UI.Access.view.fragment.LoginFragment">
 
 
@@ -21,20 +22,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:src="@drawable/decorate_head"
-            android:scaleType="fitXY"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:elevation="8dp"
+            android:elevation="20dp"
             app:cardCornerRadius="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,24 +39,34 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="10dp">
 
-                <ImageView
-                    android:id="@+id/imlogo"
+                <FrameLayout
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:visibility="gone"
-                    android:layout_marginBottom="20dp"
-                    android:src="@drawable/users_icon" />
+                    android:layout_gravity="center"
+                    android:padding="20dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/circle_user">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_user" />
+                </FrameLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Login"
-                    android:textStyle="bold"
                     android:layout_marginBottom="20dp"
-                    android:textSize="30sp"/>
+                    android:text="Acceso"
+                    android:textColor="@color/text_color"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -69,6 +74,7 @@
                     android:layout_gravity="start"
                     android:layout_marginStart="20dp"
                     android:text="@string/usuario"
+                    android:textColor="@color/text_color"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -90,7 +96,8 @@
                         android:drawablePadding="8dp"
                         android:hint="@string/ingrese_usuario"
                         android:imeOptions="actionNext"
-                        android:singleLine="true" />
+                        android:singleLine="true"
+                        android:textColor="@color/text_color" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -99,6 +106,7 @@
                     android:layout_gravity="start"
                     android:layout_marginStart="20dp"
                     android:text="@string/contrasena"
+                    android:textColor="@color/text_color"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -106,11 +114,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
+                    android:textColor="@color/text_color"
                     app:boxCornerRadiusBottomEnd="10dp"
                     app:boxCornerRadiusBottomStart="10dp"
                     app:boxCornerRadiusTopEnd="10dp"
                     app:boxCornerRadiusTopStart="10dp"
                     app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="@color/white"
                     tools:layout_editor_absoluteX="1dp"
                     tools:layout_editor_absoluteY="61dp">
 
@@ -145,17 +155,6 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-
-
-        <ImageView
-            android:id="@+id/imgfoot"
-            android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:src="@drawable/decorate_foot"
-            android:scaleType="fitXY"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

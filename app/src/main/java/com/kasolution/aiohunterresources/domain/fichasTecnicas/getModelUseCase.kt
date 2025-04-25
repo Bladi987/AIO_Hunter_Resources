@@ -13,6 +13,7 @@ class getModelUseCase() {
 
         val responseResult=repository.getModel(urlId,filter,column)
         return when (responseResult.isSuccess) {
+
             true -> {
                 val response = responseResult.getOrNull()?.asJsonObject
                 val data = response?.getAsJsonArray("Resultado")
@@ -29,13 +30,15 @@ class getModelUseCase() {
                         val autor = jsonObject.get("AUTOR").asString
                         val aprobado = jsonObject.get("APROBADO").asString
                         val estado = jsonObject.get("ESTADO").asString
-                        if (state=="Publicado"){
-                            if (estado=="Publicado")
-                                lista.add(VehicleModel(id,marca,modelo,imagen,comentarios,basica,extra,autor,aprobado,estado))
-                        }else{
-                            if (estado!="Publicado")
-                                lista.add(VehicleModel(id,marca,modelo,imagen,comentarios,basica,extra,autor,aprobado,estado))
-                        }
+
+                        lista.add(VehicleModel(id,marca,modelo,imagen,comentarios,basica,extra,autor,aprobado,estado))
+//                        if (state=="Publicado"){
+//                            if (estado=="Publicado")
+//                                lista.add(VehicleModel(id,marca,modelo,imagen,comentarios,basica,extra,autor,aprobado,estado))
+//                        }else{
+//                            if (estado!="Publicado")
+//                                lista.add(VehicleModel(id,marca,modelo,imagen,comentarios,basica,extra,autor,aprobado,estado))
+//                        }
                     }
                 }
                 Result.success(lista)

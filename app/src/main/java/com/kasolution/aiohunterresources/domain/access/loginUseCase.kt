@@ -16,9 +16,10 @@ class loginUseCase() {
                 var objeto = response?.get("Resultado")
                 if (objeto!!.isJsonPrimitive) {
                     if (objeto.asString == "not found")
-                        datauser = user("", "", "", "", "", "")
+                        datauser = user("", "", "", "", "", "","")
                 } else if (objeto.isJsonArray) {
                     val data = response?.getAsJsonArray("Resultado")
+                    Log.i("BladiDev", "Data: $data")
                     if (data != null) {
                         for (i in 0 until data.size()) {
                             if (data.get(i).isJsonObject) {
@@ -29,11 +30,13 @@ class loginUseCase() {
                                 val user = jsonObject.get("USER").asString
                                 val password = jsonObject.get("PASSWORD").asString
                                 val tipo = jsonObject.get("TIPO").asString
-                                datauser = user(id, name, lastName, user, password, tipo)
+                                val keys = jsonObject.get("keys")
+                                Log.i("BladiDev", "Key: $keys")
+                                datauser = user(id, name, lastName, user, password, tipo,keys.toString())
                             }
                         }
                     } else {
-                        datauser = user("", "", "", "", "", "")
+                        datauser = user("", "", "", "", "", "","")
                     }
                 }
                 Result.success(datauser)
@@ -44,6 +47,5 @@ class loginUseCase() {
                 Result.failure(Exception(errorMessage))
             }
         }
-
     }
 }

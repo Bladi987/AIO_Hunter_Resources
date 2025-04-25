@@ -6,42 +6,121 @@
     android:layout_height="match_parent"
     tools:context=".UI.dashboard.view.Dashboard">
 
-    <FrameLayout
-        android:id="@+id/flnotice"
+    <LinearLayout
+        android:id="@+id/llhead"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        android:weightSum="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="345dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:elevation="8dp">
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:backgroundTint="@color/backgroundColor"
+            android:padding="5dp">
 
             <FrameLayout
-                android:id="@+id/flnovedades"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </androidx.cardview.widget.CardView>
-    </FrameLayout>
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/circle_user"
+                android:layout_gravity="center"
+                >
 
-    <FrameLayout
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_user" />
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0.75"
+            android:orientation="vertical"
+            android:paddingHorizontal="5dp">
+
+            <TextView
+                android:id="@+id/tvUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Bladimiro Huallpamayta Huayllani"
+                android:textColor="@color/text_color" />
+
+            <TextView
+                android:id="@+id/tvTipoUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Developer"
+                android:textColor="@color/text_color" />
+
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/btnExit"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="0.1"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="5dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="-20dp"
+                android:src="@drawable/exit_icon" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/flmenu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/colorPrimary"
+
         app:layout_constraintBottom_toTopOf="@+id/flaction"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/flnotice">
+        app:layout_constraintTop_toBottomOf="@+id/llhead">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:src="@drawable/new_image" />
+        </FrameLayout>
 
         <FrameLayout
             android:id="@+id/flcontainerMenu"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
         android:id="@+id/flaction"
@@ -55,64 +134,54 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            android:weightSum="1">
+            android:gravity="end"
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/btnSettings"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.25">
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="10dp">
 
                 <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="35dp"
+                    android:layout_height="wrap_content"
                     android:layout_margin="-20dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:src="@drawable/ic_home" />
+                    android:src="@drawable/setting_icon" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/btnContact"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.25">
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="10dp">
 
                 <ImageView
-                    android:layout_width="match_parent"
+                    android:layout_width="35dp"
                     android:layout_height="match_parent"
-                    android:clickable="true"
                     android:layout_margin="-20dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_group" />
+                    android:src="@drawable/message_icon"
+                    app:tint="@color/white" />
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/btnAbout"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.25">
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:padding="10dp">
 
                 <ImageView
-                    android:layout_width="match_parent"
+                    android:layout_width="35dp"
                     android:layout_height="match_parent"
-                    android:clickable="true"
                     android:layout_margin="-20dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_mail" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.25">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="true"
-                    android:layout_margin="-20dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_person" />
+                    android:src="@drawable/about_icon"
+                    app:tint="@color/white" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>

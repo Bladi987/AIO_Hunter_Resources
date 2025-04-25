@@ -4,6 +4,6 @@
     <corners
         android:topLeftRadius="25dp"
         android:topRightRadius="25dp" /> <!-- Elige el valor que desees para el radio de las esquinas -->
-    <solid android:color="#fff" />
+    <solid android:color="#301F1E1E"/>
 
 </shape>

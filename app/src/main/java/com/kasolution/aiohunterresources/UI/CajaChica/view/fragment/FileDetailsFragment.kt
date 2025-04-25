@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
@@ -24,6 +26,7 @@ import com.kasolution.aiohunterresources.UI.CajaChica.view.model.recent
 import com.kasolution.aiohunterresources.UI.CajaChica.viewModel.FileDetailsViewModel
 import com.kasolution.aiohunterresources.core.DialogProgress
 import com.kasolution.aiohunterresources.core.DialogUtils
+import com.kasolution.aiohunterresources.core.ToastUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.DialogNewSheetBinding
 import com.kasolution.aiohunterresources.databinding.FragmentFileDetailsBinding
@@ -366,6 +369,10 @@ class FileDetailsFragment : Fragment() {
             2 -> {
                 fileDetail = fileDetails
                 MostrarActionIcon(true)
+            }
+            3->{
+                MostrarActionIcon(false)
+                DialogUtils.dialogMessageResponse(requireContext(), "Este archivo no es posible editar por este medio, ingrese a su plataforma de drive para realizar las modificaciones necesarias")
             }
         }
 

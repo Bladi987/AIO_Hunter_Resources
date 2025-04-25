@@ -1,30 +1,26 @@
 package com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.gson.Gson
 import com.kasolution.aiohunterresources.R
-import com.kasolution.aiohunterresources.UI.Access.AccessActivity
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.adapter.BrandAdapter
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.Brand
-import com.kasolution.aiohunterresources.UI.FichasTecnicas.view.model.menuOption
 import com.kasolution.aiohunterresources.UI.FichasTecnicas.viewModel.BrandViewModel
-import com.kasolution.aiohunterresources.UI.User.UserActivity
 import com.kasolution.aiohunterresources.core.DialogProgress
 import com.kasolution.aiohunterresources.core.DialogUtils
-import com.kasolution.aiohunterresources.core.PopupMenuHelper
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentBrandBinding
 import java.io.Serializable
@@ -40,6 +36,8 @@ class BrandFragment : Fragment() {
     var marcaSeleccionada = ""
     private var tipo = ""
     private var urlId: urlId? = null
+    private var loaded = false
+    private var brandChache: String? = null
     private lateinit var preferencesFichasTecnicas: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,13 +49,37 @@ class BrandFragment : Fragment() {
         initUI()
         recuperarPreferencias()
         configSwipe()
-
-        //extraerIniciales()
-
+        if (brandChache != null) {
+            val brands = Gson().fromJson(brandChache, Array<Brand>::class.java).toList()
+            lista.addAll(brands)
+            adapter.notifyDataSetChanged()
+        }
         brandViewModel.onCreate(urlId!!)
-        brandViewModel.isloading.observe(viewLifecycleOwner, Observer {
-            if (it) DialogProgress.show(requireContext(), "Cargando...")
-            else DialogProgress.dismiss()
+        brandViewModel.isloading.observe(viewLifecycleOwner, Observer {cargando->
+            if (cargando) {
+                if (brandChache==null) {
+                    DialogProgress.show(requireContext(), "Cargando...")
+                }else{
+                    binding.ivSearch.visibility = View.GONE
+                    binding.progressBar.visibility = View.VISIBLE
+                }
+            } else {
+                binding.ivSearch.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.GONE
+                DialogProgress.dismiss()
+                if (lista.isEmpty()) {
+                    if (!loaded) {
+                        binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                        binding.lottieAnimationView.playAnimation()
+                        binding.llNoData.visibility = View.VISIBLE
+                        binding.swipeRefresh.visibility = View.GONE
+                    }
+                } else {
+                    binding.llNoData.visibility = View.GONE
+                    binding.swipeRefresh.visibility = View.VISIBLE
+                }
+
+            }
         })
         brandViewModel.exception.observe(viewLifecycleOwner) { error ->
             showMessageError(error)
@@ -67,8 +89,10 @@ class BrandFragment : Fragment() {
                 if (respuesta.isSuccess) {
                     val data = respuesta.getOrNull()
                     data?.let { listaBrand ->
+                        lista.clear()
                         lista.addAll(listaBrand)
                         adapter.notifyDataSetChanged()
+                        saveBrandCache(listaBrand)
                     }
                 } else {
                     val exception = respuesta.exceptionOrNull()
@@ -78,7 +102,11 @@ class BrandFragment : Fragment() {
                 }
             }
         })
-
+        binding.btnActualizar.setOnClickListener()
+        {
+            binding.llNoData.visibility = View.GONE
+            brandViewModel.onRefresh(urlId!!)
+        }
         binding.customSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -109,70 +137,40 @@ class BrandFragment : Fragment() {
                 binding.customSearch.startAnimation(animInRight)
                 binding.customSearch.visibility = View.VISIBLE
                 binding.ivSearch.setImageResource(R.drawable.close_icon)
+                binding.customSearch.requestFocus()
+                val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.showSoftInput(binding.customSearch, InputMethodManager.SHOW_IMPLICIT)
             }
         }
         binding.btnAction.setOnClickListener() {
+            val checkFragment = CheckFragment()
+            val fragmentManager = requireActivity().supportFragmentManager
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.contenedor, checkFragment)
+            fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+            fragmentTransaction.commit()
 
-
-            PopupMenuHelper.configureAndShowPopupMenu(
-                requireContext(),
-                it,
-                sortUser(),
-                object : PopupMenuHelper.PopupMenuItemClickListener {
-                    override fun onMenuItemClicked(item: menuOption) {
-                        when (item.texto) {
-                            "Usuarios" -> {
-                                val i = Intent(context, UserActivity::class.java)
-                                startActivity(i)
-                            }
-
-                            "Aprobar" -> {
-                                val checkFragment = CheckFragment()
-                                val fragmentManager = requireActivity().supportFragmentManager
-                                val fragmentTransaction = fragmentManager.beginTransaction()
-                                fragmentTransaction.replace(R.id.contenedor, checkFragment)
-                                fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
-                                fragmentTransaction.commit()
-                            }
-
-                            "Salir" -> {
-                                //dialogExit()
-                                DialogUtils.dialogQuestion(
-                                    requireContext(),
-                                    titulo = "Salir",
-                                    mensage = "Desea Salir de la apliacion?",
-                                    positiveButtontext = "Salir",
-                                    onPositiveClick = {
-                                        val editor = preferencesFichasTecnicas.edit()
-                                        editor.apply {
-                                            putString("ID", "")
-                                            putString("NAME", "")
-                                            putString("LASTNAME", "")
-                                            putString("TIPO", "")
-                                        }.apply()
-                                        requireActivity().finish()
-                                        var i = Intent(requireContext(), AccessActivity::class.java)
-                                        startActivity(i)
-                                    })
-                            }
-                        }
-                    }
-
-                })
-        }
-        binding.btnback.setOnClickListener() {
-            requireActivity().finish()
         }
     }
+
     private fun initUI() {
         val columnWidthDp = 300
         val columns = resources.displayMetrics.widthPixels / columnWidthDp
         glmanager = GridLayoutManager(context, columns)
         adapter = BrandAdapter(
             listaRecibida = lista,
-            OnClickListener = { itemBrand -> onItemSelected(itemBrand) })
+            OnClickListener = { itemBrand -> onItemSelected(itemBrand) },
+            requireContext()
+        )
         binding.rvListaBrand.layoutManager = glmanager
         binding.rvListaBrand.adapter = adapter
+    }
+    private fun saveBrandCache(lista: List<Brand>) {
+        val editor = preferencesFichasTecnicas.edit()
+        val gson = Gson()
+        val json = gson.toJson(lista)
+        editor.putString("BRAND_CACHE", json)
+        editor.apply()
     }
 
     private fun onItemSelected(itemBrand: Brand) {
@@ -187,6 +185,7 @@ class BrandFragment : Fragment() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.contenedor, detailsFragment)
         fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+        loaded = true
         fragmentTransaction.commit()
         binding.customSearch.text.clear()
     }
@@ -213,45 +212,25 @@ class BrandFragment : Fragment() {
     fun recuperarPreferencias() {
         val url = preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
         val idSheet = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
+        brandChache = preferencesFichasTecnicas.getString("BRAND_CACHE", null)
         urlId = urlId(url!!, "", idSheet!!, "")
         tipo = preferencesUser.getString("TIPO", "")!!
     }
 
-    private fun sortUser(): ArrayList<menuOption> {
-        val lista: ArrayList<menuOption> = ArrayList()
-        when (tipo) {
-            "Administrador" -> {
-                lista.add(menuOption(R.drawable.user_icon, "Usuarios"))
-                lista.add(menuOption(R.drawable.ic_aprobar, "Aprobar"))
-                lista.add(menuOption(R.drawable.exit_icon, "Salir"))
-            }
-
-            "Coloborador" -> {
-                lista.add(menuOption(R.drawable.exit_icon, "Salir"))
-            }
-
-            "Invitado" -> {
-                lista.add(menuOption(R.drawable.exit_icon, "Salir"))
-            }
-
-            "Developer" -> {
-                lista.add(menuOption(R.drawable.user_icon, "Usuarios"))
-                lista.add(menuOption(R.drawable.ic_aprobar, "Aprobar"))
-                lista.add(menuOption(R.drawable.exit_icon, "Salir"))
-            }
-
-            else -> {
-                lista.add(menuOption(R.drawable.exit_icon, "Salir"))
-            }
-        }
-        return lista
-    }
 
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            adapter.limpiar()
-            brandViewModel.onRefresh(urlId!!)
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    adapter.limpiar()
+                    brandViewModel.onRefresh(urlId!!)
+                })
         }
     }
 

@@ -20,7 +20,7 @@
             android:name=".UI.ControlEquipos.view.ControlEquipos"
             android:exported="false" />
         <activity
-            android:name=".UI.Settings.SettingsActivity"
+            android:name=".UI.Settings.view.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".UI.CajaChica.view.CajaChica"

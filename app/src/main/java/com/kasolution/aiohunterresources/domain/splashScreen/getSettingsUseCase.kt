@@ -15,15 +15,18 @@ class getSettingsUseCase() {
         return when (responseResult.isSuccess) {
             true -> {
                 val response = responseResult.getOrNull()?.asJsonObject
-                val data = response?.getAsJsonArray("Respuesta")
-                if (data != null) {
-                    for (i in 0 until data.size()) {
-                        val jsonObject = data.get(i).asJsonObject
-                        versionAPP = jsonObject.get("VERSION").asString
-                    }
-                }
+                Log.i(log, "respuesta: $response")
+                val data = response?.getAsJsonObject("respuesta")
+                versionAPP = data?.get("VERSION")!!.asString
+
+//                for (i in 0 until data.size()) {
+//                    val jsonObject = data.get(i).asJsonObject
+//                    versionAPP = jsonObject.get("VERSION").asString
+//                }
+
                 Result.success(versionAPP)
             }
+
             false -> {
                 val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"
                 Log.e("BladiDev", "Error al obtener los datos: $errorMessage")

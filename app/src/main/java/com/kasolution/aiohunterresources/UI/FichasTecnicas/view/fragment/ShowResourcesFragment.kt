@@ -2,6 +2,8 @@ package com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,6 +29,7 @@ import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.FragmentShowResourcesBinding
 import com.kasolution.recursoshunter.UI.view.Home.Interfaces.DialogListener
 import com.squareup.picasso.Callback
+import java.io.File
 import java.lang.Exception
 
 class ShowResourcesFragment : Fragment(), DialogListener {
@@ -106,10 +109,10 @@ class ShowResourcesFragment : Fragment(), DialogListener {
                 }
             }
         })
-        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result-> //vehiculo ->
-            result?.let { respuesta ->
-                if (respuesta.isSuccess) {
-                    val data = respuesta.getOrNull()
+        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result ->
+                result?.let { respuesta ->
+                    if (respuesta.isSuccess) {
+                        val data = respuesta.getOrNull()
                         data?.let { vehiculo ->
                             lista[itemPosition] = vehiculo
                             adapter.notifyItemChanged(itemPosition)
@@ -119,15 +122,15 @@ class ShowResourcesFragment : Fragment(), DialogListener {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-                }else{
-                    val exception = respuesta.exceptionOrNull()
-                    exception?.let { ex ->
-                        showMessageError(ex.message.toString())
+                    } else {
+                        val exception = respuesta.exceptionOrNull()
+                        exception?.let { ex ->
+                            showMessageError(ex.message.toString())
+                        }
                     }
                 }
-            }
-        })
-        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {result->
+            })
+        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer { result ->
             result?.let { respuesta ->
                 if (respuesta.isSuccess) {
                     val data = respuesta.getOrNull()
@@ -138,7 +141,7 @@ class ShowResourcesFragment : Fragment(), DialogListener {
                             requireActivity().supportFragmentManager.popBackStack()
                         else Log.i("BladiDevShowResoucesFragment", "lista aun no esta vacio")
                     }
-                }else{
+                } else {
                     val exception = respuesta.exceptionOrNull()
                     exception?.let { ex ->
                         showMessageError(ex.message.toString())
@@ -270,17 +273,22 @@ class ShowResourcesFragment : Fragment(), DialogListener {
     }
 
     private fun cargarIcon(icono: String) {
-        val customPicasso = CustomPicasso.getInstance(requireContext())
-        customPicasso.load("https://drive.google.com/uc?export=view&id=${icono}").into(
-            binding.imgLogo,
-            object : Callback {
-                override fun onSuccess() {
-                    binding.imgLogo.animate().alpha(1f).setDuration(300)
-                }
+        val cachedImage = loadImageFromCache(requireContext(), "https://drive.google.com/uc?export=view&id=${icono}")
+        if (cachedImage != null) {
+            binding.imgLogo.setImageBitmap(cachedImage)
+        }
 
-                override fun onError(e: Exception?) {
-                }
-            })
+//        val customPicasso = CustomPicasso.getInstance(requireContext())
+//        customPicasso.load("https://drive.google.com/uc?export=view&id=${icono}").into(
+//            binding.imgLogo,
+//            object : Callback {
+//                override fun onSuccess() {
+//                    binding.imgLogo.animate().alpha(1f).setDuration(300)
+//                }
+//
+//                override fun onError(e: Exception?) {
+//                }
+//            })
     }
 
     override fun onDataCollected(
@@ -365,8 +373,17 @@ class ShowResourcesFragment : Fragment(), DialogListener {
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            adapter.limpiar()
-            ShowModelViewModel.onRefresh(urlId!!, binding.tvModelo.text.toString(), 2, "Publicado")
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    adapter.limpiar()
+                    ShowModelViewModel.onRefresh(urlId!!, binding.tvModelo.text.toString(), 2, "Publicado")
+                })
+
         }
     }
 
@@ -377,5 +394,16 @@ class ShowResourcesFragment : Fragment(), DialogListener {
             message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
             codigo = "Codigo: $error",
         )
+    }
+    fun loadImageFromCache(context: Context, imageUrl: String): Bitmap? {
+        val fileName = imageUrl.split("/").last()
+        val cacheDir = context.cacheDir
+        val file = File(cacheDir, fileName)
+
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            null
+        }
     }
 }

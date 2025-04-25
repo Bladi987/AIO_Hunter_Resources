@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +22,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.google.gson.JsonArray
+import com.google.gson.JsonParser
 import com.kasolution.aiohunterresources.BuildConfig
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.Access.viewModel.LoginViewModel
@@ -36,10 +39,16 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private val loginViewModel: LoginViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
-    private lateinit var usuario: user
-    private var urlId: urlId? = null
     private lateinit var preferencesAccess: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
+    private lateinit var preferencesCajaChica: SharedPreferences
+    private lateinit var preferencesFichasTecnicas: SharedPreferences
+    private lateinit var preferencesControlEquipos: SharedPreferences
+    private lateinit var preferencesDocumentos: SharedPreferences
+    private lateinit var usuario: user
+    private var urlId: urlId? = null
+    private var idUser:String?=null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,9 +61,12 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        preferencesAccess =
-            requireContext().getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
+        preferencesAccess = requireContext().getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
         preferencesUser = requireContext().getSharedPreferences("valueUser", Context.MODE_PRIVATE)
+        preferencesCajaChica = requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+        preferencesFichasTecnicas = requireContext().getSharedPreferences("valueFichasTecnicas", Context.MODE_PRIVATE)
+        preferencesControlEquipos = requireContext().getSharedPreferences("valueControlEquipos", Context.MODE_PRIVATE)
+        preferencesDocumentos = requireContext().getSharedPreferences("valueDocumentos", Context.MODE_PRIVATE)
 
         recuperarPreferencias()
         binding.btnIngresar.setOnClickListener() {
@@ -69,8 +81,9 @@ class LoginFragment : Fragment() {
                         "",
                         "",
                         "",
-                        binding.etUser.text.toString(),
-                        binding.etPassword.text.toString(),
+                        binding.etUser.text.toString().trim(),
+                        binding.etPassword.text.toString().trim(),
+                        "",
                         ""
                     )
                 )
@@ -88,8 +101,19 @@ class LoginFragment : Fragment() {
                     val lista = respuesta.getOrNull()
                     lista?.let { User ->
                         usuario = User
+                        if(idUser!=null && idUser!=User.id){
+                            preferencesCajaChica.edit().clear().apply()
+                            preferencesFichasTecnicas.edit().clear().apply()
+                            preferencesControlEquipos.edit().clear().apply()
+                            preferencesDocumentos.edit().clear().apply()
+                        }
                         if (User.id.isNotEmpty() && User.name.isNotEmpty() && User.lastName.isNotEmpty() && User.user.isNotEmpty() && User.password.isNotEmpty() && User.tipo.isNotEmpty())
                             almacenarpref(User.id, User.name, User.lastName, User.tipo)
+                        val cambios=procesarKeys(requireContext(),User.keys)
+                        if (cambios.isNotEmpty()) {
+                            cambios.forEach { Log.i("Preferencias", it) }
+                            // Aquí podrías mostrar un diálogo o Snackbar si quieres notificar visualmente.
+                        }
                     }
                 } else {
                     val exception = respuesta.exceptionOrNull()
@@ -113,7 +137,7 @@ class LoginFragment : Fragment() {
         loginViewModel.access.observe(getViewLifecycleOwner(), Observer { valor ->
             if (valor == 1) {
                 requireActivity().finish()
-                var i = Intent(requireContext(), Dashboard::class.java)
+                val i = Intent(requireContext(), Dashboard::class.java)
                 startActivity(i)
 
             } else if (valor == 2) {
@@ -131,6 +155,91 @@ class LoginFragment : Fragment() {
         })
     }
 
+    private fun procesarKeys(context: Context, key: String): List<String> {
+        Log.i("BladiDev","el valor de key es: $key")
+        if (key.isNullOrBlank() || key.trim().equals("\"not found\"", ignoreCase = true))
+            return emptyList()
+        else{
+            val keysJson: JsonArray = JsonParser.parseString(key).asJsonArray
+            val cambiosRealizados = mutableListOf<String>()
+
+            keysJson.forEach { element ->
+                if (element.isJsonObject) {
+                    val categoriaJson = element.asJsonObject
+                    val nombreCategoria = categoriaJson.keySet().firstOrNull() ?: return@forEach
+                    val datos = categoriaJson.getAsJsonObject(nombreCategoria)
+
+                    val prefs = when (nombreCategoria.lowercase()) {
+                        "caja chica" -> context.getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+                        "fichas tecnicas" -> context.getSharedPreferences("valueFichasTecnicas", Context.MODE_PRIVATE)
+                        "equipos" -> context.getSharedPreferences("valueControlEquipos", Context.MODE_PRIVATE)
+                        "documentos" -> context.getSharedPreferences("valueDocumentos", Context.MODE_PRIVATE)
+                        else -> null
+                    } ?: return@forEach
+
+                    val editor = prefs.edit()
+
+                    // Verificar si todos los valores son vacíos
+                    val todosVacios = datos.entrySet().all { (_, valor) -> valor.asString.isBlank() }
+
+                    if (todosVacios) {
+                        // Borrar todos los campos relacionados con esta categoría
+                        datos.entrySet().forEach { (clave, _) ->
+                            editor.remove(claveMapeado(clave, nombreCategoria))
+                        }
+                        editor.apply()
+                        cambiosRealizados.add("[$nombreCategoria] Todos los valores estaban vacíos, se eliminaron del almacenamiento.")
+                        return@forEach
+                    }
+
+                    // Si no están vacíos, verificar cambios y actualizar
+                    datos.entrySet().forEach { (clave, valor) ->
+                        val valorNuevo = valor.asString
+                        if (valorNuevo.isNotBlank()) {
+                            val clavePrefs = claveMapeado(clave, nombreCategoria)
+                            val valorActual = prefs.getString(clavePrefs, null)
+
+                            if (valorNuevo != valorActual) {
+                                editor.putString(clavePrefs, valorNuevo)
+                                cambiosRealizados.add("[$nombreCategoria] Se actualizó '$clave' de '$valorActual' a '$valorNuevo'")
+                            }
+                        }
+                    }
+                    editor.apply()
+                }
+            }
+            return cambiosRealizados
+        }
+    }
+
+
+    fun claveMapeado(clave: String, categoria: String): String {
+        return when (categoria.lowercase()) {
+            "caja chica" -> when (clave) {
+                "cajaChica" -> "MONTOCAJACHICA"
+                "urlid" -> "URL_SCRIPT"
+                "fileid" -> "IDFILE"
+                "liquidacionid" -> "IDSHEETLIQUIDACION"
+                else -> clave
+            }
+            "fichas tecnicas" -> when (clave) {
+                "urlid" -> "URL_SCRIPT_FICHAS"
+                "sheetid" -> "IDSHEET_FICHAS"
+                else -> clave
+            }
+            "equipos" -> when (clave) {
+                "urlid" -> "URL_SCRIPT_CONTROL_EQUIPOS"
+                "sheetid" -> "IDSHEET_CONTROL_EQUIPOS"
+                else -> clave
+            }
+            "documentos" -> when (clave) {
+                "urlid" -> "URL_SCRIPT_DOCUMENTOS"
+                "sheetid" -> "IDSHEET_DOCUMENTOS"
+                else -> clave
+            }
+            else -> clave
+        }
+    }
 
     private fun recuperarPreferencias() {
         urlId = urlId(
@@ -139,11 +248,7 @@ class LoginFragment : Fragment() {
             idSheet = preferencesAccess.getString("IDSHEETACCESS", "").toString(),
             ""
         )
-//        val id = preferencesAccess.getString("ID", "")
-//        val name = preferencesAccess.getString("NAME", "")
-//        val lastName = preferencesAccess.getString("LASTNAME", "")
-//        val tipo = preferencesAccess.getString("TIPO", "")
-//        return !(id.isNullOrEmpty() || name.isNullOrEmpty() || lastName.isNullOrEmpty() || tipo.isNullOrEmpty())
+        idUser=preferencesUser.getString("ID",null)
     }
 
     private fun almacenarpref(id: String, name: String, lastName: String, tipo: String) {
@@ -253,19 +358,6 @@ class LoginFragment : Fragment() {
             }
 
         }
-    }
-
-    private fun getIds(public: Boolean): String {
-        val idScript: String
-        val idSheet: String
-        if (public) {
-            idScript = preferencesAccess.getString("IDSCRIPTPUBLIC", "").toString()
-            idSheet = preferencesAccess.getString("IDSHEETPUBLIC", "").toString()
-        } else {
-            idScript = preferencesAccess.getString("IDSCRIPTPRIVATE", "").toString()
-            idSheet = preferencesAccess.getString("IDSHEETPRIVATE", "").toString()
-        }
-        return "$idScript->$idSheet"
     }
 
     private fun showMessageError(error: String) {

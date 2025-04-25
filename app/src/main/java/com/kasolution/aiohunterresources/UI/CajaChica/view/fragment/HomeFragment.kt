@@ -88,8 +88,6 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
-
-
         }
         liquidacionViewModel.isloading.observe(viewLifecycleOwner) {
             if (it) {
@@ -118,12 +116,22 @@ class HomeFragment : Fragment() {
             }
         }
         binding.btnRegistrar.setOnClickListener() {
-            val fragment = RegisterFragment()
-            val fragmentManager = requireActivity().supportFragmentManager
-            val fragmentTransaction = fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.contenedorCajaChica, fragment)
-            fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
-            fragmentTransaction.commit()
+            val Sheets = preferencesCajaChica.getString("LIST_SHEET", null)
+            if (Sheets == null) {
+                val fragment = FileFragment()
+                val fragmentManager = requireActivity().supportFragmentManager
+                val fragmentTransaction = fragmentManager.beginTransaction()
+                fragmentTransaction.replace(R.id.contenedorCajaChica, fragment)
+                fragmentTransaction.addToBackStack("H") // Para agregar el fragmento a la pila de retroceso
+                fragmentTransaction.commit()
+            }else{
+                val fragment = RegisterFragment()
+                val fragmentManager = requireActivity().supportFragmentManager
+                val fragmentTransaction = fragmentManager.beginTransaction()
+                fragmentTransaction.replace(R.id.contenedorCajaChica, fragment)
+                fragmentTransaction.addToBackStack(null) // Para agregar el fragmento a la pila de retroceso
+                fragmentTransaction.commit()
+            }
         }
         binding.btnArchivos.setOnClickListener() {
             val fragment = FileFragment()
@@ -189,7 +197,7 @@ class HomeFragment : Fragment() {
         // Agregar un Listener para cambiar los datos al finalizar la animación
         animatorSet.addListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(p0: Animator) {
-
+                recuperarSaldo()
             }
 
             override fun onAnimationEnd(p0: Animator) {
@@ -199,7 +207,8 @@ class HomeFragment : Fragment() {
                 // Cambiar el valor de los datos cuando termine la animación
                 binding.tvSaldo.text = "S/.${"%.2f".format(dataList[currentIndex].monto)}"
                 binding.tvsaldocontable.text = dataList[currentIndex].descripcion
-                binding.progressCircleView.setProgress(dataList[currentIndex].porcentaje)
+                //binding.progressCircleView.setProgress(dataList[currentIndex].porcentaje)
+                animarProgresoYTexto2(500, 100-dataList[currentIndex].porcentaje)
                 scheduleReturnToDataA()
             }
 
@@ -249,6 +258,7 @@ class HomeFragment : Fragment() {
                     binding.tvsaldocontable.text = dataList[0].descripcion
                     binding.progressCircleView.setProgress(dataList[0].porcentaje)
                     currentIndex = 0 // Restablecer el índice a 0
+                    animarProgresoYTexto2(500, 100-dataList[0].porcentaje)
                 }
 
                 override fun onAnimationCancel(p0: Animator) {
@@ -293,13 +303,13 @@ class HomeFragment : Fragment() {
 
 
     // Método para animar tanto el progreso circular como el texto
-    private fun animarProgresoYTexto() {
+    private fun animarProgresoYTexto(duration: Long = 2000) {
         // Calcular el porcentaje de saldo restante
         val porcentajeRestante = calcularPorcentajeRestante()
 
         // Creamos el ValueAnimator para animar tanto el progreso como el texto
         val animator = ValueAnimator.ofFloat(100f, porcentajeRestante)
-        animator.duration = 2000 // Duración de la animación en milisegundos
+        animator.duration = duration // Duración de la animación en milisegundos
         animator.interpolator = DecelerateInterpolator() // Interpolador para suavizar la animación
 
         animator.addUpdateListener { animation ->
@@ -317,8 +327,26 @@ class HomeFragment : Fragment() {
         dataList[1].porcentaje = (100 - porcentajeRestante)
         binding.tvsaldocontable.text = dataList[0].descripcion
     }
+    private fun animarProgresoYTexto2(duration: Long = 2000,porcentaje: Float) {
+        // Calcular el porcentaje de saldo restante
+        val porcentajeRestante = 100f-porcentaje
+
+        // Creamos el ValueAnimator para animar tanto el progreso como el texto
+        val animator = ValueAnimator.ofFloat(100f, porcentajeRestante)
+        animator.duration = duration // Duración de la animación en milisegundos
+        animator.interpolator = DecelerateInterpolator() // Interpolador para suavizar la animación
+
+        animator.addUpdateListener { animation ->
+            val animatedValue = animation.animatedValue as Float
+            // Actualizamos el progreso circular
+            binding.progressCircleView.setProgress(animatedValue)
+
+        }
+        animator.start() // Iniciamos la animación
+    }
 
     private fun recuperarSaldo() {
+        dataList.clear()
         urlId = urlId(
             preferencesCajaChica.getString("URL_SCRIPT", "").toString(),
             preferencesCajaChica.getString("IDFILE", "").toString(),
@@ -330,8 +358,8 @@ class HomeFragment : Fragment() {
             "SALDODISPONIBLE",
             preferencesCajaChica.getString("MONTOCAJACHICA", "")
         )!!.toDouble()
-        dataList.add(DataItem(saldoDisponible, "Saldo disponible"))
-        dataList.add(DataItem((montoCajaChica - saldoDisponible), "Total gastos"))
+        dataList.add(DataItem(saldoDisponible, "Saldo disponible",((saldoDisponible/montoCajaChica)*100).toFloat()))
+        dataList.add(DataItem((montoCajaChica - saldoDisponible), "Total gastos",(((montoCajaChica - saldoDisponible)/montoCajaChica)*100).toFloat()))
     }
 
     data class DataItem(val monto: Double, val descripcion: String, var porcentaje: Float = 0f)

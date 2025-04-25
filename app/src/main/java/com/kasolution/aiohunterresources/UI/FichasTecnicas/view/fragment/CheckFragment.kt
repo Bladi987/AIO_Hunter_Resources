@@ -3,6 +3,7 @@ package com.kasolution.aiohunterresources.UI.FichasTecnicas.view.fragment
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -40,6 +41,7 @@ class CheckFragment : Fragment() {
         _binding = FragmentCheckBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         preferencesFichasTecnicas =
@@ -52,15 +54,17 @@ class CheckFragment : Fragment() {
 
 
         ShowModelViewModel.onCreate(urlId!!, "Publicado", 3, "Revision")
-        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { result->
-            result?.let { respuesta->
-                if (respuesta.isSuccess){
-                    val data=respuesta.getOrNull()
-                    data?.let { listaModel->
+        ShowModelViewModel.showVehicleModel.observe(viewLifecycleOwner, Observer { result ->
+
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    adapter.limpiar()
+                    val data = respuesta.getOrNull()
+                    data?.let { listaModel ->
                         lista.addAll(listaModel)
                         adapter.notifyDataSetChanged()
                     }
-                }else{
+                } else {
                     val exception = respuesta.exceptionOrNull()
                     exception?.let { ex ->
                         showMessageError(ex.message.toString())
@@ -68,15 +72,15 @@ class CheckFragment : Fragment() {
                 }
             }
         })
-        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result->
-            result?.let {respuesta->
-                if (respuesta.isSuccess){
-                    val data=respuesta.getOrNull()
+        ShowModelViewModel.updateModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
                     data?.let {
                         lista.removeAt(itemPosition)
                         adapter.notifyItemRemoved(itemPosition)
                     }
-                }else{
+                } else {
                     val exception = respuesta.exceptionOrNull()
                     exception?.let { ex ->
                         showMessageError(ex.message.toString())
@@ -85,15 +89,15 @@ class CheckFragment : Fragment() {
             }
 
         })
-        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer {result->
-            result?.let {respuesta->
-                if (respuesta.isSuccess){
-                    val data=respuesta.getOrNull()
+        ShowModelViewModel.deleteModel.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { respuesta ->
+                if (respuesta.isSuccess) {
+                    val data = respuesta.getOrNull()
                     data?.let {
                         lista.removeAt(itemPosition)
                         adapter.notifyItemRemoved(itemPosition)
                     }
-                }else{
+                } else {
                     val exception = respuesta.exceptionOrNull()
                     exception?.let { ex ->
                         showMessageError(ex.message.toString())
@@ -103,7 +107,18 @@ class CheckFragment : Fragment() {
         })
         ShowModelViewModel.isloading.observe(viewLifecycleOwner, Observer {
             if (it) DialogProgress.show(requireContext(), "Cargando...")
-            else DialogProgress.dismiss()
+            else {
+                DialogProgress.dismiss()
+                if (lista.isEmpty()) {
+                    binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                    binding.lottieAnimationView.playAnimation()
+                    binding.llNoData.visibility = View.VISIBLE
+                    binding.swipeRefresh.visibility = View.GONE
+                } else {
+                    binding.llNoData.visibility = View.GONE
+                    binding.swipeRefresh.visibility = View.VISIBLE
+                }
+            }
         })
         ShowModelViewModel.exception.observe(viewLifecycleOwner) { error ->
             showMessageError(error)
@@ -111,13 +126,18 @@ class CheckFragment : Fragment() {
         binding.imgBottonBack.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
+        binding.btnActualizar.setOnClickListener()
+        {
+            binding.llNoData.visibility = View.GONE
+            ShowModelViewModel.onRefresh(urlId!!, "Publicado", 3, "Revision")
+        }
 
     }
 
     private fun recuperarPreferencias() {
-        val url=preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
-        val idSheet=preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
-        urlId= urlId(url!!,"",idSheet!!,"")
+        val url = preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", "")
+        val idSheet = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", "")
+        urlId = urlId(url!!, "", idSheet!!, "")
     }
 
     private fun initUI() {
@@ -165,18 +185,30 @@ class CheckFragment : Fragment() {
             dialogFragment.show(childFragmentManager, "AddImageResourceDialogFragment")
         }
     }
+
     private fun getUserAdmin(): String {
         val name = preferencesUser.getString("NAME", "").toString()
         val lastName = preferencesUser.getString("LASTNAME", "").toString()
 
         return "$name $lastName"
     }
+
     private fun configSwipe() {
         binding.swipeRefresh.setOnRefreshListener {
             binding.swipeRefresh.isRefreshing = false
-            ShowModelViewModel.onRefresh(urlId!!, "Publicado", 3, "Revision")
+            DialogUtils.dialogQuestion(
+                requireContext(),
+                "Aviso",
+                "Desea actualizar la lista?",
+                positiveButtontext = "Si",
+                negativeButtontext = "no",
+                onPositiveClick = {
+                    adapter.limpiar()
+                    ShowModelViewModel.onRefresh(urlId!!, "Publicado", 3, "Revision")
+                })
         }
     }
+
     private fun showMessageError(error: String) {
         DialogUtils.dialogMessageResponseError(
             requireContext(),

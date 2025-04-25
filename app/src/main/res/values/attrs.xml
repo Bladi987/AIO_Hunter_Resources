@@ -14,4 +14,10 @@
         <attr name="textOption2" format="string"/>             <!-- Texto de la opción 2 -->
         <attr name="textColor" format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="ProgressCircleView">
+        <attr name="strokeWidth" format="dimension" />
+        <attr name="circleColor" format="color" />
+        <attr name="backgroundColor" format="color" />
+    </declare-styleable>
 </resources>

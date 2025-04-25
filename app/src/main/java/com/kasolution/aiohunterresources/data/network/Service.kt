@@ -8,6 +8,9 @@ import com.kasolution.aiohunterresources.UI.CajaChica.view.model.file
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.fileDetails
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.liquidacion
 import com.kasolution.aiohunterresources.UI.CajaChica.view.model.register
+import com.kasolution.aiohunterresources.UI.ControlEquipos.view.model.equipos
+import com.kasolution.aiohunterresources.UI.Settings.view.model.itemContactUs
+import com.kasolution.aiohunterresources.UI.Settings.view.model.userKey
 import com.kasolution.aiohunterresources.UI.User.model.user
 import com.kasolution.aiohunterresources.core.RetrofitHelper
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
@@ -24,7 +27,6 @@ class Service(urlId: urlId) {
     private val idFile = urlId.idFile
     private val sheetName = urlId.sheetName
     private val idSheet = urlId.idSheet
-
     //privateModule
     private val retrofit = RetrofitHelper.getRetrofit(urlScript)
 
@@ -76,6 +78,8 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "VEHICLEDATA")
         jsonRequest.addProperty("filter", filter)
+
+        Log.i("BladiDev", "request enviado: ${jsonRequest.toString()}")
         return safePeticion(jsonRequest)
     }
 
@@ -195,9 +199,57 @@ class Service(urlId: urlId) {
 
     suspend fun getSettings(): Result<JsonElement?> {
         val jsonRequest = JsonObject()
-        jsonRequest.addProperty("action", "getSettings")
+        jsonRequest.addProperty("action", "getVersion")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "Settings")
+        return safePeticion(jsonRequest)
+    }
+    suspend fun setKeys(user:String,userKey: userKey): Result<JsonElement?> {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "setKeys")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("userName", user)
+
+        val keysArray = JsonArray()
+        val keysObject = JsonObject()
+
+        userKey.cajaChica?.let {
+            val cajaChicaArray = JsonArray()
+            it.forEach { item -> cajaChicaArray.add(item) }
+            keysObject.add("cajaChica", cajaChicaArray)
+        }
+        userKey.fichasTecnicas?.let {
+            val fichasTecnicasArray = JsonArray()
+            it.forEach { item -> fichasTecnicasArray.add(item) }
+            keysObject.add("fichasTecnicas", fichasTecnicasArray)
+        }
+        userKey.controlEquipos?.let {
+            val equiposArray = JsonArray()
+            it.forEach { item -> equiposArray.add(item) }
+            keysObject.add("equipos", equiposArray)
+        }
+        userKey.documentos?.let {
+            val documentosArray = JsonArray()
+            it.forEach { item -> documentosArray.add(item) }
+            keysObject.add("documentos", documentosArray)
+        }
+        keysArray.add(keysObject)
+        jsonRequest.add("keys", keysArray)
+
+        return safePeticion(jsonRequest)
+    }
+
+    suspend fun insertMessage(itemContactUs: itemContactUs): Result<JsonElement?> {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "setContactUs")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "Contact Us")
+        val rowArray = JsonArray()
+        rowArray.add(itemContactUs.usuario)
+        rowArray.add(itemContactUs.correo)
+        rowArray.add(itemContactUs.fecha)
+        rowArray.add(itemContactUs.mensaje)
+        jsonRequest.add("rows", rowArray)
         return safePeticion(jsonRequest)
     }
 
@@ -452,7 +504,6 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("action", "getLinkDownload")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
-
         return safePeticion(jsonRequest)
     }
 
@@ -461,6 +512,32 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("action", "getResumengatos")
         jsonRequest.addProperty("idFile", idFile)
 
+        return safePeticion(jsonRequest)
+    }
+
+    suspend fun getEquipos(user:String):Result<JsonElement>{
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "getInvetaryUser")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "SALIDAS")
+        jsonRequest.addProperty("user", user)
+        return safePeticion(jsonRequest)
+    }
+    suspend fun updateEquipo(equipo: equipos): Result<JsonElement?> {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "updateItemInventaryUser")
+        jsonRequest.addProperty("idSheet", idSheet)
+        jsonRequest.addProperty("sheet", "SALIDAS")
+        val rowArray = JsonArray()
+        rowArray.add(equipo.vid)
+        rowArray.add(equipo.marca)
+        rowArray.add(equipo.modelo)
+        rowArray.add(equipo.tecnico)
+        rowArray.add(equipo.fechaEntrega)
+        rowArray.add(equipo.estado)
+        rowArray.add(equipo.comentarios)
+        jsonRequest.add("rows", rowArray)
+        Log.i("BladiDev", jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
 }

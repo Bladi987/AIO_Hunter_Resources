@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="10dp"
     android:layout_marginVertical="1dp"
+    android:backgroundTint="@color/white"
     android:foreground="?android:attr/selectableItemBackground">
 
     <LinearLayout
@@ -24,7 +25,7 @@
             <ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:src="@drawable/user_icon"
+                android:src="@drawable/users_icon"
                 app:tint="#7E7E7E" />
         </LinearLayout>
 
@@ -41,6 +42,7 @@
                 android:layout_weight="0.6"
                 android:maxLines="1"
                 android:textSize="15sp"
+                android:textColor="@color/text_color2"
                 android:textStyle="bold"
                 tools:text="Nombre" />
 
@@ -49,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.4"
-                android:textColor="#65000000"
+                android:textColor="@color/text_color2"
                 android:textSize="12sp"
                 tools:text="Tipo" />
         </LinearLayout>
@@ -64,6 +66,7 @@
                 android:id="@+id/tvUser"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/text_color2"
                 android:maxLines="1"
                 tools:text="Developer" />
         </LinearLayout>
