@@ -5,33 +5,41 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
-import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.kasolution.aiohunterresources.BuildConfig
 import com.kasolution.aiohunterresources.R
 import com.kasolution.aiohunterresources.UI.Access.AccessActivity
 import com.kasolution.aiohunterresources.UI.dashboard.view.Dashboard
-import com.kasolution.aiohunterresources.UI.splashScreen.model.settingsData
-import com.kasolution.aiohunterresources.UI.splashScreen.viewModel.splashViewModel
+import com.kasolution.aiohunterresources.UI.splashScreen.fragment.newVersionFragment
+import com.kasolution.aiohunterresources.UI.splashScreen.viewModel.SplashViewModel
 import com.kasolution.aiohunterresources.core.DialogUtils
 import com.kasolution.aiohunterresources.core.FadeAnimationUtil
 import com.kasolution.aiohunterresources.core.NetworkUtils
 import com.kasolution.aiohunterresources.core.dataConexion.urlId
 import com.kasolution.aiohunterresources.databinding.ActivitySplashBinding
+import java.io.File
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
-    private val SettingsViewModel: splashViewModel by viewModels()
+    private lateinit var splashViewModel: SplashViewModel
     private lateinit var preferencesAccess: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
-    private var versionAPP = ""
+    private var versionAPP:String?=null
+    private var linkUpdate:String?=null
 
     private var urlId: urlId? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        clearFileUpdate()
+        // Obtener el ViewModel usando ViewModelProvider con el contexto de la aplicación
+        splashViewModel = ViewModelProvider(
+            this, ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        ).get(SplashViewModel::class.java)
         preferencesAccess = getSharedPreferences("valuesAccess", Context.MODE_PRIVATE)
         preferencesUser = getSharedPreferences("valueUser", Context.MODE_PRIVATE)
 
@@ -42,7 +50,7 @@ class SplashActivity : AppCompatActivity() {
             if (isConnected) {
                 // La conexión a Internet está disponible
                 //solicitar settings del servidor
-                SettingsViewModel.onCreate(urlId!!)
+                splashViewModel.onCreate(urlId!!)
 //                SettingsViewModel.onCreate(urlId)
             } else {
                 DialogUtils.dialogMessage(
@@ -58,12 +66,14 @@ class SplashActivity : AppCompatActivity() {
             }
         }
 
-        SettingsViewModel.versionAPP.observe(this, Observer { result ->
+        splashViewModel.dataSettings.observe(this, Observer { result ->
+            Log.d("SplashActivity", "versionAPP: $result")
             result?.let { respuesta ->
                 if (respuesta.isSuccess) {
                     val data = respuesta.getOrNull()
-                    data?.let { version ->
-                        versionAPP = version
+                    data?.let { data ->
+                        versionAPP = data.first
+                        linkUpdate = data.second
                     }
                 } else {
                     val exception = respuesta.exceptionOrNull()
@@ -73,15 +83,15 @@ class SplashActivity : AppCompatActivity() {
                 }
             }
         })
-        SettingsViewModel.isloading.observe(this, Observer { loading ->
+        splashViewModel.isloading.observe(this, Observer { loading ->
             if (loading) {
                 FadeAnimationUtil.startFadeAnimation(binding.imgLogo)
-
             } else {
                 FadeAnimationUtil.stopFadeAnimation(binding.imgLogo)
-                //direccionar()
-
-                saveprefCheckVersionSettings(versionAPP)
+                if (versionAPP != null)
+                saveprefCheckVersionSettings()
+                else
+                    showMessageError("101") //no se encontro version
             }
 
         })
@@ -90,17 +100,22 @@ class SplashActivity : AppCompatActivity() {
     }
 
 
-    private fun saveprefCheckVersionSettings(versionAPP: String) {
-        if (versionAPP.isNotEmpty()) {
+    private fun saveprefCheckVersionSettings() {
+        if (!versionAPP.isNullOrEmpty()) {
             if (BuildConfig.VERSION_NAME != versionAPP) {
                 //existe una nueva version
-                DialogUtils.dialogMessage(
-                    this,
-                    imagen = R.drawable.new_update_lite,
-                    "Existe una Version nueva, necesita ser actualizada. Solicite a su Administrador dicha actualizacion",
-                    countOption = 2,
-                    onPositiveClick = { finish() },
-                    onNegativeClick = { finish() })
+                if (!linkUpdate.isNullOrEmpty()){
+                    val dialogFragment = newVersionFragment()
+                    dialogFragment.isCancelable = false
+                    val args = Bundle().apply {
+                        putString("message", "Existe una Version nueva, necesita ser actualizada.")
+                        putString("linkUpdate", linkUpdate)
+                    }
+                    dialogFragment.arguments = args
+                    dialogFragment.show(supportFragmentManager, "newVersionFragment")
+                }else showMessageError("102") //no se encontro link de descarga
+
+
             } else {
                 //no hay version nueva
                 if (recuperarPreferenciasUser()) {
@@ -127,7 +142,7 @@ class SplashActivity : AppCompatActivity() {
                 putString("IDSHEETACCESS", newIdSheet)
             }.apply()
             urlId = urlId(idScript = newIdScript, idSheet = newIdSheet, idFile = "", sheetName = "")
-        }else{
+        } else {
             urlId = urlId(idScript = idScript, idSheet = idSheet, idFile = "", sheetName = "")
         }
     }
@@ -150,5 +165,19 @@ class SplashActivity : AppCompatActivity() {
                 finish()
             }
         )
+    }
+
+    private fun clearFileUpdate() {
+        val file = File(this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "update.apk")
+        if (file.exists()) {
+            val eliminado = file.delete()
+            if (eliminado) {
+                Log.i("APK", "Archivo eliminado correctamente.")
+            } else {
+                Log.e("APK", "No se pudo eliminar el archivo.")
+            }
+        } else {
+            Log.w("APK", "El archivo no existe.")
+        }
     }
 }
