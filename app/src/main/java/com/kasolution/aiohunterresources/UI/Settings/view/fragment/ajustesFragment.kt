@@ -258,35 +258,67 @@ class ajustesFragment : Fragment() {
             }
 
             val ids = binding.tvInputData.text.toString().split("->")
-            when (ids.size) {
-                2 -> validarIds(
-                    ids[0],
-                    ids[1],
-                    null,
-                    binding.tvInputData,
-                    binding.progressBar,
-                    binding.imgIcon,
-                    binding.imgPaste,
-                    dialog,
-                    binding.etMontoCajaChica.text.toString(),
-                    position
-                )
+            if (ids.size>1){
+                if (tittle == cajaChica) {
+                    validarIds(
+                        ids[0],
+                        null,
+                        ids[1],
+                        binding.tvInputData,
+                        binding.progressBar,
+                        binding.imgIcon,
+                        binding.imgPaste,
+                        dialog,
+                        binding.etMontoCajaChica.text.toString(),
+                        position
+                    )
+                }else{
+                    validarIds(
+                        ids[0],
+                        ids[1],
+                        null,
+                        binding.tvInputData,
+                        binding.progressBar,
+                        binding.imgIcon,
+                        binding.imgPaste,
+                        dialog,
+                        binding.etMontoCajaChica.text.toString(),
+                        position
+                    )
+                }
+            }else binding.tvInputData.setError("Codigo invalido")
 
-                3 -> validarIds(
-                    ids[0],
-                    ids[2],
-                    ids[1],
-                    binding.tvInputData,
-                    binding.progressBar,
-                    binding.imgIcon,
-                    binding.imgPaste,
-                    dialog,
-                    binding.etMontoCajaChica.text.toString(),
-                    position
-                )
 
-                else -> binding.tvInputData.setError("Codigo invalido")
-            }
+
+//            when (ids.size) {
+//                2 -> validarIds(
+//                    ids[0],
+//                    ids[1],
+//                    null,
+//                    binding.tvInputData,
+//                    binding.progressBar,
+//                    binding.imgIcon,
+//                    binding.imgPaste,
+//                    dialog,
+//                    binding.etMontoCajaChica.text.toString(),
+//                    position
+//                )
+//
+//                3 -> validarIds(
+//                    ids[0],
+//                    ids[2],
+//                    ids[1],
+//                    binding.tvInputData,
+//                    binding.progressBar,
+//                    binding.imgIcon,
+//                    binding.imgPaste,
+//                    dialog,
+//                    binding.etMontoCajaChica.text.toString(),
+//                    position
+//                )
+//
+//                else -> binding.tvInputData.setError("Codigo invalido")
+//            }
 
         }
         binding.imgPaste.setOnClickListener() {
@@ -343,7 +375,7 @@ class ajustesFragment : Fragment() {
         val idSheetDocumentos = preferencesDocumentos.getString("IDSHEET_DOCUMENTOS", null)
         Log.i("BladiDev","documentos: $urlDocumentos $idSheetDocumentos")
 
-        if (urlCc != null && idfileCc != null && idSheetLiquidacionCc != null) {
+        if (urlCc != null && idfileCc != null ) {
             funcionLista.add(
                 funcionModelList(
                     R.drawable.ic_gastos,
@@ -391,10 +423,7 @@ class ajustesFragment : Fragment() {
     }
 
     private fun savePreferences(
-        dialog: AlertDialog,
-        namePreferences: SharedPreferences,
-        datos: Map<String, String>
-    ) {
+        dialog: AlertDialog, namePreferences: SharedPreferences, datos: Map<String, String>) {
         val editor = namePreferences.edit()
         for ((key, value) in datos) {
             editor.putString(key, value)
@@ -492,13 +521,13 @@ class ajustesFragment : Fragment() {
     ) {
         Log.i("BladiDev", "validarIds: $idScript $idSheet $idFolder")
         var validacionesCorrectas = 0
-        var nroSelection = 0
+        var nroSelection: Int
         val totalValidaciones = listOfNotNull(idScript, idSheet, idFolder).size
         var validacionesPendientes = totalValidaciones
         progressBar?.visibility = View.VISIBLE
         paste?.visibility = View.GONE
         fun asambledSetKey(nroSelection: Int) {
-            val cajaChica = if (nroSelection == 1) listOf(monto!!,idScript!!, idFolder!!, idSheet!!) else listOf("","", "", "")
+            val cajaChica = if (nroSelection == 1) listOf(monto!!,idScript!!, idFolder!!) else listOf("","", "")
             val fichasTecnicas = if (nroSelection == 2) listOf(idScript!!, idSheet!!) else listOf("", "")
             val controlEquipos = if (nroSelection == 3) listOf(idScript!!, idSheet!!) else listOf("", "")
             val documentos = if (nroSelection == 4) listOf(idScript!!, idSheet!!) else listOf("", "")
@@ -509,7 +538,6 @@ class ajustesFragment : Fragment() {
                 controlEquipos = controlEquipos,
                 documentos = documentos
             )
-
             settingsViewModel.setKeys(urlId!!, userName, userkeys)
         }
 
@@ -529,8 +557,7 @@ class ajustesFragment : Fragment() {
                                     mapOf(
                                         "MONTOCAJACHICA" to (monto ?: ""),
                                         "URL_SCRIPT" to (idScript ?: ""),
-                                        "IDFILE" to (idFolder ?: ""),
-                                        "IDSHEETLIQUIDACION" to (idSheet ?: "")
+                                        "IDFILE" to (idFolder ?: "")
                                     )
                                 )
                                 funcionLista.add(
@@ -541,7 +568,6 @@ class ajustesFragment : Fragment() {
                                     )
                                 )
                             }
-
                             fichasTecnicas -> {
                                 nroSelection = 2
                                 savePreferences(
@@ -559,7 +585,6 @@ class ajustesFragment : Fragment() {
                                     )
                                 )
                             }
-
                             controlEquipos -> {
                                 nroSelection = 3
                                 savePreferences(
@@ -577,7 +602,6 @@ class ajustesFragment : Fragment() {
                                     )
                                 )
                             }
-
                             else -> {
                                 nroSelection = 4
                                 savePreferences(
@@ -613,11 +637,10 @@ class ajustesFragment : Fragment() {
 
 
         idScript?.takeIf { it.isNotBlank() }?.let { script ->
-
             validarIdScript(script) { esValido ->
                 if (esValido) validacionesCorrectas++
                 validacionesPendientes--
-                procesarResultados() // Llamar fuera del if
+                procesarResultados()
                 Log.i("resultado", "idScript: $esValido")
             }
         }
@@ -626,7 +649,7 @@ class ajustesFragment : Fragment() {
             validarIdSheet(sheet) { esValido ->
                 if (esValido) validacionesCorrectas++
                 validacionesPendientes--
-                procesarResultados() // Llamar fuera del if
+                procesarResultados()
                 Log.i("resultado", "idSheet: $esValido")
             }
         }
@@ -635,7 +658,7 @@ class ajustesFragment : Fragment() {
             validarIdFile(folder) { esValido ->
                 if (esValido) validacionesCorrectas++
                 validacionesPendientes--
-                procesarResultados() // Llamar fuera del if
+                procesarResultados()
                 Log.i("resultado", "idFolder: $esValido")
             }
         }

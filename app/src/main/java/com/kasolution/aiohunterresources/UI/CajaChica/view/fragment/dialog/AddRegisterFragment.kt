@@ -33,7 +33,7 @@ class AddRegisterFragment : DialogFragment() {
     private lateinit var preferencesCajaChica: SharedPreferences
     var sustento = false
     var tipoGasto = 0
-    var ultimaUbicacion=""
+    var ultimaUbicacion = ""
     private var register: register? = null
     var idRegister = ""
     override fun onCreateView(
@@ -60,14 +60,15 @@ class AddRegisterFragment : DialogFragment() {
                 register = it.getSerializable("register")!! as register
             }
         }
-        preferencesCajaChica = requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
-        recuperarPreferencias()
+        preferencesCajaChica =
+            requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
+//        recuperarPreferencias()
         calcularTamano()
 
         if (register == null) {
             //es registro nuevo
             binding.tvFecha.text = obtenerFecha()
-            binding.txtLugar.setText(ultimaUbicacion)
+//            binding.txtLugar.setText(ultimaUbicacion)
             binding.tvtitle.text = "Nuevo Registro"
             binding.imgSSustento.setColorFilter(
                 ContextCompat.getColor(requireContext(), R.color.boton_verde),
@@ -136,31 +137,58 @@ class AddRegisterFragment : DialogFragment() {
                 binding.lysustento.visibility = View.GONE
             }
             //se seleccionara el boton correspondiente
+            when (register!!.motivo) {
+                "MOVILIDAD" -> {
+                    ImageViewCompat.setImageTintList(
+                        binding.btnmovilidad,
+                        ColorStateList.valueOf(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.boton_verde
+                            )
+                        )
+                    )
+                    tipoGasto = 1
+                }
 
-            if (register!!.c_movilidad.isNotEmpty() || register!!.s_movilidad.isNotEmpty()) {
-                ImageViewCompat.setImageTintList(
-                    binding.btnmovilidad,
-                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.boton_verde))
-                )
-                tipoGasto = 1
-            } else if (register!!.c_alimentacion.isNotEmpty() || register!!.s_alimentacion.isNotEmpty()) {
-                ImageViewCompat.setImageTintList(
-                    binding.btnalimentacion,
-                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.boton_verde))
-                )
-                tipoGasto = 2
-            } else if (register!!.c_alojamiento.isNotEmpty() || register!!.s_alojamiento.isNotEmpty()) {
-                ImageViewCompat.setImageTintList(
-                    binding.btnalojamiento,
-                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.boton_verde))
-                )
-                tipoGasto = 3
-            } else {
-                ImageViewCompat.setImageTintList(
-                    binding.btnotros,
-                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.boton_verde))
-                )
-                tipoGasto = 4
+                "ALIMENTACION" -> {
+                    ImageViewCompat.setImageTintList(
+                        binding.btnalimentacion,
+                        ColorStateList.valueOf(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.boton_verde
+                            )
+                        )
+                    )
+                    tipoGasto = 2
+                }
+
+                "ALOJAMIENTO" -> {
+                    ImageViewCompat.setImageTintList(
+                        binding.btnalojamiento,
+                        ColorStateList.valueOf(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.boton_verde
+                            )
+                        )
+                    )
+                    tipoGasto = 3
+                }
+
+                else -> {
+                    ImageViewCompat.setImageTintList(
+                        binding.btnotros,
+                        ColorStateList.valueOf(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.boton_verde
+                            )
+                        )
+                    )
+                    tipoGasto = 4
+                }
             }
 
             //se seleccionara el radiobutton correspondiente
@@ -175,39 +203,35 @@ class AddRegisterFragment : DialogFragment() {
             //guardamos el id del registro seleccionado para actualizarlo
             idRegister = register!!.id
             binding.tvFecha.text = register!!.fecha
-            binding.txtLugar.setText(register!!.ciudad)
+//            binding.txtLugar.setText(register!!.ciudad)
             binding.tvtitle.text = "Editar Registro"
             //se distribuye los datos en los distinto imputs segun al tipo de gasto
             when (tipoGasto) {
                 1 -> {
                     binding.lyRuta.visibility = View.VISIBLE
                     binding.txtDescripcion.visibility = View.GONE
-                    binding.txtorigen.setText(register!!.descripcion.split("-")[0])
-                    binding.txtdestino.setText(register!!.descripcion.split("-")[1])
+                    binding.txtorigen.setText(register!!.detalle.split("-")[0])
+                    binding.txtdestino.setText(register!!.detalle.split("-")[1])
                 }
 
                 2, 3, 4 -> {
                     binding.lyRuta.visibility = View.GONE
                     binding.txtDescripcion.visibility = View.VISIBLE
                     binding.txtproveedor.setText(register!!.proveedor)
-                    binding.txtDescripcion.setText(register!!.descripcion)
+                    binding.txtDescripcion.setText(register!!.detalle)
                 }
             }
             //buscamos quien tiene el monto y lo recuperamos
-            var montoRecuperado = when {
-                register!!.c_movilidad.isNotEmpty() -> register!!.c_movilidad
-                register!!.c_alimentacion.isNotEmpty() -> register!!.c_alimentacion
-                register!!.c_alojamiento.isNotEmpty() -> register!!.c_alojamiento
-                register!!.c_otros.isNotEmpty() -> register!!.c_otros
-                register!!.s_movilidad.isNotEmpty() -> register!!.s_movilidad
-                register!!.s_alimentacion.isNotEmpty() -> register!!.s_alimentacion
-                register!!.s_alojamiento.isNotEmpty() -> register!!.s_alojamiento
-                register!!.s_otros.isNotEmpty() -> register!!.s_otros
-                else -> ""
-            }
+            val montoRecuperado = register!!.monto
             //le damos formato al monto que recuperamos y lo colocamos en su respectivo input
             if (montoRecuperado.startsWith("S")) binding.txtMonto.setText(montoRecuperado.split("/")[1].trim())
-            else binding.txtMonto.setText(String.format(Locale.getDefault(), "%.2f", formatearMonto(montoRecuperado).toFloat()).trim())
+            else binding.txtMonto.setText(
+                String.format(
+                    Locale.getDefault(),
+                    "%.2f",
+                    formatearMonto(montoRecuperado).toFloat()
+                ).trim()
+            )
 
         }
 
@@ -318,7 +342,7 @@ class AddRegisterFragment : DialogFragment() {
             if (sustento) {
                 if (tipoGasto == 1) {
                     textosVacios = when {
-                        validatetvVacio(binding.txtLugar, mensajeError) -> true
+                        validatetvVacio(binding.txtRuc, mensajeError) -> true
                         validatetvVacio(binding.txtserie, mensajeError) -> true
                         validatetvVacio(binding.txtcorrelativo, mensajeError) -> true
                         validatetvVacio(binding.txtproveedor, mensajeError) -> true
@@ -329,7 +353,7 @@ class AddRegisterFragment : DialogFragment() {
                     }
                 } else {
                     textosVacios = when {
-                        validatetvVacio(binding.txtLugar, mensajeError) -> true
+                        validatetvVacio(binding.txtRuc, mensajeError) -> true
                         validatetvVacio(binding.txtserie, mensajeError) -> true
                         validatetvVacio(binding.txtcorrelativo, mensajeError) -> true
                         validatetvVacio(binding.txtproveedor, mensajeError) -> true
@@ -341,7 +365,6 @@ class AddRegisterFragment : DialogFragment() {
             } else {
                 if (tipoGasto == 1) {
                     textosVacios = when {
-                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtorigen, mensajeError) -> true
                         validatetvVacio(binding.txtdestino, mensajeError) -> true
                         validatetvVacio(binding.txtMonto, mensajeError) -> true
@@ -349,7 +372,6 @@ class AddRegisterFragment : DialogFragment() {
                     }
                 } else {
                     textosVacios = when {
-                        validatetvVacio(binding.txtLugar, mensajeError) -> true
                         validatetvVacio(binding.txtDescripcion, mensajeError) -> true
                         validatetvVacio(binding.txtMonto, mensajeError) -> true
                         else -> false
@@ -379,124 +401,51 @@ class AddRegisterFragment : DialogFragment() {
                     if (!sustento) tipoDoc = ""
                     listener?.onDataCollected(
                         register(
-                            "",
-                            binding.tvFecha.text.toString(),
-                            binding.txtLugar.text.toString(),
-                            tipoDoc,
-                            nroDocumento,
-                            binding.txtproveedor.text.toString().trim(),
-                            descripcion,
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                1,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                2,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                3,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                4,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                5,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                6,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                7,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                8,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            )
+                            id = "",
+                            fecha = binding.tvFecha.text.toString(),
+                            tipoDoc = tipoDoc,
+                            nroDoc = nroDocumento,
+                            ruc = binding.txtRuc.text.toString(),
+                            proveedor = binding.txtproveedor.text.toString().trim(),
+                            detalle = descripcion,
+                            motivo = when (tipoGasto) {
+                                1 -> "MOVILIDAD"
+                                2 -> "ALIMENTACION"
+                                3 -> "ALOJAMIENTO"
+                                else -> "OTROS"
+                            },
+                            tipoGasto = when (sustento) {
+                                true -> "0" //pasara 0 si es con sustento
+                                else -> "1" //pasara 1 si es sin sustento
+                            },
+                            monto = formatearMonto(binding.txtMonto.text.toString().trim())
                         )
                     )
                     idRegister = ""
-                    actualizarUltimaUbicacion(binding.txtLugar.text.toString())
                 } else {
                     if (!sustento) tipoDoc = ""
                     //se realizara una actualizacion de registro
                     listener?.onDataCollectedUpdate(
                         register(
-                            idRegister,
-                            binding.tvFecha.text.toString(),
-                            binding.txtLugar.text.toString(),
-                            tipoDoc,
-                            nroDocumento,
-                            binding.txtproveedor.text.toString().trim(),
-                            descripcion,
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                1,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                2,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                3,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                4,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                5,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                6,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                7,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
-                            ),
-                            identificarGasto(
-                                sustento,
-                                tipoGasto,
-                                8,
-                                formatearMonto(binding.txtMonto.text.toString().trim())
+                            id=idRegister,
+                            fecha=binding.tvFecha.text.toString(),
+                            tipoDoc=tipoDoc,
+                            nroDoc=nroDocumento,
+                            ruc=binding.txtRuc.text.toString(),
+                            proveedor=binding.txtproveedor.text.toString().trim(),
+                            detalle=descripcion,
+                            motivo = when (tipoGasto) {
+                                1 -> "MOVILIDAD"
+                                2 -> "ALIMENTACION"
+                                3 -> "ALOJAMIENTO"
+                                else -> "OTROS"
+                            },
+                            tipoGasto = when (sustento) {
+                                true -> "0"
+                                else -> "1"
+                            },
+                            monto = formatearMonto(
+                                binding.txtMonto.text.toString().trim()
                             )
                         )
                     )
@@ -504,20 +453,14 @@ class AddRegisterFragment : DialogFragment() {
                 dismiss()
             }
         }
-        binding.btnCancelar.setOnClickListener(){
+        binding.btnCancelar.setOnClickListener() {
             dismiss()
         }
     }
 
-    private fun actualizarUltimaUbicacion(ultimoLugar: String) {
-        val editor = preferencesCajaChica.edit()
-        editor.putString("ULTIMA_UBICACION", ultimoLugar)
-        editor.apply()
-    }
-
-    private fun recuperarPreferencias() {
-        ultimaUbicacion = preferencesCajaChica.getString("ULTIMA_UBICACION", "").toString()
-    }
+//    private fun recuperarPreferencias() {
+//        ultimaUbicacion = preferencesCajaChica.getString("ULTIMA_UBICACION", "").toString()
+//    }
 
     private fun identificarGasto(
         b_CS: Boolean,
@@ -545,17 +488,10 @@ class AddRegisterFragment : DialogFragment() {
         var Monto = ""
         if (monto != "") {
             Monto = monto.replace("S/.", "S/ ")
-            Monto = Monto.replace(",", ".")
+            Monto = Monto.replace(".", ",")
         }
         return Monto
     }
-//    private fun formatearMonto(monto: String): String {
-//        return monto
-//            .takeIf { it.isNotEmpty() } // Verifica que no esté vacío
-//            ?.replace("S/.", "S/ ")
-//            ?.replace(",", ".")
-//            ?: ""                        // Devuelve cadena vacía si es null o vacío
-//    }
 
     private fun selectedButton(buttonSelected: ImageView) {
         val buttons = listOf(

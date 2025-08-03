@@ -57,28 +57,48 @@ class RegisterAdapter(
 
             binding.lblid.text = lista.id
             binding.lblfecha.text = lista.fecha
-            binding.lblciudad.text = lista.ciudad
             binding.lbltipoDoc.text = lista.tipoDoc
             binding.lblNroDoc.text = lista.nroDoc
             binding.lblProveedor.text = lista.proveedor
-            binding.lblDescripcion.text = lista.descripcion
+            binding.lblDescripcion.text = lista.detalle
+            binding.lblRuc.text = lista.ruc
+
 
             // Manejo de tipo de gasto
 
 
-            val tipoGastos = when {
-                lista.c_movilidad.isNotEmpty() -> Pair("Con sustento", "Movilidad")
-                lista.c_alimentacion.isNotEmpty() -> Pair("Con sustento", "Alimentacion")
-                lista.c_alojamiento.isNotEmpty() -> Pair("Con sustento", "Alojamiento")
-                lista.c_otros.isNotEmpty() -> Pair("Con sustento", "Otros")
-                lista.s_movilidad.isNotEmpty() -> Pair("Sin sustento", "Movilidad")
-                lista.s_alimentacion.isNotEmpty() -> Pair("Sin sustento", "Alimentacion")
-                lista.s_alojamiento.isNotEmpty() -> Pair("Sin sustento", "Alojamiento")
-                lista.s_otros.isNotEmpty() -> Pair("Sin sustento", "Otros")
-                else -> null
-            }
+//            val tipoGastos = when {
+//
+//                lista.c_movilidad.isNotEmpty() -> Pair("Con sustento", "Movilidad")
+//                lista.c_alimentacion.isNotEmpty() -> Pair("Con sustento", "Alimentacion")
+//                lista.c_alojamiento.isNotEmpty() -> Pair("Con sustento", "Alojamiento")
+//                lista.c_otros.isNotEmpty() -> Pair("Con sustento", "Otros")
+//                lista.s_movilidad.isNotEmpty() -> Pair("Sin sustento", "Movilidad")
+//                lista.s_alimentacion.isNotEmpty() -> Pair("Sin sustento", "Alimentacion")
+//                lista.s_alojamiento.isNotEmpty() -> Pair("Sin sustento", "Alojamiento")
+//                lista.s_otros.isNotEmpty() -> Pair("Sin sustento", "Otros")
+//                else -> null
+//            }
 
-            val (tipoSustento, tipoGastoDetalle) = tipoGastos ?: Pair("", "")
+            val tipoGastos =
+                if (lista.tipoGasto == "0") {
+                    when (lista.motivo) {
+                        "MOVILIDAD" -> Pair("Con sustento", "Movilidad")
+                        "ALIMENTACION" -> Pair("Con sustento", "Alimentacion")
+                        "ALOJAMIENTO" -> Pair("Con sustento", "Alojamiento")
+                        else -> Pair("Con sustento", "Otros")
+                    }
+                } else {
+                    when (lista.motivo) {
+                        "MOVILIDAD" -> Pair("Sin sustento", "Movilidad")
+                        "ALIMENTACION" -> Pair("Sin sustento", "Alimentacion")
+                        "ALOJAMIENTO" -> Pair("Sin sustento", "Alojamiento")
+                        else -> Pair("Sin sustento", "Otros")
+                    }
+                }
+
+
+            val (tipoSustento, tipoGastoDetalle) = tipoGastos
             binding.lbltipoGasto.text = tipoSustento
             binding.lbltipoGastoDetalle.text = tipoGastoDetalle
             when (tipoGastoDetalle) {
@@ -88,27 +108,21 @@ class RegisterAdapter(
                 else -> binding.imgIcon.setImageResource(R.drawable.otros_icon)
             }
             // Manejo de monto
-            val monto = when (tipoGastoDetalle) {
-                "Movilidad" -> lista.c_movilidad
-                "Alimentacion" -> lista.c_alimentacion
-                "Alojamiento" -> lista.c_alojamiento
-                "Otros" -> lista.c_otros
-                else -> ""
-            }
+            var monto = lista.monto
 
-            var MontoTemp = if (monto.isNotEmpty()) monto else when (tipoGastoDetalle) {
-                "Movilidad" -> lista.s_movilidad
-                "Alimentacion" -> lista.s_alimentacion
-                "Alojamiento" -> lista.s_alojamiento
-                "Otros" -> lista.s_otros
-                else -> ""
-            }
-            if (MontoTemp.startsWith("S")) {
-                binding.lblMonto.text = MontoTemp
+//            var MontoTemp = if (monto.isNotEmpty()) monto else when (tipoGastoDetalle) {
+//                "Movilidad" -> lista.s_movilidad
+//                "Alimentacion" -> lista.s_alimentacion
+//                "Alojamiento" -> lista.s_alojamiento
+//                "Otros" -> lista.s_otros
+//                else -> ""
+//            }
+            if (monto.startsWith("S")) {
+                binding.lblMonto.text = monto
             } else {
-                MontoTemp = MontoTemp.replace(",", ".")
+                monto = monto.replace(",", ".")
                 binding.lblMonto.text =
-                    String.format(Locale.getDefault(), "S/ %.2f", MontoTemp.toDoubleOrNull() ?: 0.0)
+                    String.format(Locale.getDefault(), "S/ %.2f", monto.toDoubleOrNull() ?: 0.0)
             }
             binding.cvComprobante.visibility =
                 if (tipoSustento == "Sin sustento") View.GONE else View.VISIBLE

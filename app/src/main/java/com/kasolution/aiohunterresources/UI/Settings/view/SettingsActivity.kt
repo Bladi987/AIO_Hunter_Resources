@@ -53,12 +53,4 @@ class SettingsActivity : AppCompatActivity() {
             super.onBackPressed() // Cierra la actividad si no hay más fragmentos
         }
     }
-//    override fun onBackPressed() {
-//        val resultIntent = Intent()
-//        resultIntent.putExtra("ACTUALIZAR_MENU", true) // Avisamos que hay cambios
-//        setResult(Activity.RESULT_OK, resultIntent)
-//        super.onBackPressed()
-//    }
-
-
 }

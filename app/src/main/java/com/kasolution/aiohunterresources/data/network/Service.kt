@@ -346,7 +346,6 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("action", "getData")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
-
         return safePeticion(jsonRequest)
     }
 
@@ -359,23 +358,14 @@ class Service(urlId: urlId) {
         val rowArray = JsonArray()
         val row1 = JsonArray()
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
+        row1.add(registro.ruc)
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
-
-        //zona con sustento
-        row1.add(registro.c_movilidad)     // cs-movilidad
-        row1.add(registro.c_alimentacion)  //cs-alimentacionc_alimentacion)  //cs-alimentacion
-        row1.add(registro.c_alojamiento)    //cs-alojamiento
-        row1.add(registro.c_otros)    //cs-otros
-        //zona sin sustento
-        row1.add(registro.s_movilidad)    //ss-movildiad
-        row1.add(registro.s_alimentacion)    //cs-alimentacion
-        row1.add(registro.s_alojamiento)    //cs-alojamiento
-        row1.add(registro.s_otros)    //cs-otros
-
+        row1.add(registro.detalle) //descripcion
+        row1.add(registro.motivo)
+        row1.add(registro.tipoGasto)
+        row1.add(registro.monto)
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)
 
@@ -392,21 +382,14 @@ class Service(urlId: urlId) {
         val row1 = JsonArray()
         row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
+        row1.add(registro.ruc)
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
-        //zona con sustento
-        row1.add(registro.c_movilidad)     // cs-movilidad
-        row1.add(registro.c_alimentacion)  //cs-alimentacionc_alimentacion)  //cs-alimentacion
-        row1.add(registro.c_alojamiento)    //cs-alojamiento
-        row1.add(registro.c_otros)    //cs-otros
-        //zona sin sustento
-        row1.add(registro.s_movilidad)    //ss-movildiad
-        row1.add(registro.s_alimentacion)    //cs-alimentacion
-        row1.add(registro.s_alojamiento)    //cs-alojamiento
-        row1.add(registro.s_otros)    //cs-otros
+        row1.add(registro.detalle) //descripcion
+        row1.add(registro.motivo)
+        row1.add(registro.tipoGasto)
+        row1.add(registro.monto)
 
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)
@@ -424,11 +407,10 @@ class Service(urlId: urlId) {
         val row1 = JsonArray()
         row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
+        row1.add(registro.detalle) //descripcion
 
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)

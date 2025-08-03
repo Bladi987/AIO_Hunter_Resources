@@ -41,6 +41,7 @@ class LiquidacionFragment : Fragment() {
     private var messageLoading = "Recuperando..."
     private var idScript = ""
     private var sheetName=""
+    private var idSheet: String? = null
     private lateinit var preferencesCajaChica: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,7 +65,15 @@ class LiquidacionFragment : Fragment() {
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        LiquidacionViewModel.getLiquidacion(urlId!!)
+        if (idSheet!=null) {
+            LiquidacionViewModel.getLiquidacion(urlId!!)
+        }else{
+            Toast.makeText(requireContext(), "La hoja Liquidacion requiere ser configurado", Toast.LENGTH_SHORT).show()
+            requireActivity().supportFragmentManager.popBackStack()
+            //enviamos datos para la configuracion del la hoja liquidacion
+            LiquidacionViewModel.createLiquidacionSheet(urlId!!)
+        }
+
         LiquidacionViewModel.isloading.observe(viewLifecycleOwner, Observer {
             adapter.limpiarSeleccion()
             if (it) DialogProgress.show(requireContext(), messageLoading)
@@ -251,12 +260,12 @@ class LiquidacionFragment : Fragment() {
 
     private fun recuperarPreferencias() {
         idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString()
-        val idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", "").toString()
+        idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", null)
         saldoCajaChica = preferencesCajaChica.getString("SALDODISPONIBLE", "0.00")!!.toDouble()
         urlId = urlId(
             idScript = idScript,
             "",
-            idSheet = idSheet,
+            idSheet = if (idSheet != null) idSheet!! else "",
             ""
         )
     }

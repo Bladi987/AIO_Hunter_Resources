@@ -13,7 +13,6 @@ import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -168,7 +167,7 @@ class RegisterFragment : Fragment(), DialogListener {
                             recent(
                                 icon = R.drawable.register,
                                 titulo = "Gastos -> Movilidad",
-                                detalle = registro.descripcion,
+                                detalle = registro.detalle,
                                 fecha = obtenerFechaActual()
                             )
                         )
@@ -195,7 +194,7 @@ class RegisterFragment : Fragment(), DialogListener {
                             recent(
                                 icon = R.drawable.register,
                                 titulo = "Gastos -> Registro actualizado",
-                                detalle = registro.descripcion,
+                                detalle = registro.detalle,
                                 fecha = obtenerFechaActual()
                             )
                         )
@@ -521,16 +520,7 @@ class RegisterFragment : Fragment(), DialogListener {
     }
 
     private fun determinarGasto(register: register): String {
-        return listOf(
-            register.s_movilidad,
-            register.c_movilidad,
-            register.s_alimentacion,
-            register.c_alimentacion,
-            register.s_alojamiento,
-            register.c_alojamiento,
-            register.s_otros,
-            register.c_otros
-        ).firstOrNull { it.isNotEmpty() } ?: ""
+        return listOf(register.monto).firstOrNull { it.isNotEmpty() } ?: ""
     }
 
     private fun configSwipe() {
@@ -701,7 +691,7 @@ class RegisterFragment : Fragment(), DialogListener {
             positiveButtontext = "Si",
             negativeButtontext = "no",
             onPositiveClick = {
-                messageLoading="Eliminando..."
+                messageLoading = "Eliminando..."
                 itemPosition = position
                 itemRegistro = itemRegister
                 registerViewModel.deleteRegister(urlId!!, itemRegister)
@@ -806,12 +796,12 @@ class RegisterFragment : Fragment(), DialogListener {
 
 
     override fun onDataCollected(register: register) {
-        messageLoading="Guardando..."
+        messageLoading = "Guardando..."
         registerViewModel.insertRegister(urlId!!, register)
     }
 
     override fun onDataCollectedUpdate(register: register) {
-        messageLoading="Modificando..."
+        messageLoading = "Modificando..."
         registerViewModel.updateRegister(urlId!!, register)
     }
 

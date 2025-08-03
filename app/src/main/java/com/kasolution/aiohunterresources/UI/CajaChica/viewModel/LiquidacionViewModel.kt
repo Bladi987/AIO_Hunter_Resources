@@ -35,6 +35,10 @@ class LiquidacionViewModel : ViewModel() {
     var downloadExcelUseCase = downloadExcelUseCase()
     var getSaldoContableUseCase = getResumenGastosUseCase()
 
+    fun createLiquidacionSheet(urlid: urlId) {
+
+    }
+
     fun getLiquidacion(urlid: urlId) {
         viewModelScope.launch {
             try {

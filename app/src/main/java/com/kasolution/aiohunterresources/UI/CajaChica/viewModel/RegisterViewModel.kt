@@ -182,7 +182,7 @@ class RegisterViewModel : ViewModel() {
             var totalSuma = 0.0
 
             // Función auxiliar para agregar al resumen
-            fun agregarAlResumen(campo: String, monto: String?, conSustento: Boolean) {
+            fun agregarAlResumen(campo: String, monto: String?) {
                 if (!monto.isNullOrEmpty()) {
                     val montoNumerico =
                         monto.replace("S/", "").replace(",", "").trim().toDoubleOrNull() ?: 0.0
@@ -199,21 +199,29 @@ class RegisterViewModel : ViewModel() {
 
             // Recorrer cada registro y contar/sumar los montos
             for (registro in response) {
-                // Asumimos que c_ son con sustento y s_ son sin sustento
-                agregarAlResumen("c_movilidad", registro.c_movilidad, true)
-                agregarAlResumen("c_alimentacion", registro.c_alimentacion, true)
-                agregarAlResumen("c_alojamiento", registro.c_alojamiento, true)
-                agregarAlResumen("c_otros", registro.c_otros, true)
-                agregarAlResumen("s_movilidad", registro.s_movilidad, false)
-                agregarAlResumen("s_alimentacion", registro.s_alimentacion, false)
-                agregarAlResumen("s_alojamiento", registro.s_alojamiento, false)
-                agregarAlResumen("s_otros", registro.s_otros, false)
-            }
-            // Agregar totales al resumen
-            resumenResultados["Total Registros"] = Pair(totalRegistros, 0.0)
-            resumenResultados["Total Suma"] = Pair(0, totalSuma)
+                if (registro.tipoGasto == "0") {
+                    //aqui se ejecutara si el tipo de gasto es con sustento
+                    when (registro.motivo) {
+                        "MOVILIDAD" -> agregarAlResumen("c_movilidad", registro.monto)
+                        "ALIMENTACION" -> agregarAlResumen("c_alimentacion", registro.monto)
+                        "ALOJAMIENTO" -> agregarAlResumen("c_alojamiento", registro.monto)
+                        "OTROS" -> agregarAlResumen("c_otros", registro.monto)
+                    }
+                } else {
+                    // aqui se ejecuta si el tipo de gasto es sin sustento
+                    when (registro.motivo) {
+                        "MOVILIDAD" -> agregarAlResumen("s_movilidad", registro.monto)
+                        "ALIMENTACION" -> agregarAlResumen("s_alimentacion", registro.monto)
+                        "ALOJAMIENTO" -> agregarAlResumen("s_alojamiento", registro.monto)
+                        "OTROS" -> agregarAlResumen("s_otros", registro.monto)
+                    }
+                }
+                // Agregar totales al resumen
+                resumenResultados["Total Registros"] = Pair(totalRegistros, 0.0)
+                resumenResultados["Total Suma"] = Pair(0, totalSuma)
 
-            _resumen.value = resumenResultados // Actualiza el LiveData
+                _resumen.value = resumenResultados // Actualiza el LiveData
+            }
         }
     }
 }
