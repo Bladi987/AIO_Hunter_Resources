@@ -7,6 +7,7 @@ data class user(
     @SerializedName("ID")val id: String,
     @SerializedName("NAME")val name: String,
     @SerializedName("LASTNAME")val lastName: String,
+    @SerializedName("IDENTIFICACION")val identification: String,
     @SerializedName("USER")val user: String,
     @SerializedName("PASSWORD") var password: String,
     @SerializedName("TIPO")val tipo: String,

@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment
 
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -47,6 +48,7 @@ class FileFragment : Fragment() {
     private lateinit var files: file
     private var messageLoading = "Recuperando..."
     private var nameTecnico: String? = null
+    private var identifacionUser:String?=null
     private var insert = false
     private var loaded = false
     private lateinit var preferencesCajaChica: SharedPreferences
@@ -240,6 +242,8 @@ class FileFragment : Fragment() {
         )
         nameTecnico =
             preferencesUser.getString("NAME", "") + " " + preferencesUser.getString("LASTNAME", "")
+        identifacionUser=preferencesUser.getString("IDENTIFICATION",null)
+        Log.i("BladiDev","identificacion $identifacionUser")
     }
 
     private fun guardarListaArchivos(listaArchivos: ArrayList<file>?) {
@@ -339,14 +343,22 @@ class FileFragment : Fragment() {
 
         // Lógica de los botones
         binding.btnAdicional.setOnClickListener() {
-            binding.llDatosAdicional.visibility = View.VISIBLE
+            binding.llAdicionales.visibility = View.VISIBLE
             binding.llAdicional.visibility = View.GONE
             binding.llNotificacion.visibility = View.GONE
+            binding.llinclude.tvFechaInicio.text=obtenerFecha()
+            binding.llinclude.tvFechaFin.text=obtenerFecha()
             mostrarAdicional = true
         }
         binding.cbConcentimiento.setOnClickListener() {
             concentimiento = true
             binding.btnCrear.isEnabled = true
+        }
+        binding.llinclude.btnFechaInicio.setOnClickListener {
+            showDatePickerDialog(binding.llinclude.tvFechaInicio)
+        }
+        binding.llinclude.btnFechaFin.setOnClickListener {
+            showDatePickerDialog(binding.llinclude.tvFechaFin)
         }
         binding.btnCrear.setOnClickListener {
             if (binding.tvname.text.toString().isEmpty()) {
@@ -374,7 +386,7 @@ class FileFragment : Fragment() {
                                 "",
                                 binding.tvname.text.toString().trim()
                             ),
-                            listOf("Hoja 1", nameTecnico.toString(), "", "")
+                            listOf("Hoja 1", nameTecnico.toString(), identifacionUser.toString(), "","","")
                         )
                         dialog.dismiss()
                         insert = true
@@ -382,7 +394,7 @@ class FileFragment : Fragment() {
                         if (mostrarAdicional) {
                             //los campos adicionales esta visibles, evaluar si estan con datos
                             val editTexts =
-                                listOf(binding.tvFirstSheet, binding.tvDestino, binding.tvFecha)
+                                listOf(binding.llinclude.tvname, binding.llinclude.tvDestino)
                             val isValid = validarEdittext(editTexts)
                             if (isValid) {
                                 // Si todos los campos son válidos, continuar con el proceso
@@ -394,10 +406,12 @@ class FileFragment : Fragment() {
                                         binding.tvname.text.toString().trim()
                                     ),
                                     listOf(
-                                        binding.tvFirstSheet.text.toString().trim(),
+                                        binding.llinclude.tvname.text.toString().trim(),
                                         nameTecnico.toString(),
-                                        binding.tvDestino.text.toString().trim(),
-                                        binding.tvFecha.text.toString().trim()
+                                        identifacionUser.toString(),
+                                        binding.llinclude.tvDestino.text.toString().trim(),
+                                        binding.llinclude.tvFechaInicio.text.toString().trim(),
+                                        binding.llinclude.tvFechaFin.text.toString().trim()
                                     )
                                 )
                                 dialog.dismiss()
@@ -517,5 +531,33 @@ class FileFragment : Fragment() {
             message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
             codigo = "Codigo: $error",
         )
+    }
+    private fun obtenerFecha(): String {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 1)
+        val dayOfMonth =
+            String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH))
+        return "$dayOfMonth/$month/$year"
+    }
+    private fun showDatePickerDialog(textView: TextView) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog =
+            DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
+                val formattedDate = String.format(
+                    Locale.getDefault(),
+                    "%02d/%02d/%04d",
+                    selectedDay,
+                    selectedMonth + 1,
+                    selectedYear
+                )
+                textView.text = formattedDate
+            }, year, month, day)
+
+        datePickerDialog.show()
     }
 }

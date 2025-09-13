@@ -11,6 +11,7 @@ class getResumenGastosUseCase() {
     suspend operator fun invoke(urlId: urlId): Result<String> {
         lateinit var saldoContable: String
         val responseResult = repository.getResumenGastos(urlId)
+        Log.i("BladiDev", "saldo recibido: $responseResult")
         return when (responseResult.isSuccess) {
             true -> {
                 val response = responseResult.getOrNull()?.asJsonObject

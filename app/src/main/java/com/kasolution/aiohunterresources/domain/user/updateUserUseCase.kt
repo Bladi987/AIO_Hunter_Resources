@@ -23,10 +23,11 @@ class updateUserUseCase() {
                         data[3].asString,
                         data[4].asString,
                         data[5].asString,
+                        data[6].asString,
                         ""
                     )
                 } else {
-                    datauser = user("", "", "", "", "", "","")
+                    datauser = user("", "", "", "", "", "","","")
                 }
                 Result.success(datauser)
             }

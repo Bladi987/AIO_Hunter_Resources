@@ -101,7 +101,10 @@ class UserViewModel : ViewModel() {
                 val response = updateUserUseCase(urlid, user)
                 if (response.isSuccess) {
                     response.getOrNull()?.let { registro ->
-                        if (action == "reset") reset.postValue(true)
+                        if (action == "reset") {
+                            reset.postValue(true)
+                            updateUser.postValue(Result.success(registro))
+                        }
                         else updateUser.postValue(Result.success(registro))
                     }
                 } else {

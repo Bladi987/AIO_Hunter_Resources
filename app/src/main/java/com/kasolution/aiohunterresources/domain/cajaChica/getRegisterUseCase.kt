@@ -16,7 +16,6 @@ class getRegisterUseCase() {
 
         // Llamamos al repositorio para obtener el resultado de getRegister
         val responseResult = repository.getRegister(urlId)
-
         return when (responseResult.isSuccess) {
             true -> {
                 // Si la llamada fue exitosa, procesamos la respuesta
@@ -26,64 +25,18 @@ class getRegisterUseCase() {
                 if (data != null) {
                     for (i in data.size() - 1 downTo 0) {
                         val jsonObject = data.get(i).asJsonObject
-                        val id = jsonObject.get("id").asString
+                        val id = jsonObject.get("index").asString
                         val fecha = jsonObject.get("Fecha").asString
-                        val ciudad = jsonObject.get("Ciudad").asString
                         val tipoDoc = jsonObject.get("TipoDoc").asString
                         val nroDoc = jsonObject.get("NroDoc").asString
+                        val ruc = jsonObject.get("Ruc").asString
                         val proveedor = jsonObject.get("Proveedor").asString
-                        val descripcion = jsonObject.get("Descripcion").asString
-                        var c_movilidad = ""
-                        var c_alimentacion = ""
-                        var c_alojamiento = ""
-                        var c_otros = ""
-                        var s_movilidad = ""
-                        var s_alimentacion = ""
-                        var s_alojamiento = ""
-                        var s_otros = ""
-                        var Monto = ""
-
-                        when (jsonObject.size()) {
-                            8 -> c_movilidad =
-                                formatearMonto(jsonObject.get("cs-Movilidad").asString)
-
-                            9 -> c_alimentacion =
-                                formatearMonto(jsonObject.get("cs-Alimentación").asString)
-
-                            10 -> c_alojamiento =
-                                formatearMonto(jsonObject.get("cs-Alojamiento").asString)
-
-                            11 -> c_otros = formatearMonto(jsonObject.get("cs-Otros").asString)
-                            12 -> s_movilidad =
-                                formatearMonto(jsonObject.get("ss-Movilidad").asString)
-
-                            13 -> s_alimentacion =
-                                formatearMonto(jsonObject.get("ss-Alimentación").asString)
-
-                            14 -> s_alojamiento =
-                                formatearMonto(jsonObject.get("ss-Alojamiento").asString)
-
-                            15 -> s_otros = formatearMonto(jsonObject.get("ss-Otros").asString)
-                        }
-
+                        var detalle = jsonObject.get("Detalle").asString
+                        var motivo = jsonObject.get("Motivo").asString
+                        var tipoGasto = jsonObject.get("TipoGasto").asString
+                        var monto = formatearMonto(jsonObject.get("Monto").asString)
                         lista.add(
-                            register(
-                                id,
-                                fecha,
-                                ciudad,
-                                tipoDoc,
-                                nroDoc,
-                                proveedor,
-                                descripcion,
-                                c_movilidad,
-                                c_alimentacion,
-                                c_alojamiento,
-                                c_otros,
-                                s_movilidad,
-                                s_alimentacion,
-                                s_alojamiento,
-                                s_otros
-                            )
+                            register(id, fecha, tipoDoc, nroDoc, ruc, proveedor, detalle, motivo, tipoGasto, monto)
                         )
                     }
                 }

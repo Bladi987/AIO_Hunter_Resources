@@ -208,19 +208,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_marginBottom="10dp"
+            android:gravity="center"
             android:weightSum="1">
 
-            <EditText
-                android:id="@+id/txtLugar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="0.5"
-                android:background="@drawable/border_dialog_white"
-                android:inputType="textCapCharacters"
-                android:hint="Ingrese lugar"
-                android:textAlignment="center"
-                android:textColor="@color/text_color2" />
 
             <LinearLayout
                 android:id="@+id/btnFecha"
@@ -261,7 +251,8 @@
             android:layout_marginBottom="10dp"
             android:background="@drawable/border_dialog_white"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:layout_width="match_parent"
@@ -313,7 +304,41 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/txtRuc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/border_dialog_white"
+                        android:hint="Ingrese RUC"
+                        android:inputType="number"
+                        android:maxLength="11"
+                        android:textAlignment="center"
+                        android:textColor="@color/text_color2" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/txtproveedor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/border_dialog_white"
+                        android:hint="Proveedor"
+                        android:textAlignment="center"
+                        android:inputType="textCapCharacters"
+                        android:maxLines="1"
+                        android:textColor="@color/text_color2" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
                     android:weightSum="1">
 
                     <EditText
@@ -350,14 +375,7 @@
                         android:textColor="@color/text_color2" />
                 </LinearLayout>
 
-                <EditText
-                    android:id="@+id/txtproveedor"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/border_dialog_white"
-                    android:hint="Proveedor"
-                    android:textColor="@color/text_color2" />
+
             </LinearLayout>
         </LinearLayout>
 

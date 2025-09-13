@@ -46,12 +46,10 @@ class ajustesDetailsFragment : Fragment() {
     private val cajaChica = "Caja Chica"
     private val fichasTecnicas = "Fichas Técnicas"
     private val controlEquipos = "Control de Equipos"
-    private val documentos = "Documentos"
 
     private var monto: String? = null
     private var idScript: String? = null
-    private var idfile: String? = null
-    private var idSheet: String? = null
+    private var idSheetFolder: String? = null
     private var saveItem: ArrayList<String>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,39 +78,36 @@ class ajustesDetailsFragment : Fragment() {
                 }
             }
             saveItem = arrayListOf()
-            val montoLimpioEditText = binding.etMontoCajaChica.text.toString().replace("S/ ", "").trim()
-            if (binding.etMontoCajaChica.text.toString().isNotEmpty() && montoLimpioEditText != monto) {
+            val montoLimpioEditText =
+                binding.etMontoCajaChica.text.toString().replace("S/ ", "").trim()
+            if (binding.etMontoCajaChica.text.toString()
+                    .isNotEmpty() && montoLimpioEditText != monto
+            ) {
                 Log.i("BladiDev", "Monto: $montoLimpioEditText")
                 Log.i("BladiDev", "Monto: $monto")
                 saveItem?.add("Monto caja Chica")
                 val montoLimpio = binding.etMontoCajaChica.text.toString().replace("S/ ", "").trim()
                 preferencesCajaChica.edit()
                     .putString("MONTOCAJACHICA", montoLimpio).apply()
-                monto= montoLimpio
+                monto = montoLimpio
             }
             validarIds(
                 idScript = if (binding.etInputUrl.text.toString() != idScript) binding.etInputUrl.text.toString() else null,
-                idSheet = if (binding.etInputIdSheet.text.toString() != idSheet) binding.etInputIdSheet.text.toString() else null,
-                idFolder = if (binding.llIdFile.visibility == View.VISIBLE && binding.etInputIdFile.text.toString() != idfile) binding.etInputIdFile.text.toString() else null,
+                idSheetFolder = if (binding.etInputIdSheetIdFile.text.toString() != idSheetFolder) binding.etInputIdSheetIdFile.text.toString() else null,
                 progressBarScript = if (binding.etInputUrl.text.toString() != idScript) binding.progressScript else null,
-                progressBarSheet = if (binding.etInputIdSheet.text.toString() != idSheet) binding.progressSheet else null,
-                progressBarFolder = if (binding.llIdFile.visibility == View.VISIBLE && binding.etInputIdFile.text.toString() != idfile) binding.progressFile else null,
+                progressBarSheetFolder = if (binding.etInputIdSheetIdFile.text.toString() != idSheetFolder) binding.progressSheet else null,
                 iconScript = if (binding.etInputUrl.text.toString() != idScript) binding.iconScript else null,
-                iconSheet = if (binding.etInputIdSheet.text.toString() != idSheet) binding.iconSheet else null,
-                iconFolder = if (binding.llIdFile.visibility == View.VISIBLE && binding.etInputIdFile.text.toString() != idfile) binding.iconFile else null,
+                iconSheetFolder = if (binding.etInputIdSheetIdFile.text.toString() != idSheetFolder) binding.iconSheet else null,
                 pasteScript = if (binding.etInputUrl.text.toString() != idScript) binding.ivPasteScript else null,
-                pasteSheet = if (binding.etInputIdSheet.text.toString() != idSheet) binding.ivPasteSheet else null,
-                pasteFolder = if (binding.llIdFile.visibility == View.VISIBLE && binding.etInputIdFile.text.toString() != idfile) binding.ivPasteFile else null
+                pasteSheetFolder = if (binding.etInputIdSheetIdFile.text.toString() != idSheetFolder) binding.ivPasteSheet else null,
+                isfolder = binding.etMontoCajaChica.visibility == View.VISIBLE
             )
         }
         binding.ivPasteScript.setOnClickListener() {
             pasteCode(binding.etInputUrl)
         }
         binding.ivPasteSheet.setOnClickListener() {
-            pasteCode(binding.etInputIdSheet)
-        }
-        binding.ivPasteFile.setOnClickListener() {
-            pasteCode(binding.etInputIdFile)
+            pasteCode(binding.etInputIdSheetIdFile)
         }
         binding.etMontoCajaChica.addTextChangedListener(CurrencyTextWatcher(binding.etMontoCajaChica))
     }
@@ -125,8 +120,7 @@ class ajustesDetailsFragment : Fragment() {
                     requireContext().getSharedPreferences("valuesCajaChica", Context.MODE_PRIVATE)
                 monto = preferencesCajaChica.getString("MONTOCAJACHICA", "0") ?: "0"
                 idScript = preferencesCajaChica.getString("URL_SCRIPT", null)
-                idfile = preferencesCajaChica.getString("IDFILE", "")
-                idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", null)
+                idSheetFolder = preferencesCajaChica.getString("IDFILE", "")
 
                 //formateamos el monto recuperado
                 val montoFormateado =
@@ -135,14 +129,10 @@ class ajustesDetailsFragment : Fragment() {
                 //asignamos los valores recuperados
                 //asignamos los valores recuperados y mostramos controles necesarios
                 binding.llMonto.visibility = View.VISIBLE
-                binding.llIdFile.visibility = View.VISIBLE
-                binding.tvInputNameSheet.text = "ID File Liquidación"
+                binding.tvInputNameSheet.text = "ID Folder Caja Chica"
                 binding.etMontoCajaChica.setText(montoFormateado)
                 binding.etInputUrl.setText(idScript)
-                binding.etInputIdFile.setText(idfile)
-                binding.etInputIdSheet.setText(idSheet)
-
-
+                binding.etInputIdSheetIdFile.setText(idSheetFolder)
             }
 
             fichasTecnicas -> {
@@ -151,10 +141,10 @@ class ajustesDetailsFragment : Fragment() {
                     Context.MODE_PRIVATE
                 )
                 idScript = preferencesFichasTecnicas.getString("URL_SCRIPT_FICHAS", null)
-                idSheet = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", null)
+                idSheetFolder = preferencesFichasTecnicas.getString("IDSHEET_FICHAS", null)
                 //asignamos los valores recuperados y mostramos controles necesarios
                 binding.etInputUrl.setText(idScript)
-                binding.etInputIdSheet.setText(idSheet)
+                binding.etInputIdSheetIdFile.setText(idSheetFolder)
             }
 
             controlEquipos -> {
@@ -163,20 +153,20 @@ class ajustesDetailsFragment : Fragment() {
                     Context.MODE_PRIVATE
                 )
                 idScript = preferencesControlEquipos.getString("URL_SCRIPT_CONTROL_EQUIPOS", null)
-                idSheet = preferencesControlEquipos.getString("IDSHEET_CONTROL_EQUIPOS", null)
+                idSheetFolder = preferencesControlEquipos.getString("IDSHEET_CONTROL_EQUIPOS", null)
                 //asignamos los valores recuperados y mostramos controles necesarios
                 binding.etInputUrl.setText(idScript)
-                binding.etInputIdSheet.setText(idSheet)
+                binding.etInputIdSheetIdFile.setText(idSheetFolder)
             }
 
             else -> {
                 preferencesDocumentos =
                     requireContext().getSharedPreferences("valueDocumentos", Context.MODE_PRIVATE)
                 idScript = preferencesDocumentos.getString("URL_SCRIPT_DOCUMENTOS", null)
-                idSheet = preferencesDocumentos.getString("IDSHEET_DOCUMENTOS", null)
+                idSheetFolder = preferencesDocumentos.getString("IDSHEET_DOCUMENTOS", null)
                 //asignamos los valores recuperados y mostramos controles necesarios
                 binding.etInputUrl.setText(idScript)
-                binding.etInputIdSheet.setText(idSheet)
+                binding.etInputIdSheetIdFile.setText(idSheetFolder)
             }
         }
         preferencesAccess =
@@ -275,20 +265,17 @@ class ajustesDetailsFragment : Fragment() {
     //nueva implementacion
     fun validarIds(
         idScript: String?,
-        idSheet: String?,
-        idFolder: String?,
+        idSheetFolder: String?,
         progressBarScript: ProgressBar?,
-        progressBarSheet: ProgressBar?,
-        progressBarFolder: ProgressBar?,
+        progressBarSheetFolder: ProgressBar?,
         iconScript: ImageView?,
-        iconSheet: ImageView?,
-        iconFolder: ImageView?,
+        iconSheetFolder: ImageView?,
         pasteScript: ImageView?,
-        pasteSheet: ImageView?,
-        pasteFolder: ImageView?
+        pasteSheetFolder: ImageView?,
+        isfolder: Boolean = false
     ) {
         var validacionesCompletadas = 0
-        val totalValidaciones = listOfNotNull(idScript, idSheet, idFolder).size
+        val totalValidaciones = listOfNotNull(idScript, idSheetFolder).size
         fun savePreferences(typeId: String) {
             when (selected) {
                 cajaChica -> {
@@ -297,11 +284,11 @@ class ajustesDetailsFragment : Fragment() {
                             .putString("URL_SCRIPT", binding.etInputUrl.text.toString()).apply()
 
                         "sheet" -> preferencesCajaChica.edit()
-                            .putString("IDSHEETLIQUIDACION", binding.etInputIdSheet.text.toString())
+                            .putString("IDSHEETLIQUIDACION", binding.etInputIdSheetIdFile.text.toString())
                             .apply()
 
                         "file" -> preferencesCajaChica.edit()
-                            .putString("IDFILE", binding.etInputIdFile.text.toString()).apply()
+                            .putString("IDFILE", binding.etInputIdSheetIdFile.text.toString()).apply()
                     }
                     saveItem?.add("Caja chica -> $typeId")
                     //enviamos los keys al servidor
@@ -309,8 +296,7 @@ class ajustesDetailsFragment : Fragment() {
                         cajaChica = listOf(
                             binding.etMontoCajaChica.text.toString(),
                             binding.etInputUrl.text.toString(),
-                            binding.etInputIdFile.text.toString(),
-                            binding.etInputIdSheet.text.toString()
+                            binding.etInputIdSheetIdFile.text.toString()
                         ),
                         fichasTecnicas = listOf("", ""),
                         controlEquipos = listOf("", ""),
@@ -326,7 +312,7 @@ class ajustesDetailsFragment : Fragment() {
                             .apply()
 
                         "sheet" -> preferencesFichasTecnicas.edit()
-                            .putString("IDSHEET_FICHAS", binding.etInputIdSheet.text.toString())
+                            .putString("IDSHEET_FICHAS", binding.etInputIdSheetIdFile.text.toString())
                             .apply()
                     }
                     saveItem?.add("Fichas técnicas -> $typeId")
@@ -335,7 +321,7 @@ class ajustesDetailsFragment : Fragment() {
                         cajaChica = listOf("", "", "", ""),
                         fichasTecnicas = listOf(
                             binding.etInputUrl.text.toString(),
-                            binding.etInputIdSheet.text.toString()
+                            binding.etInputIdSheetIdFile.text.toString()
                         ),
                         controlEquipos = listOf("", ""),
                         documentos = listOf("", "")
@@ -352,7 +338,7 @@ class ajustesDetailsFragment : Fragment() {
 
                         "sheet" -> preferencesControlEquipos.edit().putString(
                             "IDSHEET_CONTROL_EQUIPOS",
-                            binding.etInputIdSheet.text.toString()
+                            binding.etInputIdSheetIdFile.text.toString()
                         ).apply()
                     }
                     saveItem?.add("Control equipos -> $typeId")
@@ -361,7 +347,7 @@ class ajustesDetailsFragment : Fragment() {
                         fichasTecnicas = listOf("", ""),
                         controlEquipos = listOf(
                             binding.etInputUrl.text.toString(),
-                            binding.etInputIdSheet.text.toString()
+                            binding.etInputIdSheetIdFile.text.toString()
                         ),
                         documentos = listOf("", "")
                     )
@@ -375,7 +361,7 @@ class ajustesDetailsFragment : Fragment() {
                             .apply()
 
                         "sheet" -> preferencesDocumentos.edit()
-                            .putString("IDSHEET_DOCUMENTOS", binding.etInputIdSheet.text.toString())
+                            .putString("IDSHEET_DOCUMENTOS", binding.etInputIdSheetIdFile.text.toString())
                             .apply()
                     }
                     saveItem?.add("Documentos -> $typeId")
@@ -385,7 +371,7 @@ class ajustesDetailsFragment : Fragment() {
                         controlEquipos = listOf("", ""),
                         documentos = listOf(
                             binding.etInputUrl.text.toString(),
-                            binding.etInputIdSheet.text.toString()
+                            binding.etInputIdSheetIdFile.text.toString()
                         )
                     )
                     settingsViewModel.setKeys(urlId!!, userName, userkeys)
@@ -406,8 +392,7 @@ class ajustesDetailsFragment : Fragment() {
                             cajaChica = listOf(
                                 binding.etMontoCajaChica.text.toString().replace("S/ ", "").trim(),
                                 binding.etInputUrl.text.toString(),
-                                binding.etInputIdFile.text.toString(),
-                                binding.etInputIdSheet.text.toString()
+                                binding.etInputIdSheetIdFile.text.toString()
                             ),
                             fichasTecnicas = listOf("", ""),
                             controlEquipos = listOf("", ""),
@@ -442,7 +427,6 @@ class ajustesDetailsFragment : Fragment() {
                 paste?.visibility = View.GONE
             }
         }
-
         // Si no hay IDs para validar, solo llamamos a `verificarFinalizacion()`
         if (totalValidaciones == 0) {
             verificarFinalizacion()
@@ -455,18 +439,19 @@ class ajustesDetailsFragment : Fragment() {
                 actualizarUI(progressBarScript, iconScript, esValido, "script")
             }
         }
-        idSheet?.takeIf { it.isNotBlank() }?.let { sheet ->
-            iniciarValidacion(progressBarSheet, iconSheet, pasteSheet)
-            validarIdSheet(sheet) { esValido ->
-                actualizarUI(progressBarSheet, iconSheet, esValido, "sheet")
+        idSheetFolder?.takeIf { it.isNotBlank() }?.let { id ->
+            iniciarValidacion(progressBarSheetFolder, iconSheetFolder, pasteSheetFolder)
+            if (isfolder) {
+                validarIdFile(id) { esValido ->
+                    actualizarUI(progressBarSheetFolder, iconSheetFolder, esValido, "folder")
+                }
+            } else {
+                validarIdSheet(id) { esValido ->
+                    actualizarUI(progressBarSheetFolder, iconSheetFolder, esValido, "sheet")
+                }
             }
         }
-        idFolder?.takeIf { it.isNotBlank() }?.let { folder ->
-            iniciarValidacion(progressBarFolder, iconFolder, pasteFolder)
-            validarIdFile(folder) { esValido ->
-                actualizarUI(progressBarFolder, iconFolder, esValido, "folder")
-            }
-        }
+
     }
 
     fun mostrarToast(idsGuardados: List<String>) {

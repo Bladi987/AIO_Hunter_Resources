@@ -19,12 +19,13 @@ class insertUserUseCase() {
                     val id = data[0].asString
                     val name = data[1].asString
                     val lastName = data[2].asString
-                    val user = data[3].asString
-                    val password = data[4].asString
-                    val tipo = data[5].asString
-                    datauser = user(id, name, lastName, user, password, tipo,"")
+                    val identification=data[3].asString
+                    val user = data[4].asString
+                    val password = data[5].asString
+                    val tipo = data[6].asString
+                    datauser = user(id, name, lastName, identification,user, password, tipo,"")
                 } else {
-                    datauser = user("", "", "", "", "", "","")
+                    datauser = user("", "", "", "", "", "","","")
                 }
                 Result.success(datauser)
             }

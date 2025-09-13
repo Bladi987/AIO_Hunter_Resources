@@ -47,7 +47,7 @@ object DialogUtils {
         // Configurar la ventana del diálogo como transparente
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         //Configuramos la animacion del dialogo
-        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
+        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce)
         // Configuración del botón positivo
         binding.root.animation = anim1
 
@@ -121,7 +121,7 @@ object DialogUtils {
         // Configurar la ventana del diálogo como transparente
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         //Configuramos la animacion del dialogo
-        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
+        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce)
         // Configuración del botón positivo
         binding.root.animation = anim1
 
@@ -212,7 +212,7 @@ object DialogUtils {
 
     //funciones generales de uso dentro de la clase
     fun aparecer(context: Context, view: View) {
-        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
+        val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce)
         view.animation = anim1
     }
 

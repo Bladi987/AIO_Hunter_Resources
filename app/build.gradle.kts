@@ -36,48 +36,47 @@ android {
     buildFeatures{
         buildConfig = true
         viewBinding=true
+        dataBinding = true
     }
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    //liveData
-    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
-    //viewmodel
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
-    //fragment
-    implementation ("androidx.fragment:fragment-ktx:1.6.2")
-    //activity
-    implementation ("androidx.activity:activity-ktx:1.8.2")
+    // Actualizamos las dependencias a versiones más recientes
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.0")
+    implementation("androidx.fragment:fragment-ktx:1.7.1")
+    // Usar solo la version -ktx
+    implementation("androidx.activity:activity-ktx:1.9.0")
+
     //refrofit
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     //picasso
-    implementation ("com.squareup.picasso:picasso:2.71828")
+    implementation("com.squareup.picasso:picasso:2.71828")
     //compressor
-    implementation ("id.zelory:compressor:3.0.1")
+    implementation("id.zelory:compressor:3.0.1")
     //zoomImage
-    implementation ("com.github.MikeOrtiz:TouchImageView:3.6")
+    implementation("com.github.MikeOrtiz:TouchImageView:3.6")
     //shimmer facebook efect
-    implementation ("com.facebook.shimmer:shimmer:0.5.0")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
     //validar conexion a internet
-    implementation ("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
     //gson
     implementation("com.google.code.gson:gson:2.10.1")
     //swipe
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     //lottiefiles
-    implementation ("com.airbnb.android:lottie:4.2.0")
-    implementation("androidx.activity:activity:1.8.0")
+    implementation("com.airbnb.android:lottie:4.2.0")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.0")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }

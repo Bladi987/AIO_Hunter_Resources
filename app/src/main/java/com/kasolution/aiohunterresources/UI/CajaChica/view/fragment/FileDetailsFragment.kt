@@ -1,5 +1,6 @@
 package com.kasolution.aiohunterresources.UI.CajaChica.view.fragment
 
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentManager
@@ -52,6 +54,7 @@ class FileDetailsFragment : Fragment() {
     private var listaSheet: ArrayList<fileDetails>? = null
     private lateinit var fileDetail: fileDetails
     private var nameTecnico: String? = null
+    private var identifacionUser:String?=null
     private lateinit var preferencesCajaChica: SharedPreferences
     private lateinit var preferencesUser: SharedPreferences
     override fun onCreateView(
@@ -296,7 +299,7 @@ class FileDetailsFragment : Fragment() {
         val sheets = preferencesCajaChica.getString("LIST_SHEET", null)
         nameTecnico =
             preferencesUser.getString("NAME", "") + " " + preferencesUser.getString("LASTNAME", "")
-
+        identifacionUser=preferencesUser.getString("IDENTIFICATION",null)
         //if (!sheets.isNullOrEmpty() && sheets!="null")
         listaSheet = llenarListaSheet(sheets)
 
@@ -383,14 +386,16 @@ class FileDetailsFragment : Fragment() {
         val anim1 = AnimationUtils.loadAnimation(context, R.anim.bounce3)
         // Usar ViewBinding para inflar el layout del diálogo
         val binding = DialogNewSheetBinding.inflate(LayoutInflater.from(context))
+        binding.llinclude.tvFechaInicio.text=obtenerFecha()
+        binding.llinclude.tvFechaFin.text=obtenerFecha()
         // Análisis y precarga
         if (!nameSheet.isNullOrEmpty()) {
             // Modificar el nombre de la hoja
             binding.tvtitle.text = "Modificar Nombre"
-            binding.tvoldName.visibility = View.VISIBLE
-            binding.tvoldName.text = nameSheet
+            binding.llinclude.tvoldName.visibility=View.VISIBLE
+            binding.llinclude.tvoldName.text=nameSheet
             binding.btnCrear.text = "Modificar"
-            binding.tvname.hint = "Ingrese Nuevo Nombre"
+            binding.llinclude.tvname.hint="Ingrese Nuevo Nombre"
         }
 
         // Crear el diálogo y mostrarlo
@@ -401,16 +406,21 @@ class FileDetailsFragment : Fragment() {
         // Establecer animación
         binding.root.animation = anim1
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
+        binding.llinclude.btnFechaInicio.setOnClickListener {
+            showDatePickerDialog(binding.llinclude.tvFechaInicio)
+        }
+        binding.llinclude.btnFechaFin.setOnClickListener {
+            showDatePickerDialog(binding.llinclude.tvFechaFin)
+        }
         // Lógica de los botones
         binding.btnCrear.setOnClickListener {
 
-            if (binding.tvname.text.toString().isEmpty()) {
-                binding.tvname.error = "Ingrese un nombre"
-            } else if (binding.tvDestino.text.isEmpty()) {
-                binding.tvDestino.error = "Ingrese un destino"
-            } else if (binding.tvFechas.text.isEmpty()) {
-                binding.tvFechas.error = "Ingrese fecha"
+            if (binding.llinclude.tvname.text.toString().isEmpty()) {
+                binding.llinclude.tvname.error = "Ingrese un nombre"
+            } else if (binding.llinclude.tvDestino.text.isEmpty()) {
+                binding.llinclude.tvDestino.error = "Ingrese un destino"
+            } else if (binding.llinclude.tvFechaInicio.text.isEmpty()) {
+                binding.llinclude.tvFechaInicio.error = "Ingrese fecha"
             } else {
                 if (!nameSheet.isNullOrEmpty()) {
                     // Acción de actualización
@@ -418,13 +428,15 @@ class FileDetailsFragment : Fragment() {
                     fileDetailsViewModel.onUpdate(
                         urlId!!,
                         fileDetails(
-                            binding.tvname.text.toString().trim(),
-                            binding.tvoldName.text.toString().trim()
+                            binding.llinclude.tvname.text.toString().trim(),
+                            binding.llinclude.tvoldName.text.toString().trim()
                         ),
                         listOf(
                             nameTecnico.toString(),
-                            binding.tvDestino.text.toString().trim(),
-                            binding.tvFechas.text.toString().trim()
+                            identifacionUser.toString(),
+                            binding.llinclude.tvDestino.text.toString().trim(),
+                            binding.llinclude.tvFechaInicio.text.toString().trim(),
+                            binding.llinclude.tvFechaFin.text.toString().trim()
                         )
                     )
                     dialog.dismiss()
@@ -435,12 +447,14 @@ class FileDetailsFragment : Fragment() {
                         urlId!!,
                         fileDetails(
                             "",
-                            binding.tvname.text.toString().trim()
+                            binding.llinclude.tvname.text.toString().trim()
                         ),
                         listOf(
                             nameTecnico.toString(),
-                            binding.tvDestino.text.toString().trim(),
-                            binding.tvFechas.text.toString().trim()
+                            identifacionUser.toString(),
+                            binding.llinclude.tvDestino.text.toString().trim(),
+                            binding.llinclude.tvFechaInicio.text.toString().trim(),
+                            binding.llinclude.tvFechaFin.text.toString().trim()
                         )
                     )
                     dialog.dismiss()
@@ -487,5 +501,33 @@ class FileDetailsFragment : Fragment() {
             message = "Ups... Ocurrio un error, Vuelva a intentarlo en unos instantes",
             codigo = "Codigo: $error",
         )
+    }
+    private fun showDatePickerDialog(textView: TextView) {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog =
+            DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
+                val formattedDate = String.format(
+                    Locale.getDefault(),
+                    "%02d/%02d/%04d",
+                    selectedDay,
+                    selectedMonth + 1,
+                    selectedYear
+                )
+                textView.text = formattedDate
+            }, year, month, day)
+
+        datePickerDialog.show()
+    }
+    private fun obtenerFecha(): String {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 1)
+        val dayOfMonth =
+            String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH))
+        return "$dayOfMonth/$month/$year"
     }
 }

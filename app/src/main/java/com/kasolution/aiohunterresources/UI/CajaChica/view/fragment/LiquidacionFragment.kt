@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,6 +35,7 @@ class LiquidacionFragment : Fragment() {
     private lateinit var lmanager: LinearLayoutManager
     private lateinit var adapter: LiquidacionAdapter
     private lateinit var lista: ArrayList<liquidacion>
+    private var startConfiguration=true
     private lateinit var itemLiquidacion: liquidacion
     private var itemPosition = -1
     private var urlId: urlId? = null
@@ -41,6 +43,7 @@ class LiquidacionFragment : Fragment() {
     private var messageLoading = "Recuperando..."
     private var idScript = ""
     private var sheetName=""
+    private var idSheet: String? = null
     private lateinit var preferencesCajaChica: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,24 +67,59 @@ class LiquidacionFragment : Fragment() {
         binding.btnback.setOnClickListener() {
             requireActivity().supportFragmentManager.popBackStack()
         }
-        LiquidacionViewModel.getLiquidacion(urlId!!)
+        if (idSheet!=null) {
+            LiquidacionViewModel.getLiquidacion(urlId!!)
+        }else{
+            //Toast.makeText(requireContext(), "La hoja Liquidacion requiere ser configurado", Toast.LENGTH_SHORT).show()
+            //requireActivity().supportFragmentManager.popBackStack()
+            //enviamos datos para la configuracion del la hoja liquidacion
+            startConfiguration=false
+            messageLoading="Configurando..."
+            LiquidacionViewModel.createLiquidacionSheet(urlId!!)
+        }
+
+        LiquidacionViewModel.getIdSheetLiquidacion.observe(viewLifecycleOwner, Observer{result->
+            result?.let { respuesta->
+                if (respuesta.isSuccess){
+                    val data = respuesta.getOrNull()
+                    data?.let { fileAdd ->
+                        if (fileAdd.id.isNotEmpty()){
+                            preferencesCajaChica.edit {
+                                apply { putString("IDSHEETLIQUIDACION", fileAdd.id) }
+                            }
+                            recuperarPreferencias()
+                            startConfiguration=true
+                            messageLoading="Recuperando..."
+                            LiquidacionViewModel.getLiquidacion(urlId!!)
+                        }
+                    }
+
+
+                }else{
+                    val exception = respuesta.exceptionOrNull()
+                    exception?.let { ex ->
+                        showMessageError(ex.message.toString())
+                    }
+                }
+            }
+        })
         LiquidacionViewModel.isloading.observe(viewLifecycleOwner, Observer {
             adapter.limpiarSeleccion()
             if (it) DialogProgress.show(requireContext(), messageLoading)
             else {
                 DialogProgress.dismiss()
-                if (lista.isEmpty()) {
-                    binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
-                    binding.lottieAnimationView.playAnimation()
-                    binding.llNoData.visibility = View.VISIBLE
-                    binding.swipeRefresh.visibility = View.GONE
-                } else {
-                    binding.llNoData.visibility = View.GONE
-                    binding.swipeRefresh.visibility = View.VISIBLE
+                if (startConfiguration){
+                    if (lista.isEmpty()) {
+                        binding.lottieAnimationView.setAnimation(R.raw.no_data_found)
+                        binding.lottieAnimationView.playAnimation()
+                        binding.llNoData.visibility = View.VISIBLE
+                        binding.swipeRefresh.visibility = View.GONE
+                    } else {
+                        binding.llNoData.visibility = View.GONE
+                        binding.swipeRefresh.visibility = View.VISIBLE
+                    }
                 }
             }
-
-
         })
         LiquidacionViewModel.getLiquidacion.observe(viewLifecycleOwner) { result ->
             result?.let { respuesta ->
@@ -210,7 +248,7 @@ class LiquidacionFragment : Fragment() {
             DialogUtils.dialogQuestion(
                 requireContext(),
                 titulo = "Aviso",
-                mensage = "Anular la liquidacion de ${itemLiquidacion.concepto}, esto eliminara esta liquidacion de la base de datos, y podra agregar nuevamente.\n\n¿Desea continuar?",
+                mensage = "Anular la liquidacion de ${itemLiquidacion.concepto}, esto eliminara esta liquidacion de la base de datos, y podra registrar nuevamente.\n\n¿Desea continuar?",
                 positiveButtontext = "Aceptar",
                 negativeButtontext = "Cancelar", onPositiveClick = {
                     LiquidacionViewModel.deleteLiquidacion(urlId!!, itemLiquidacion)
@@ -251,14 +289,13 @@ class LiquidacionFragment : Fragment() {
 
     private fun recuperarPreferencias() {
         idScript = preferencesCajaChica.getString("URL_SCRIPT", "").toString()
-        val idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", "").toString()
+        idSheet = preferencesCajaChica.getString("IDSHEETLIQUIDACION", null)
         saldoCajaChica = preferencesCajaChica.getString("SALDODISPONIBLE", "0.00")!!.toDouble()
-        urlId = urlId(
-            idScript = idScript,
-            "",
-            idSheet = idSheet,
-            ""
-        )
+        val idFile=preferencesCajaChica.getString("IDFILE", "").toString()
+        urlId = if (idSheet!=null)
+            urlId(idScript = idScript, "", idSheet = if (idSheet != null) idSheet!! else "", "")
+        else
+            urlId(idScript = idScript, idFile=idFile, idSheet = "", sheetName="")
     }
 
     private fun init() {
@@ -281,7 +318,10 @@ class LiquidacionFragment : Fragment() {
     private fun onItemClicListener(liquidacion: liquidacion, estado: Int, position: Int) {
         when (estado) {
             1 -> binding.btnConfirmPay.visibility = View.VISIBLE
-            2 -> binding.btnConfirmPay.visibility = View.INVISIBLE
+            2 -> {
+                binding.btnConfirmPay.visibility = View.INVISIBLE
+                binding.btnDelete.visibility=View.INVISIBLE
+            }
             3 -> downloadExcel(liquidacion)
         }
         if (estado != 3) {

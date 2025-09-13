@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#C3C3C3"> <!-- Color de la onda de presión -->
+    <!-- El fondo circular -->
+    <item>
+        <shape>
+            <solid android:color="@color/white" />
+        </shape>
+    </item>
+</ripple>

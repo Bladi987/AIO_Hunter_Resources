@@ -28,7 +28,8 @@ class getBrandUseCase() {
                         }
                     }
                 }
-                Result.success(lista)
+                val listaOrdenada = lista.sortedBy { it.brand }
+                Result.success(ArrayList(listaOrdenada))
             }
             false->{
                 val errorMessage = responseResult.exceptionOrNull()?.message ?: "Error desconocido"

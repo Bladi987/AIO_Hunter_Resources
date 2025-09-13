@@ -173,64 +173,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/llIdFile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:paddingVertical="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ID File"
-                    android:layout_marginStart="10dp"
-                    android:textColor="@color/text_color"
-                    android:textStyle="bold" />
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-                    <EditText
-                        android:id="@+id/etInputIdFile"
-                        android:layout_width="match_parent"
-                        android:layout_height="80dp"
-                        android:background="@drawable/edittext_style2"
-                        android:gravity="left|top"
-                        android:textSize="12sp"
-                        android:layout_weight="1"
-                        android:textColor="@color/white"
-                        android:textColorHint="#9B9A9A" />
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp">
-                        <ImageView
-                            android:id="@+id/ivPasteFile"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_paste"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:clickable="true"
-                            android:focusable="true"/>
-                        <ProgressBar
-                            android:id="@+id/progressFile"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:visibility="gone"/>
-
-                        <ImageView
-                            android:id="@+id/iconFile"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:visibility="gone"/>
-                    </FrameLayout>
-                </LinearLayout>
-
-
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llLiquidacion"
@@ -253,7 +195,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
                     <EditText
-                        android:id="@+id/etInputIdSheet"
+                        android:id="@+id/etInputIdSheet_idFile"
                         android:layout_width="0dp"
                         android:layout_height="80dp"
                         android:background="@drawable/edittext_style2"

@@ -318,7 +318,7 @@ class EquipmentListFragment : Fragment() {
         binding.llDisponibles.isVisible = listDisponibles.isNotEmpty()
         binding.llNoDisponible.isVisible = listNoDisponibles.isNotEmpty()
         binding.llAveriados.isVisible = listAveriados.isNotEmpty()
-        calcularTamanoResumenView()
+//        calcularTamanoResumenView()
     }
 
 
@@ -470,11 +470,11 @@ class EquipmentListFragment : Fragment() {
 
     }
 
-    private fun calcularTamanoResumenView() {
-        binding.bottomSheet.post {
-            heigthResumen = binding.bottomSheet.height  // Alto de la vista
-        }
-    }
+//    private fun calcularTamanoResumenView() {
+//        binding.bottomSheet.post {
+//            heigthResumen = binding.bottomSheet.height  // Alto de la vista
+//        }
+//    }
 
     private fun calcularTamanoShowButtonResumen() {
         binding.llMostrarBoton.post {

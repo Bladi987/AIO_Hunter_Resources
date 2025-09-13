@@ -85,6 +85,11 @@ class RepositoryCajaChica() {
         val response = api!!.getLiquidacion()
         return response
     }
+    suspend fun getIdSheetLiquidacion(urlId: urlId): Result<JsonElement?> {
+        procesarUrl(urlId)
+        val response = api!!.getIdSheetLiquidacion()
+        return response
+    }
     suspend fun insertLiquidacion(urlid: urlId, liquidacion: liquidacion,adicional:ArrayList<Int>): Result<JsonElement?> {
         procesarUrl(urlid)
         val response = api!!.insertLiquidacion(liquidacion,adicional)

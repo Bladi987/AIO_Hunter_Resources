@@ -19,7 +19,7 @@ class getLiquidacionUseCase() {
                 if (respuesta != null && respuesta.asString == "exito") {
                     val data = response.getAsJsonArray("Resultado")
                     if (data != null) {
-                        for (i in 0 until data.size()) {
+                        for (i in data.size() - 1 downTo 0) {
                             val jsonObject = data.get(i).asJsonObject
                             val id = jsonObject.get("CODIGO").asString
                             val fecha = jsonObject.get("FECHA").asString

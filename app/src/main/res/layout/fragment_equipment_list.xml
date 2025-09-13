@@ -31,8 +31,6 @@
                     android:text="CONTROL DE EQUIPOS"
                     android:textSize="18sp"
                     android:textStyle="bold" />
-
-
             </LinearLayout>
 
 

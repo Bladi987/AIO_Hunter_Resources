@@ -19,6 +19,7 @@ class LiquidacionAdapter(
     private val onClickDeselect: () -> Unit
 ) : RecyclerView.Adapter<LiquidacionAdapter.viewHolder>() {
     private var selectedItemPosition: Int? = null
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int

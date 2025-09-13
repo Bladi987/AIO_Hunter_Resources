@@ -2,7 +2,7 @@
     <string name="app_name">Hunter Hub</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="idScript">AKfycbwiMyS57P_KGB9HQj8m9nXjpn0ap3Ik00bMIVC4O5J8tg6v5GK_rSEUrh8bNQenrUs</string>
+    <string name="idScript">AKfycbzi4t6c3QGS_FuUnGle9SldM2dQ_Nu4dTrn1YSR6L4dtPBvC4fIcEh01rutw43yr-g8</string>
     <string name="idSheet">1tT1q8ltoJNeAnMshA-JMYRgZb7Fkslj4ZxMYcMAsNR4</string>
 
     <string name="ingrese_usuario">Ingrese Usuario</string>
@@ -46,5 +46,6 @@
     <string name="Contact">Contáctenos</string>
     <string name="send">Enviar</string>
     <string name="About_Us">Acerca de</string>
+    <string name="IngreseIdentificacion">Ingrese DNI</string>
 
 </resources>

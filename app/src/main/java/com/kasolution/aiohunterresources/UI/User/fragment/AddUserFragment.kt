@@ -40,7 +40,7 @@ class AddUserFragment : DialogFragment() {
         val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.bounce3)
 
         // Aplica la animación a la vista del fragmento
-        binding.root?.startAnimation(anim)
+        binding.root.startAnimation(anim)
 
         return binding.root
     }
@@ -56,6 +56,7 @@ class AddUserFragment : DialogFragment() {
             usuario = it.getSerializable("usuario")!! as user
             binding.etNombre.setText(usuario!!.name)
             binding.etApellidos.setText(usuario!!.lastName)
+            binding.etIdentification.setText(usuario!!.identification)
             binding.etUser.setText(usuario!!.user)
             tipoSeleccionado = usuario!!.tipo
         }
@@ -76,8 +77,9 @@ class AddUserFragment : DialogFragment() {
                                 user(
                                     id = usuario!!.id, name = binding.etNombre.text.toString(),
                                     lastName = binding.etApellidos.text.toString(),
+                                    identification = binding.etIdentification.text.toString(),
                                     user = binding.etUser.text.toString(),
-                                    password = "",
+                                    password = usuario!!.password,
                                     tipo = binding.spTipo.selectedItem.toString(),
                                     ""
                                 )
@@ -91,6 +93,7 @@ class AddUserFragment : DialogFragment() {
                                     id = "",
                                     name = binding.etNombre.text.toString(),
                                     lastName = binding.etApellidos.text.toString(),
+                                    identification = binding.etIdentification.text.toString(),
                                     user = binding.etUser.text.toString(),
                                     password = "",
                                     tipo = binding.spTipo.selectedItem.toString(),

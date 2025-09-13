@@ -68,9 +68,6 @@ class UserActivity : AppCompatActivity() {
                         lista.add(usuario)
                         adapter.notifyItemInserted(lista.size - 1)
                         lmanager.scrollToPositionWithOffset(lista.size - 1, 10)
-//                        lista.add(0, usuario)
-//                        adapter.notifyItemInserted(0)
-//                        lmanager.scrollToPositionWithOffset(0, 10)
                     }
                 } else {
                     val exception = respuesta.exceptionOrNull()
@@ -144,10 +141,12 @@ class UserActivity : AppCompatActivity() {
                     mensage = "Desea Resetear el password de ${usuario.name} ${usuario.lastName}?",
                     positiveButtontext = "Aceptar",
                     onPositiveClick = {
+                        //quitamos limpiamos el campo password antes de enviar al servidor
+                        val userMod=usuario.copy(password = "")
                         //es una accion de reseteo
                         UserViewModel.updateUser(
                             urlId!!,
-                            usuario,
+                            userMod,
                             action = "reset"
                         )
                     })

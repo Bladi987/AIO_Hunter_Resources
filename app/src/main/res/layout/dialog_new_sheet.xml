@@ -3,22 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/border_dialog"
-    android:paddingBottom="10dp"
-    android:layout_height="wrap_content">
+    android:paddingBottom="10dp">
+
     <com.kasolution.aiohunterresources.core.RoundedImageView
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:src="@drawable/decorate_head_small"
-        app:topLeftRadius="10dp"
-        app:topRightRadius="10dp"
-        app:bottomRightRadius="0dp"
-        app:bottomLeftRadius="0dp"
+        android:adjustViewBounds="true"
         android:scaleType="fitCenter"
-        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/decorate_head_small"
+        app:bottomLeftRadius="0dp"
+        app:bottomRightRadius="0dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:adjustViewBounds="true"/>
+        app:topLeftRadius="10dp"
+        app:topRightRadius="10dp" />
+
     <LinearLayout
         android:id="@+id/llhead"
         android:layout_width="0dp"
@@ -31,8 +33,8 @@
             android:id="@+id/tvtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:layout_marginTop="10dp"
+            android:padding="10dp"
             android:text="@string/IngreseNombreHoja"
             android:textAlignment="center"
             android:textSize="20sp"
@@ -44,66 +46,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/llhead">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:paddingHorizontal="10dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvold_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:textAlignment="center"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:visibility="gone"
-                tools:text="hoja 1" />
-
-            <EditText
-                android:id="@+id/tvname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="@color/text_hint_color"
-                android:textColor="@color/black"
-                android:background="@drawable/border_dialog_white"
-                android:hint="Ingrese nombre de hoja" />
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:paddingHorizontal="10dp"
-            android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/tvDestino"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="@color/text_hint_color"
-                android:textColor="@color/black"
-                android:layout_marginBottom="15dp"
-                android:background="@drawable/border_dialog_white"
-                android:hint="Ingrese destino"
-                />
-
-            <EditText
-                android:id="@+id/tvFechas"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColorHint="@color/text_hint_color"
-                android:textColor="@color/black"
-                android:background="@drawable/border_dialog_white"
-                android:hint="Ingrese Fecha" />
-
-        </LinearLayout>
+        <include
+            android:id="@+id/llinclude"
+            layout="@layout/componentes_nuevo_registro" />
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -15,12 +15,18 @@ object RetrofitHelper {
         .readTimeout(20, TimeUnit.SECONDS) // Tiempo máximo de espera para la lectura de datos
         .writeTimeout(20, TimeUnit.SECONDS) // Tiempo máximo de espera para la escritura de datos
         .build()
-    fun getRetrofit(url: String): Retrofit {
+    fun getRetrofit(url: String, client: OkHttpClient = httpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(url)
-            .client(httpClient)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+    fun getRetrofitForDownload(baseUrl: String, client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(client)
+            .build() // sin converter
     }
     fun <T> handleRetrofitCall(call: Call<T>, callback: Callback<T>) {
         call.enqueue(object : Callback<T> {

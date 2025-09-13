@@ -136,17 +136,18 @@
                 android:id="@+id/llNotificacion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
+                android:orientation="vertical"
                 android:paddingHorizontal="10dp"
-                android:orientation="vertical">
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tvMensaje"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/mensajeAdvertencia"
                     android:layout_marginBottom="8dp"
+                    android:text="@string/mensajeAdvertencia"
                     android:textColor="#FF0000" />
+
                 <TextView
                     android:id="@+id/tvContador"
                     android:layout_width="match_parent"
@@ -157,49 +158,23 @@
                     android:id="@+id/cbConcentimiento"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:text="Soy conciente de la advertencia"
                     android:textColor="@color/colorPrimaryDark"
-                    android:text="Soy conciente de la advertencia"/>
+                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llDatosAdicional"
+                android:id="@+id/llAdicionales"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="10dp"
                 android:visibility="gone">
+                <include
+                    android:id="@+id/llinclude"
+                    layout="@layout/componentes_nuevo_registro" />
 
-                <EditText
-                    android:id="@+id/tvFirstSheet"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:background="@drawable/border_dialog_white"
-                    android:hint="Ingrese nombre primera hoja"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/text_hint_color" />
-
-                <EditText
-                    android:id="@+id/tvDestino"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:background="@drawable/border_dialog_white"
-                    android:hint="Ingrese destino"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/text_hint_color" />
-
-                <EditText
-                    android:id="@+id/tvFecha"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    android:background="@drawable/border_dialog_white"
-                    android:hint="Ingrese fecha(s)"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/text_hint_color" />
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout

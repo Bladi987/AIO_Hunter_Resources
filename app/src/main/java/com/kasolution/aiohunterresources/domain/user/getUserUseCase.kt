@@ -22,10 +22,11 @@ class getUserUseCase() {
                         val id = jsonObject.get("ID").asString
                         val name = jsonObject.get("NAME").asString
                         val lastName = jsonObject.get("LAST NAME").asString
+                        val identification=jsonObject.get("IDENTIFICATION").asString
                         val user = jsonObject.get("USER").asString
                         val password = jsonObject.get("PASSWORD").asString
                         val tipo = jsonObject.get("TIPO").asString
-                        lista.add(user(id, name, lastName, user, password, tipo,""))
+                        lista.add(user(id, name, lastName, identification,user, password, tipo,""))
                     }
                 }
                 Result.success(lista)

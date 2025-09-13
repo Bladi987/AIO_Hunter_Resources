@@ -26,4 +26,13 @@
 
     <color name="circle_color">#A84417</color>
     <color name="backgroundColor">#E0E0E0</color>
+
+    <!--colores para botones-->
+    <color name="btn_verde">#223738</color>
+    <color name="btn_verde_decore">#2B4D4B</color>
+    <color name="btn_rosado">#41243A</color>
+    <color name="btn_rosado_decore">#643859</color>
+    <color name="btn_marron">#463428</color>
+    <color name="btn_marron_decore">#634937</color>
+
 </resources>

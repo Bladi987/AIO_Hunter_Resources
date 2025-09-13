@@ -144,7 +144,7 @@ class FragmentMenu : Fragment() {
         val idScriptUser = preferencesAccess.getString("IDSCRIPTACCESS", null)
         val idSheetUser = preferencesAccess.getString("IDSHEETACCESS", null)
 
-        if (!urlCc.isNullOrEmpty() && !idfileCc.isNullOrEmpty() && !idSheetLiquidacionCc.isNullOrEmpty()) {
+        if (!urlCc.isNullOrEmpty() && !idfileCc.isNullOrEmpty()) {
             arrayList.add(itemGrid(R.drawable.ic_gastos, "Caja chica"))
         }
         if (!urlFichas.isNullOrEmpty() && !idSheetFichas.isNullOrEmpty())

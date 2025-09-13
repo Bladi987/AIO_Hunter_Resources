@@ -144,6 +144,7 @@ class Service(urlId: urlId) {
 
         jsonRequest.addProperty("user", user.user)
         jsonRequest.addProperty("password", user.password)
+        Log.i("BladiDev","peticion login: "+jsonRequest)
         return safePeticion(jsonRequest)
     }
 
@@ -163,6 +164,7 @@ class Service(urlId: urlId) {
         val rowArray = JsonArray()
         rowArray.add(user.name)
         rowArray.add(user.lastName)
+        rowArray.add(user.identification)
         rowArray.add(user.user)
         rowArray.add(user.password)
         rowArray.add(user.tipo)
@@ -179,10 +181,12 @@ class Service(urlId: urlId) {
         rowArray.add(user.id)
         rowArray.add(user.name)
         rowArray.add(user.lastName)
+        rowArray.add(user.identification)
         rowArray.add(user.user)
         rowArray.add(user.password)
         rowArray.add(user.tipo)
         jsonRequest.add("rows", rowArray)
+        Log.i("BladiDev","peticion post: $jsonRequest")
         return safePeticion(jsonRequest)
     }
 
@@ -270,8 +274,10 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("nameDocument", file.nombre)
         jsonRequest.addProperty("nameFirstSheet", adicional[0])
         jsonRequest.addProperty("nameTecnico", adicional[1])
-        jsonRequest.addProperty("destino", adicional[2])
-        jsonRequest.addProperty("fecha", adicional[3])
+        jsonRequest.addProperty("identificacion", adicional[2])
+        jsonRequest.addProperty("destino", adicional[3])
+        jsonRequest.addProperty("fechaInicio", adicional[4])
+        jsonRequest.addProperty("fechaFin", adicional[5])
         Log.i("BladiDev", jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
@@ -301,17 +307,16 @@ class Service(urlId: urlId) {
         return safePeticion(jsonRequest)
     }
 
-    suspend fun insertFileSheet(
-        fileDetails: fileDetails,
-        adicional: List<String>
-    ): Result<JsonElement?> {
+    suspend fun insertFileSheet(fileDetails: fileDetails, adicional: List<String>): Result<JsonElement?> {
         val jsonRequest = JsonObject()
         jsonRequest.addProperty("action", "newSheet")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", fileDetails.nombre)
         jsonRequest.addProperty("nameTecnico", adicional[0])
-        jsonRequest.addProperty("destino", adicional[1])
-        jsonRequest.addProperty("fecha", adicional[2])
+        jsonRequest.addProperty("identificacion", adicional[1])
+        jsonRequest.addProperty("destino", adicional[2])
+        jsonRequest.addProperty("fechaInicio", adicional[3])
+        jsonRequest.addProperty("fechaFin", adicional[4])
         Log.i("BladiDev", jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
@@ -326,8 +331,10 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("sheet", fileDetails.nombre)
         jsonRequest.addProperty("newName", fileDetails.nombreReal)
         jsonRequest.addProperty("nameTecnico", adicional[0])
-        jsonRequest.addProperty("destino", adicional[1])
-        jsonRequest.addProperty("fecha", adicional[2])
+        jsonRequest.addProperty("identificacion", adicional[1])
+        jsonRequest.addProperty("destino", adicional[2])
+        jsonRequest.addProperty("fechaInicio", adicional[3])
+        jsonRequest.addProperty("fechaFin", adicional[4])
         Log.i("BladiDev", jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
@@ -346,7 +353,6 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("action", "getData")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", sheetName)
-
         return safePeticion(jsonRequest)
     }
 
@@ -359,23 +365,14 @@ class Service(urlId: urlId) {
         val rowArray = JsonArray()
         val row1 = JsonArray()
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
+        row1.add(registro.ruc)
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
-
-        //zona con sustento
-        row1.add(registro.c_movilidad)     // cs-movilidad
-        row1.add(registro.c_alimentacion)  //cs-alimentacionc_alimentacion)  //cs-alimentacion
-        row1.add(registro.c_alojamiento)    //cs-alojamiento
-        row1.add(registro.c_otros)    //cs-otros
-        //zona sin sustento
-        row1.add(registro.s_movilidad)    //ss-movildiad
-        row1.add(registro.s_alimentacion)    //cs-alimentacion
-        row1.add(registro.s_alojamiento)    //cs-alojamiento
-        row1.add(registro.s_otros)    //cs-otros
-
+        row1.add(registro.detalle) //descripcion
+        row1.add(registro.motivo)
+        row1.add(registro.tipoGasto)
+        row1.add(registro.monto)
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)
 
@@ -392,21 +389,14 @@ class Service(urlId: urlId) {
         val row1 = JsonArray()
         row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
+        row1.add(registro.ruc)
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
-        //zona con sustento
-        row1.add(registro.c_movilidad)     // cs-movilidad
-        row1.add(registro.c_alimentacion)  //cs-alimentacionc_alimentacion)  //cs-alimentacion
-        row1.add(registro.c_alojamiento)    //cs-alojamiento
-        row1.add(registro.c_otros)    //cs-otros
-        //zona sin sustento
-        row1.add(registro.s_movilidad)    //ss-movildiad
-        row1.add(registro.s_alimentacion)    //cs-alimentacion
-        row1.add(registro.s_alojamiento)    //cs-alojamiento
-        row1.add(registro.s_otros)    //cs-otros
+        row1.add(registro.detalle) //descripcion
+        row1.add(registro.motivo)
+        row1.add(registro.tipoGasto)
+        row1.add(registro.monto)
 
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)
@@ -422,16 +412,17 @@ class Service(urlId: urlId) {
 
         val rowArray = JsonArray()
         val row1 = JsonArray()
-        row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
+        //row1.add(registro.id)         //se envia el id el cual sera el index dentro del sheet
         row1.add(registro.fecha)     //fecha
-        row1.add(registro.ciudad)    //ciudad
         row1.add(registro.tipoDoc) //tipo de documento
         row1.add(registro.nroDoc) //nro documento
+        row1.add(registro.ruc)
         row1.add(registro.proveedor) //proveedor
-        row1.add(registro.descripcion) //descripcion
+        row1.add(registro.detalle) //descripcion
 
         rowArray.add(row1)
         jsonRequest.add("rows", rowArray)
+        Log.i("BladiDev","peticion enviada: "+ jsonRequest.toString())
         return safePeticion(jsonRequest)
     }
 
@@ -440,7 +431,21 @@ class Service(urlId: urlId) {
         jsonRequest.addProperty("action", "getLiquidacion")
         jsonRequest.addProperty("idSheet", idSheet)
         jsonRequest.addProperty("sheet", "LIQUIDACIONES")
-
+        Log.i("BladiDev", "datos post enviados son: $jsonRequest")
+        return safePeticion(jsonRequest)
+    }
+    suspend fun getIdSheetLiquidacion(): Result<JsonElement?> {
+        val jsonRequest = JsonObject()
+        jsonRequest.addProperty("action", "newDocument")
+        jsonRequest.addProperty("idFile", idFile)
+        jsonRequest.addProperty("nameDocument", "LIQUIDACIONES")
+        jsonRequest.addProperty("nameFirstSheet", "LIQUIDACIONES")
+        jsonRequest.addProperty("nameTecnico", "")
+        jsonRequest.addProperty("identificacion", "")
+        jsonRequest.addProperty("destino", "")
+        jsonRequest.addProperty("fechaInicio", "")
+        jsonRequest.addProperty("fechaFin", "")
+        Log.i("BladiDev", "datos post enviados son: $jsonRequest")
         return safePeticion(jsonRequest)
     }
 
